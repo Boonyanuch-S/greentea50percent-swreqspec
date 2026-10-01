@@ -1,12 +1,12 @@
-import ActivityDashboard from './pages/ActivityDashboard.jsx'
-import { dashboardMock } from './api/dashboardMock.js'
+import ActivityHoursQueue from './pages/ActivityHoursQueue.jsx'
+import { activityHoursMock } from './api/activityHoursMock.js'
 
-// เปิดหน้าจอ Dashboard ด้วย API จำลอง รองรับ FR-DSH-01, FR-DSH-02 และ ASM-02
+// เปิดหน้าคิวตรวจสอบชั่วโมงกิจกรรมด้วย API จำลอง รองรับ FR-HRS-01
 export default function App() {
   return (
     <>
-      <span className="sr-only">ระบบจองคิวตรวจสุขภาพ</span>
-      <ActivityDashboard client={dashboardMock} />
+      <span className="sr-only">คิวตรวจสอบชั่วโมงกิจกรรม</span>
+      <ActivityHoursQueue client={activityHoursMock} />
     </>
   )
 }

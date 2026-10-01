@@ -337,3 +337,70 @@
   - เพิ่ม `ASM-02` เพื่อบันทึกการตัดสินใจของทีม
   - ลบ `Q-01` ที่ได้รับคำตอบแล้ว และคงคำถามอื่นไว้
   - เปลี่ยน Status เป็น Draft v2 และอัปเดตวันที่
+
+---
+
+## 2569-10-01 คำสั่ง: /tasks
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ต้นทาง: specs/002-ส่งข้อมูลชั่วโมง/spec.md และ specs/002-ส่งข้อมูลชั่วโมง/plan.md (Draft v2)
+- ผลลัพธ์: specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+- สรุปผล: แตกแผนเป็น 17 tasks เรียงตามการพึ่งพา ครอบคลุม AC-SBH-01 ถึง AC-SBH-06 และ CON-NFR-21, IF-TPL-01, IF-PRJNUM-01, IF-UC07-01 ในตารางตรวจความครบ
+- สิ่งที่ยังรอ: 4 tasks รอ Q-02 หรือ Q-03; Q-01 ยังไม่มี task implementation เพราะ spec ยังไม่กำหนด FR สำหรับมาตรการเพิ่มเติม จึงไม่ได้เดาคำตอบหรือเพิ่มฟีเจอร์นอก scope
+
+---
+
+## 2569-10-01 คำสั่ง: /implement T-11
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้างหรือแก้ตาม task: `frontend/src/pages/HoursSubmission.jsx`, `frontend/src/api/hoursSubmissionMock.js`, `frontend/src/App.jsx`
+- ผลการทดสอบ: `cd frontend && npm test` ผ่าน 1 test; `npm run build` ผ่านหลังปรับ traceability comment
+- หมายเหตุการตรวจ: มี React `act(...)` warning จาก test โครงเดิมที่ไม่ได้รอ mock API แบบ async; ไม่ได้เพิ่ม test file เพราะไม่อยู่ในช่อง "ไฟล์ที่แตะ" ของ T-11
+- สิ่งที่เกือบต้องเดา: ไม่มีการเดาขั้นตอนยืนยันส่งหรือการแก้ข้อมูล เพราะเป็นขอบเขตของ T-14/T-15 และ Q-02/Q-03; mock ใช้เฉพาะ preview และสถานะเลขสรุปตาม T-11
+
+---
+
+## 2569-10-01 คำสั่ง: /tasks
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ต้นทาง: specs/008-นำเข้าข้อมูลกิจกรรมเดิม/spec.md และ specs/008-นำเข้าข้อมูลกิจกรรมเดิม/plan.md (Draft v2)
+- ผลลัพธ์: specs/008-นำเข้าข้อมูลกิจกรรมเดิม/tasks.md
+- สรุปผล: แตกแผนเป็น 17 tasks เรียงตามการพึ่งพา ครอบคลุม AC-IMP-01 ถึง AC-IMP-05 และ CON-NFR-21, IF-FMT-01, DOM-ATOMIC-01 ในตารางตรวจความครบ
+- สิ่งที่ยังรอ: 10 tasks รอ Q-01, Q-02 หรือ Q-04; ไม่ได้เดารูปแบบคอลัมน์ พฤติกรรม atomicity หรือขนาดไฟล์แทนทีม
+
+---
+
+## 2569-10-01 คำสั่ง: /implement T-03
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `frontend/src/api/projectDocumentMock.js`, `frontend/src/pages/ProjectDocumentForm.jsx`, `frontend/src/__tests__/projectDocumentForm.test.jsx`
+- ผลการทดสอบ: `cd frontend && npm test -- --run src/__tests__/projectDocumentForm.test.jsx` ผ่าน 1 test; `npm run build` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ฟิลด์ทั้ง 5 รายการระบุชัดใน spec และไม่ได้เพิ่มการบันทึก, Checklist หรือ validation ที่เป็นงานอื่น
+
+---
+
+## 2569-10-01 คำสั่ง: /implement T-04
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `frontend/src/pages/LegacyDataImport.jsx`, `frontend/src/api/legacyDataImportMock.js`
+- ผลการทดสอบ: `cd frontend && npm run build` ผ่าน; คำสั่งแรกที่รันจาก workspace root ไม่ผ่านเพราะไม่มี `package.json` ใน root แล้วรันซ้ำจาก `frontend` สำเร็จ
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ไม่ได้เพิ่ม validation, preview, duplicate confirmation หรือ commit เพราะเป็นขอบเขตของ task ถัดไป
+
+---
+
+## 2569-10-01 คำสั่ง: /tasks
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ต้นทาง: specs/001-จัดการเอกสารโครงการ/spec.md และ specs/001-จัดการเอกสารโครงการ/plan.md (spec Draft v1, plan v2)
+- ผลลัพธ์: specs/001-จัดการเอกสารโครงการ/tasks.md
+- สรุปผล: แตกแผนเป็น 19 tasks โดยยึด FR/AC/Constraint ที่มีอยู่ใน spec v1 ครบทุกข้อ และแยกงาน API จริงจากหน้าจอ API จำลอง
+- สิ่งที่ยังรอ: 15 tasks รอ Q-01 ถึง Q-05; ไม่ได้แตก FR/AC ชุดใหม่ที่มีเฉพาะใน plan v2 เพราะยังไม่มี ID เหล่านั้นใน spec
+
+---
+
+## 2569-10-01 คำสั่ง: /implement T-06
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/api/activityHoursMock.js`
+- ผลการทดสอบ: one-shot mock assertion `T-06 mock ordering passed`; `npm run build` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้สัญญา output ขั้นต่ำจาก plan (`documentId`, `activityName`, `submittedAt`, `status`) และไม่ได้เพิ่มการตรวจรายการชั่วโมงซึ่งเป็นงานอื่น
