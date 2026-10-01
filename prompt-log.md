@@ -103,6 +103,26 @@
 
 ---
 
+## 2569-10-01 คำสั่ง: /tasks
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ต้นทาง: specs/006-ดูภาพรวมกิจกรรม/spec.md และ specs/006-ดูภาพรวมกิจกรรม/plan.md (Draft v2)
+- ผลลัพธ์: specs/006-ดูภาพรวมกิจกรรม/tasks.md
+- สรุปผล: แตกแผนเป็น 13 tasks เรียงตามการพึ่งพา ครอบคลุม AC-DSH-01 ถึง AC-DSH-04 และ CON-NFR-21 กับ DOM-SCOPE-01 ในตารางตรวจความครบ
+- สิ่งที่ยังรอ: T-13 รอ Q-04 เรื่องเป้าหมาย performance ของหน้า Dashboard โดยไม่ได้เดาค่าแทนทีม
+
+---
+
+## 2569-10-01 คำสั่ง: /implement T-06
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้างหรือแก้ตาม task: `frontend/src/pages/ActivityDashboard.jsx`, `frontend/src/api/dashboardMock.js`, `frontend/src/App.jsx`
+- ผลการทดสอบ: `cd frontend && npm test` ผ่าน 1 test; `cd frontend && npm run build` ผ่าน
+- หมายเหตุการตรวจ: มี React `act(...)` warning จาก test โครงเดิมที่ไม่ได้รอ mock API แบบ async แต่ test ผ่าน
+- สิ่งที่เกือบต้องเดา: plan.md ไม่ได้กำหนด field-level schema ของ mock response จึงใช้โครงสร้างขั้นต่ำตาม output ที่ระบุใน plan (`terms`, `statusCounts`, `skillGroups`) และไม่ได้เพิ่ม dependency
+
+---
+
 ## 2569-09-19 คำสั่ง: /plan
 
 - เครื่องมือ: Copilot ใน VS Code
