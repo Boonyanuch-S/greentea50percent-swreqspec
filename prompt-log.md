@@ -404,3 +404,75 @@
 - ไฟล์ที่สร้าง: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/api/activityHoursMock.js`
 - ผลการทดสอบ: one-shot mock assertion `T-06 mock ordering passed`; `npm run build` ผ่าน
 - สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้สัญญา output ขั้นต่ำจาก plan (`documentId`, `activityName`, `submittedAt`, `status`) และไม่ได้เพิ่มการตรวจรายการชั่วโมงซึ่งเป็นงานอื่น
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-02
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `backend/app/models/email_delivery_attempt.py`, `backend/app/services/delivery_log.py`
+- ผลการทดสอบ: SQLite focused validation `T-02 delivery log validation passed`
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่ได้กำหนด retry/provider หรือรูปแบบสถานะเพิ่มเติม เพราะเป็นงานของ T-05 ถึง T-09 และยังมี Open Questions; ใช้ฟิลด์ตาม plan เท่านั้น
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-01
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้างหรือแก้: `backend/app/middleware/auth.py`, `backend/app/routers/review_queue.py`, `frontend/src/api/client.js`
+- ผลการทดสอบ: `AC-VDC-06 authentication guard validation passed`; `cd frontend && npm run build` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้ `Authorization` เป็น authentication reference ตาม contract ใน plan และไม่เพิ่มสิทธิ์/role เกิน NFR-SEC-01
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-02
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้างหรือแก้: `backend/app/models/project_submission.py`, `backend/app/services/review_queue_service.py`, `backend/app/routers/review_queue.py`
+- ผลการทดสอบ: `AC-VDC-03 review queue validation passed` โดยตรวจคิวเรียง `submitted_at` และดึงรายละเอียดด้วย `submission_id`
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่ได้สร้างฐานข้อมูลหรือข้อมูลเอกสารจริงเพิ่มเติม; service รับรายการเอกสารจากภายนอกและค่าเริ่มต้นเป็นคิวว่างตามโครง API ใน plan
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-03
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `frontend/src/pages/ReviewQueuePage.jsx`, `frontend/src/api/reviewQueue.js`
+- ผลการทดสอบ: `AC-VDC-03 review queue mock passed`; `npm run build` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้ข้อมูล output ตาม plan (`submission_id`, `project_name`, `project_owner`, `submitted_at`, `status`) และไม่ได้เชื่อม `App.jsx` เพราะไม่อยู่ในช่องไฟล์ที่แตะของ task
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-01
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `backend/app/models/auth_token.py`, `backend/app/services/auth_service.py`, `backend/app/routers/auth.py`
+- ผลการทดสอบ: `AC-AUTH-01 login contract validation passed` โดยใช้ verifier จำลอง ตรวจ token, role, `expires_at` และอายุ 30 นาที
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่ได้สร้างแหล่งข้อมูลบัญชีหรือ verifier จริง เพราะยังไม่ระบุใน spec; คงเป็น dependency injection และ `_UnconfiguredVerifier` ตาม Open Questions
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-06
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้างหรือแก้: `frontend/src/pages/LateSubmissionPage.jsx`, `frontend/src/api/lateSubmissionMock.js`, `frontend/src/App.jsx`
+- ผลการทดสอบ: `T-06 late activities mock passed`; `npm run build` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้ข้อมูลกิจกรรมขั้นต่ำตาม FR-LATE-01 และไม่ได้เพิ่มฟอร์มเหตุผล/เอกสารแนบซึ่งเป็น T-07
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-02
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `frontend/src/pages/LoginPage.jsx`, `frontend/src/api/auth.js`
+- ผลการทดสอบ: `cd frontend && npm run build` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่ได้ทำ role routing, token storage หรือแก้ `App.jsx` เพราะเป็นขอบเขตของ T-04/T-05 และยังรอ Open Questions; ใช้ response contract `status`/`body` จาก Login API ตาม plan
+
+---
+
+## 2569-10-02 คำสั่ง: /implement T-01
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `backend/app/models/project.py`, `backend/app/models/project_evaluation.py`
+- ผลการทดสอบ: Python focused validation `T-01 model validation passed`
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ชนิดข้อมูลไม่ได้ระบุใน plan จึงใช้สมมติฐานขั้นต่ำ `Integer` สำหรับรหัส, `String` สำหรับชื่อ/คณะ/สถานะกิจกรรม และ `Text` สำหรับ `evaluation_data`; ทีมควรยืนยันก่อนใช้ต่อกับฐานข้อมูลจริง

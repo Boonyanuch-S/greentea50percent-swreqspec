@@ -1,12 +1,12 @@
-import ActivityHoursQueue from './pages/ActivityHoursQueue.jsx'
-import { activityHoursMock } from './api/activityHoursMock.js'
+import LateSubmissionPage from './pages/LateSubmissionPage.jsx'
+import { lateSubmissionMock } from './api/lateSubmissionMock.js'
 
-// เปิดหน้าคิวตรวจสอบชั่วโมงกิจกรรมด้วย API จำลอง รองรับ FR-HRS-01
+// เปิดหน้าขอบันทึกชั่วโมงย้อนหลังด้วย API จำลอง รองรับ FR-LATE-01
 export default function App() {
   return (
     <>
-      <span className="sr-only">คิวตรวจสอบชั่วโมงกิจกรรม</span>
-      <ActivityHoursQueue client={activityHoursMock} />
+      <span className="sr-only">ขอบันทึกชั่วโมงย้อนหลัง</span>
+      <LateSubmissionPage client={lateSubmissionMock} />
     </>
   )
 }
