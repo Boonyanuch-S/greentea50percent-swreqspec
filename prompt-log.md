@@ -532,3 +532,16 @@
 - ปิด F-002/F-003/F-004; F-003 แก้เฉพาะ assertion ของ test และ F-004 เพิ่ม Q-06 พร้อม CHANGELOG ใน spec
 - F-001 และ F-005 ยังรอทีมตาม Open Question/การตัดสินใจของเจ้าของ test เดิม จึงไม่แก้โค้ดแทน
 - ผล backend: `16 passed`; frontend: test ใหม่ของฟีเจอร์ late ผ่าน แต่ full suite ยังมี `setup.test.jsx` เดิมล้มจากข้อความหน้าจอเก่า
+---
+
+## 2569-10-13 การตรวจซ้ำตามคำสั่งทีม: 5 AC
+
+- ตรวจตาราง `test-cases.md` และเติมแถวของ `AC-LATE-03` ให้ครบ 3 แบบ สถานะ `ใช้ได้`; รวม 5 AC และ 18 แถว
+- ตรวจ mutation แบบ 1 บรรทัดต่อ AC แล้ว `git restore` ทุกครั้ง:
+  - `AC-AUTH-01`: ทำ token เป็นค่าว่าง; test `AUTH_01` ไม่ผ่าน
+  - `AC-AUTH-02`: เปลี่ยนข้อความ generic error; test `AUTH_02` ไม่ผ่าน
+  - `AC-AUTH-03`: กลับเงื่อนไขผลลัพธ์ login; test `AUTH_03` ไม่ผ่าน
+  - `AC-VDC-03`: เรียงคิวกลับด้าน; test `VDC_03_1` ไม่ผ่าน (mutation แรกที่เปลี่ยน key ไม่ตรวจพบเพราะข้อมูลทดสอบเรียงสัมพันธ์กัน จึงทำ mutation ที่ตรงกับ AC ใหม่)
+  - `AC-LATE-03`: เปลี่ยน `<` เป็น `<=`; test `LATE_03_2` ไม่ผ่าน
+- ผลหลัง restore: production code กลับสภาพเดิม และ test ที่มาจากตารางยังผ่าน
+- ผลรันยืนยัน: `PYTHONPATH=. pytest -q backend/tests` ผ่าน 16 tests; `cd frontend && npm test -- --run` ผ่าน 2 tests และล้ม 1 test เดิม `setup.test.jsx` เพราะยังคาดหวังข้อความของหน้าจอเก่า ซึ่งตรงกับ F-005 ใน `rtm.md`
