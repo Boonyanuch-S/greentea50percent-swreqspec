@@ -545,3 +545,9 @@
   - `AC-LATE-03`: เปลี่ยน `<` เป็น `<=`; test `LATE_03_2` ไม่ผ่าน
 - ผลหลัง restore: production code กลับสภาพเดิม และ test ที่มาจากตารางยังผ่าน
 - ผลรันยืนยัน: `PYTHONPATH=. pytest -q backend/tests` ผ่าน 16 tests; `cd frontend && npm test -- --run` ผ่าน 2 tests และล้ม 1 test เดิม `setup.test.jsx` เพราะยังคาดหวังข้อความของหน้าจอเก่า ซึ่งตรงกับ F-005 ใน `rtm.md`
+
+## 2569-10-13 แก้ frontend test เดิม F-005
+
+- ปรับ `frontend/src/__tests__/setup.test.jsx` จากข้อความหน้าจอเก่าเป็น heading `ขอบันทึกชั่วโมงย้อนหลัง` ตาม spec และใช้ `waitFor` รองรับ state update จากการโหลดกิจกรรม
+- ผลทดสอบ: `cd frontend && npm test -- --run` ผ่าน `3 tests`
+- ปิด F-005 ใน `rtm.md`; ไม่แก้ test ที่ชื่อขึ้นต้นด้วย `test_TC_`
