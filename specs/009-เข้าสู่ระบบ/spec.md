@@ -87,6 +87,9 @@ Owner: ทีม A | Status: Draft v2 | Updated: 2569-09-20
 - Q-08 เมื่อ username ว่างหรือมี whitespace ระบบต้องใช้ข้อความทั่วไปเดียวกับกรณี username ไม่พบหรือมี validation แยกต่างหาก?
   เกี่ยวกับ AC-AUTH-03
 
+## CHANGELOG
+- 2569-10-13 (CR จากการตรวจ test cases): เพิ่ม Q-07 และ Q-08 เพื่อไม่เดาพฤติกรรมกรณี input ว่างที่ AC-AUTH-02/03 ไม่ได้ระบุ
+
 ## Traceability
 | UC-09 | spec.md | AC |
 |---|---|---|
