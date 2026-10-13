@@ -3,9 +3,11 @@ from datetime import date, datetime, timedelta, timezone
 from backend.app.models.auth_token import UserRole
 from backend.app.models.activity import Activity, Base as ActivityBase
 from backend.app.repositories.activity import ActivityRepository
+from backend.app.routers.auth import LoginRequest, login
 from backend.app.services.auth_service import VerifiedUser, authenticate
 from backend.app.models.project_submission import ProjectSubmission
 from backend.app.services.review_queue_service import ReviewQueueService
+from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -43,27 +45,39 @@ def test_TC_AUTH_01_3_invalid_password_is_rejected():
     # Given รหัสผ่านไม่ถูกต้อง
     verifier = StubVerifier({})
     # When ผู้ใช้กดเข้าสู่ระบบ
-    result = authenticate(verifier, "club", "wrong")
+    try:
+        login(LoginRequest(username="club", password="wrong"), verifier)
+    except HTTPException as error:
+        result = error
     # Then ปฏิเสธและใช้ผลเดียวกับ AC-AUTH-02
-    assert result is None
+    assert result.status_code == 401
+    assert result.detail == "บัญชีหรือรหัสผ่านไม่ถูกต้อง"
 
 
 def test_TC_AUTH_02_1_wrong_password_uses_generic_message():
     # Given username มีอยู่แต่ password ไม่ถูกต้อง
     verifier = StubVerifier({})
     # When ผู้ใช้กดเข้าสู่ระบบ
-    result = authenticate(verifier, "club", "wrong")
+    try:
+        login(LoginRequest(username="club", password="wrong"), verifier)
+    except HTTPException as error:
+        result = error
     # Then ปฏิเสธ
-    assert result is None
+    assert result.status_code == 401
+    assert result.detail == "บัญชีหรือรหัสผ่านไม่ถูกต้อง"
 
 
 def test_TC_AUTH_02_2_empty_wrong_password_uses_generic_message():
     # Given username มีอยู่และ password ผิดเป็นค่าว่าง
     verifier = StubVerifier({})
     # When ผู้ใช้กดเข้าสู่ระบบ
-    result = authenticate(verifier, "club", "")
+    try:
+        login(LoginRequest(username="club", password=""), verifier)
+    except HTTPException as error:
+        result = error
     # Then ปฏิเสธ
-    assert result is None
+    assert result.status_code == 401
+    assert result.detail == "บัญชีหรือรหัสผ่านไม่ถูกต้อง"
 
 
 def test_TC_AUTH_02_3_correct_password_follows_success_path():
@@ -80,18 +94,26 @@ def test_TC_AUTH_03_1_unknown_username_uses_generic_message():
     # Given username ไม่มีอยู่ในระบบ
     verifier = StubVerifier({})
     # When ผู้ใช้กดเข้าสู่ระบบ
-    result = authenticate(verifier, "unknown", "any")
+    try:
+        login(LoginRequest(username="unknown", password="any"), verifier)
+    except HTTPException as error:
+        result = error
     # Then ปฏิเสธโดยไม่เปิดเผยรายละเอียดบัญชี
-    assert result is None
+    assert result.status_code == 401
+    assert result.detail == "บัญชีหรือรหัสผ่านไม่ถูกต้อง"
 
 
 def test_TC_AUTH_03_2_empty_username_uses_generic_message():
     # Given username ไม่มีอยู่และเป็นค่าว่าง
     verifier = StubVerifier({})
     # When ผู้ใช้กดเข้าสู่ระบบ
-    result = authenticate(verifier, "", "any")
+    try:
+        login(LoginRequest(username="", password="any"), verifier)
+    except HTTPException as error:
+        result = error
     # Then ปฏิเสธโดยไม่เปิดเผยรายละเอียดบัญชี
-    assert result is None
+    assert result.status_code == 401
+    assert result.detail == "บัญชีหรือรหัสผ่านไม่ถูกต้อง"
 
 
 def test_TC_AUTH_03_3_existing_username_follows_success_path():
