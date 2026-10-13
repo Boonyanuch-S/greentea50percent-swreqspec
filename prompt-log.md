@@ -551,3 +551,12 @@
 - ปรับ `frontend/src/__tests__/setup.test.jsx` จากข้อความหน้าจอเก่าเป็น heading `ขอบันทึกชั่วโมงย้อนหลัง` ตาม spec และใช้ `waitFor` รองรับ state update จากการโหลดกิจกรรม
 - ผลทดสอบ: `cd frontend && npm test -- --run` ผ่าน `3 tests`
 - ปิด F-005 ใน `rtm.md`; ไม่แก้ test ที่ชื่อขึ้นต้นด้วย `test_TC_`
+
+## 2569-10-13 คำสั่ง: /verify (ตรวจซ้ำหลังปิด F-005)
+
+- ตรวจ 5 AC เดิม: `AC-AUTH-01`, `AC-AUTH-02`, `AC-AUTH-03`, `AC-VDC-03`, `AC-LATE-03`
+- ตรวจ `test-cases.md`: 15 แถว, AC ละ 3 แถว ครบทางปกติ/ขอบ/ทางผิด, ทุกแถว `ใช้ได้`, ไม่มี TC ID ซ้ำ
+- ตรวจ traceability: ชื่อ `test_TC_` ตรงกับทุกแถวในตาราง ไม่มีแถวที่ไม่มี test และไม่มี test ที่อยู่นอกตาราง
+- ผล test: `PYTHONPATH=. pytest -v backend/tests` ผ่าน 16 tests; `cd frontend && npm test` ผ่าน 3 tests
+- คำสั่ง `cd backend && pytest -v` แบบตรงล้มจาก package path (`ModuleNotFoundError: backend`) ซึ่งตรงกับข้อจำกัดและคำสั่งรันที่บันทึกใน `rtm.md`
+- ไม่พบข้อค้นพบใหม่; F-005 ปิดแล้วใน commit `8d0850d`
