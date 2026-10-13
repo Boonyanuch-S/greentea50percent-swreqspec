@@ -2,8 +2,6 @@
 
 บันทึกทุกครั้งที่ใช้ AI กับ repo นี้ เขียนต่อท้ายเรื่อย ๆ ไม่ต้องลบของเก่า
 
----
-
 ## 2569-09-19 คำสั่ง: /plan
 
 - เครื่องมือ: Copilot ใน VS Code
@@ -512,3 +510,13 @@
 - ไฟล์ที่สร้าง: `backend/app/models/project.py`, `backend/app/models/project_evaluation.py`
 - ผลการทดสอบ: Python focused validation `T-01 model validation passed`
 - สิ่งที่เกือบต้องเดาแต่ถามแทน: ชนิดข้อมูลไม่ได้ระบุใน plan จึงใช้สมมติฐานขั้นต่ำ `Integer` สำหรับรหัส, `String` สำหรับชื่อ/คณะ/สถานะกิจกรรม และ `Text` สำหรับ `evaluation_data`; ทีมควรยืนยันก่อนใช้ต่อกับฐานข้อมูลจริง
+
+---
+
+## 2569-10-13 คำสั่ง: /testcases (รอบที่ 1 และรอบที่ 2)
+
+- AC ที่เลือก: `AC-AUTH-01`, `AC-AUTH-02`, `AC-AUTH-03`, `AC-VDC-03`, `AC-LATE-03`
+- โหมด: เขียน test จากแถวที่ทีมกำหนดเป็น “ใช้ได้”
+- ผลรอบที่ 1: เพิ่ม test cases 15 แถว ครบทางปกติ/ขอบ/ทางผิด และเพิ่ม Q-07/Q-08 ใน `specs/009-เข้าสู่ระบบ/spec.md` กับ Q-06 ใน `specs/003-ตรวจเอกสารโครงการ/spec.md`
+- ผลรอบที่ 2: เขียน test ตามตารางลง `backend/tests/test_TC_selected_acceptance_criteria.py`
+- ผลการทำให้พังโดยตั้งใจ: test เดิมจับ `AC-LATE-03` ได้; ไม่จับ `AC-AUTH-01/02/03` และ `AC-VDC-03` เพราะยังไม่มี test เดิม

@@ -82,6 +82,10 @@ Owner: ทีม A | Status: Draft v2 | Updated: 2569-09-20
   เกี่ยวกับ Q-02 เดิม
 - Q-06 อนุญาตให้บัญชีเดียวกัน login หลายอุปกรณ์หรือหลาย session พร้อมกันหรือไม่ และต้องรองรับ remember me หรือ refresh token หรือไม่?
   เกี่ยวกับ Q-04 และ Q-05 เดิม
+- Q-07 เมื่อกรอก password ว่าง ระบบต้องใช้ข้อความทั่วไปเดียวกับกรณี password ผิดหรือมี validation แยกต่างหาก?
+  เกี่ยวกับ AC-AUTH-02
+- Q-08 เมื่อ username ว่างหรือมี whitespace ระบบต้องใช้ข้อความทั่วไปเดียวกับกรณี username ไม่พบหรือมี validation แยกต่างหาก?
+  เกี่ยวกับ AC-AUTH-03
 
 ## Traceability
 | UC-09 | spec.md | AC |
