@@ -34,3 +34,11 @@ def require_authenticated_user(request: Request) -> str:
     if not authorization:
         raise HTTPException(status_code=401, detail="ต้องยืนยันตัวตนก่อนเข้าถึงเอกสาร")
     return authorization
+
+
+def require_late_submission_user(request: Request) -> str:
+    """ตรวจ session ก่อนใช้ฟีเจอร์ย้อนหลังตาม CON-NFR-21 และ NFR-SEC-01."""
+    session_reference = request.headers.get("Authorization")
+    if not session_reference:
+        raise HTTPException(status_code=401, detail="ต้องยืนยันตัวตนก่อนใช้คำขอย้อนหลัง")
+    return session_reference

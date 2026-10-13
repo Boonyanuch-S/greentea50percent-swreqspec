@@ -15,7 +15,7 @@
 - ไฟล์ที่แตะ: `backend/app/models/activity.py`, `backend/app/repositories/activity.py`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: มีโมเดลและ query ที่ระบุรายการกิจกรรมที่เลยกำหนดปกติของกรรมการแต่ละคนได้ โดยไม่ใช้ระยะเวลาสูงสุดเป็นเงื่อนไขปฏิเสธ
-- สถานะ: พร้อมทำ
+- สถานะ: เสร็จ รอทีมตรวจ
 
 ### T-02 บังคับยืนยันตัวตนสำหรับฟีเจอร์
 - รองรับ: CON-NFR-21, NFR-SEC-01
@@ -23,7 +23,7 @@
 - ไฟล์ที่แตะ: `backend/app/middleware/auth.py`, `frontend/src/auth/AuthGuard.jsx`, `backend/app/api/late_submissions.py`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: API และ route ของฟีเจอร์ขอบันทึกชั่วโมงย้อนหลังปฏิเสธผู้ไม่มี session และอนุญาตเฉพาะผู้ใช้ที่ยืนยันตัวตนแล้ว
-- สถานะ: พร้อมทำ
+- สถานะ: เสร็จ รอทีมตรวจ
 
 ### T-03 สร้างโมเดลคำขอและเอกสารประกอบ
 - รองรับ: FR-LATE-02, FR-LATE-03, FR-LATE-06
@@ -47,7 +47,7 @@
 - ไฟล์ที่แตะ: `backend/app/api/late_submissions.py`, `backend/app/schemas/late_submission.py`
 - ต้องทำหลัง: T-01, T-02
 - เสร็จเมื่อ: `GET /late-submissions/activities` คืนกิจกรรมที่เลยกำหนดทั้งหมดของกรรมการที่ยืนยันตัวตนแล้ว และไม่กรองด้วย maximum deadline
-- สถานะ: พร้อมทำ
+- สถานะ: เสร็จ รอทีมตรวจ
 
 ### T-06 สร้างหน้ารายการกิจกรรมด้วย API จำลอง
 - รองรับ: FR-LATE-01
@@ -79,7 +79,7 @@
 - ไฟล์ที่แตะ: `backend/tests/test_AC_LATE_03_list_all_late_activities.py`, `frontend/src/__tests__/late-submission-activities.test.jsx`
 - ต้องทำหลัง: T-05, T-06
 - เสร็จเมื่อ: `test_AC_LATE_03_list_all_late_activities` ผ่านและยืนยันว่ากิจกรรมที่เลยกำหนดหลายรายการของกรรมการแสดงครบ โดยไม่รวมกิจกรรมที่ยังไม่เลยกำหนด
-- สถานะ: พร้อมทำ
+- สถานะ: เสร็จ รอทีมตรวจ
 
 ### T-10 สร้าง API และหน้าติดตามสถานะคำขอ
 - รองรับ: FR-LATE-07, FR-LATE-06

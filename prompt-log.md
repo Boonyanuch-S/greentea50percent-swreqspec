@@ -461,6 +461,42 @@
 
 ---
 
+## 2569-10-13 คำสั่ง: /implement T-01
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `backend/app/models/activity.py`, `backend/app/repositories/activity.py`
+- ผลการทดสอบ: `T-01 late activity query validation passed` ด้วย SQLite ชั่วคราว
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้เฉพาะกำหนดส่งปกติของกิจกรรมและไม่ได้เพิ่ม maximum deadline ตาม `IF-DEADLINE-01`
+
+---
+
+## 2569-10-13 คำสั่ง: /implement T-02
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้างหรือแก้: `backend/app/middleware/auth.py`, `frontend/src/auth/AuthGuard.jsx`, `backend/app/api/late_submissions.py`
+- ผลการทดสอบ: `T-02 late submission auth validation passed`; `cd frontend && npm run build` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่ได้สร้าง endpoint ธุรกิจหรือรูปแบบ session ใหม่; router ใช้ dependency guard เพื่อให้ task API ถัดไปสืบทอดการตรวจสิทธิ์
+
+---
+
+## 2569-10-13 คำสั่ง: /implement T-05
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้างหรือแก้: `backend/app/api/late_submissions.py`, `backend/app/schemas/late_submission.py`
+- ผลการทดสอบ: `T-05 late activities API contract validation passed`
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ใช้ `request.app.state.activity_session` เป็นจุดฉีด Session และรับ `owner_user_id` ตาม input ของ API ใน plan; ไม่เพิ่ม maximum deadline หรือเงื่อนไขอื่น
+
+---
+
+## 2569-10-13 คำสั่ง: /implement T-09
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง: `backend/tests/test_AC_LATE_03_list_all_late_activities.py`, `frontend/src/__tests__/late-submission-activities.test.jsx`
+- ผลการทดสอบ: backend `1 passed`; frontend `1 passed` สำหรับ `test_AC_LATE_03_list_all_late_activities`
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้ fixture กิจกรรมเลยกำหนด 2 รายการและกิจกรรมยังไม่เลยกำหนด 1 รายการตามเงื่อนไข AC โดยไม่เพิ่มกติกา deadline สูงสุด
+
+---
+
 ## 2569-10-02 คำสั่ง: /implement T-02
 
 - เครื่องมือ: Copilot ใน VS Code
