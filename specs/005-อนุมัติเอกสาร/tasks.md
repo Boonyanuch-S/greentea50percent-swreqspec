@@ -84,7 +84,7 @@
 ### T-10 สร้างหน้าจออนุมัติด้วย API จำลอง
 - รองรับ: FR-APR-01, FR-APR-02, FR-APR-03, FR-APR-04
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-13, T-15 และ T-14
-- ไฟล์ที่แตะ: `frontend/src/pages/ProjectApprovalPage.jsx`, `frontend/src/api/projectApprovalMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/ProjectApprovalPage.jsx`, `frontend/src/services/projectApprovalMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: หน้า `ProjectApprovalPage` แสดงรายการเอกสาร เลือกเปิดดู ตรวจวัตถุประสงค์/ตัวชี้วัด/รูปแบบ อนุมัติเนื้อหา และมีช่องอัปโหลดตามสัญญา mock ใน plan.md
 - สถานะ: เสร็จ รอทีมตรวจ
@@ -92,7 +92,7 @@
 ### T-11 สร้างหน้าจอตรวจของกองกิจด้วย API จำลอง
 - รองรับ: FR-APR-05, FR-APR-06
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-14 และ T-16
-- ไฟล์ที่แตะ: `frontend/src/pages/ProjectOfficeReviewPanel.jsx`, `frontend/src/api/projectApprovalMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/ProjectOfficeReviewPanel.jsx`, `frontend/src/services/projectApprovalMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: หน้า `ProjectOfficeReviewPanel` แสดงเอกสารสถานะ `รออนุมัติ` รับผลตรวจผ่าน และรับคอมเมนต์ตีกลับเอกสารทั้งชุดได้จาก mock API
 - สถานะ: พร้อมทำ
@@ -100,7 +100,7 @@
 ### T-12 แสดงคำเตือน AI โดยไม่บล็อกการอนุมัติ
 - รองรับ: FR-APR-07
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-17
-- ไฟล์ที่แตะ: `frontend/src/pages/ProjectApprovalPage.jsx`, `frontend/src/api/projectApprovalMock.js`
+- ไฟล์ที่แตะ: `frontend/src/pages/ProjectApprovalPage.jsx`, `frontend/src/services/projectApprovalMock.js`
 - ต้องทำหลัง: T-10
 - เสร็จเมื่อ: หน้าจอแสดงคำเตือนจากข้อมูลที่ระบบส่งให้ และปุ่มอนุมัติยังใช้งานได้ โดยไม่สร้างกลไกตรวจจับ AI เพิ่มเอง
 - สถานะ: รอ Q-02
@@ -156,7 +156,7 @@
 ### T-19 ต่อหน้าจอกับ API จริง
 - รองรับ: FR-APR-01, FR-APR-02, FR-APR-03, FR-APR-04, FR-APR-05, FR-APR-06, FR-APR-07, CON-NFR-21, IF-UC10-01, IF-UC01-02, IF-UPLOAD-01
 - ตรวจด้วย: AC-APR-01, AC-APR-02, AC-APR-03, AC-APR-04, AC-APR-05, AC-APR-06
-- ไฟล์ที่แตะ: `frontend/src/api/client.js`, `frontend/src/pages/ProjectApprovalPage.jsx`, `frontend/src/pages/ProjectOfficeReviewPanel.jsx`, `backend/app/api/project_approvals.py`
+- ไฟล์ที่แตะ: `frontend/src/services/client.js`, `frontend/src/pages/ProjectApprovalPage.jsx`, `frontend/src/pages/ProjectOfficeReviewPanel.jsx`, `backend/app/api/project_approvals.py`
 - ต้องทำหลัง: T-05, T-06, T-07, T-08, T-09, T-10, T-11, T-12, T-13, T-14, T-15, T-16, T-17, T-18
 - เสร็จเมื่อ: flow ปกติของหน้าจอเรียก API จริงตามสัญญาใน plan.md แทน mock และยังผ่านการทดสอบ AC ที่เกี่ยวข้อง โดยไม่กำหนดพฤติกรรมที่ยังรอ Q-02/Q-03
 - สถานะ: รอ Q-02/Q-03

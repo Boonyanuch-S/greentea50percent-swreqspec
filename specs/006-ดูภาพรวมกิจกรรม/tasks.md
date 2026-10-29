@@ -52,7 +52,7 @@
 ### T-06 สร้างหน้าจอ Dashboard ด้วย API จำลอง
 - รองรับ: FR-DSH-01, FR-DSH-02, ASM-02
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-08, T-09 และ T-10
-- ไฟล์ที่แตะ: `frontend/src/pages/ActivityDashboard.jsx`, `frontend/src/api/dashboardMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/ActivityDashboard.jsx`, `frontend/src/services/dashboardMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: หน้าจอเลือกเทอมและแสดง KPI จำนวนตามสถานะ กราฟกลุ่มทักษะ/ตัวชี้วัด และสถานะไม่มีข้อมูลได้จาก mock API ตามสัญญาใน plan.md
 - สถานะ: เสร็จ รอทีมตรวจ
@@ -60,7 +60,7 @@
 ### T-07 ต่อ route guard และหน้าจอกับ session จำลอง
 - รองรับ: CON-NFR-21, NFR-SEC-01
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-11
-- ไฟล์ที่แตะ: `frontend/src/App.jsx`, `frontend/src/pages/ActivityDashboard.jsx`, `frontend/src/api/dashboardMock.js`
+- ไฟล์ที่แตะ: `frontend/src/App.jsx`, `frontend/src/pages/ActivityDashboard.jsx`, `frontend/src/services/dashboardMock.js`
 - ต้องทำหลัง: T-04, T-06
 - เสร็จเมื่อ: หน้าจอ Dashboard แสดงการปฏิเสธหรือเปลี่ยนเส้นทางเมื่อไม่มี session และแสดง Dashboard เมื่อมี session จำลอง
 - สถานะ: พร้อมทำ
@@ -100,7 +100,7 @@
 ### T-12 ต่อหน้าจอกับ API จริง
 - รองรับ: FR-DSH-01, FR-DSH-02, FR-DSH-03, DOM-SCOPE-01
 - ตรวจด้วย: AC-DSH-01, AC-DSH-02, AC-DSH-03
-- ไฟล์ที่แตะ: `frontend/src/api/client.js`, `frontend/src/pages/ActivityDashboard.jsx`, `backend/app/api/dashboard.py`
+- ไฟล์ที่แตะ: `frontend/src/services/client.js`, `frontend/src/pages/ActivityDashboard.jsx`, `backend/app/api/dashboard.py`
 - ต้องทำหลัง: T-05, T-08, T-09, T-10
 - เสร็จเมื่อ: หน้าจอใช้ API จริงตามสัญญา `GET /dashboard/summary` และแสดงผลครบโดยไม่ใช้ mock ใน flow ปกติ
 - สถานะ: พร้อมทำ

@@ -22,7 +22,7 @@
 ### T-02 บังคับยืนยันตัวตนสำหรับฟีเจอร์
 - รองรับ: CON-NFR-21, NFR-SEC-01
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-05 และ T-19
-- ไฟล์ที่แตะ: `backend/app/middleware/auth.py`, `frontend/src/auth/AuthGuard.jsx`, `backend/app/api/late_submissions.py`
+- ไฟล์ที่แตะ: `backend/app/middleware/auth.py`, `frontend/src/components/AuthGuard.jsx`, `backend/app/api/late_submissions.py`
 - แบบหน้าจอ: ไม่มี
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: API และ route ของฟีเจอร์ขอบันทึกชั่วโมงย้อนหลังปฏิเสธผู้ไม่มี session และอนุญาตเฉพาะผู้ใช้ที่ยืนยันตัวตนแล้ว
@@ -51,11 +51,12 @@
 ### T-06 สร้างหน้ารายการกิจกรรมด้วย API จำลอง
 - รองรับ: FR-LATE-01
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-09
-- ไฟล์ที่แตะ: `frontend/src/pages/LateSubmissionPage.jsx`, `frontend/src/api/lateSubmissionMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/LateSubmissionPage.jsx`, `frontend/src/services/lateSubmissionMock.js`, `frontend/src/App.jsx`
 - แบบหน้าจอ: ไม่มี mockup; ใช้ข้อความตาม spec
 - ต้องทำหลัง: T-05
 - เสร็จเมื่อ: หน้า mock แสดงรายการกิจกรรมที่เลยกำหนดของกรรมการและให้เลือกกิจกรรมเพื่อเริ่มคำขอได้
 - สถานะ: เสร็จ
+- หมายเหตุ 2569-10-29: หลังเพิ่มหน้า login (specs/009) `App.jsx` ไม่เปิด `LateSubmissionPage` แล้ว หน้าเดิมยังอยู่ แต่ต้องรอทีมกำหนดทางเข้า (เกี่ยวกับ Q-01 ของ specs/009)
 
 ### T-09 ทดสอบรายการกิจกรรมที่เลยกำหนดครบถ้วน
 - รองรับ: FR-LATE-01, AC-LATE-03
@@ -89,7 +90,7 @@
 ### T-07 สร้างหน้ากรอกเหตุผลและแนบเอกสารด้วย API จำลอง
 - รองรับ: FR-LATE-02
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-14
-- ไฟล์ที่แตะ: `frontend/src/pages/LateSubmissionForm.jsx`, `frontend/src/api/lateSubmissionMock.js`
+- ไฟล์ที่แตะ: `frontend/src/pages/LateSubmissionForm.jsx`, `frontend/src/services/lateSubmissionMock.js`
 - แบบหน้าจอ: ไม่มี mockup; ใช้ข้อความตาม spec
 - ต้องทำหลัง: T-06
 - เสร็จเมื่อ: กรรมการเลือกกิจกรรม กรอกเหตุผล และแนบเอกสารประกอบผ่าน mock ได้ โดยไม่กำหนดชนิดเอกสารแทน Q-05
@@ -283,7 +284,7 @@
 ### T-20 ต่อหน้าจอกับ API จริงและตรวจ flow ครบ
 - รองรับ: FR-LATE-01, FR-LATE-02, FR-LATE-03, FR-LATE-04, FR-LATE-05, FR-LATE-06, FR-LATE-07, FR-LATE-08, FR-LATE-09, CON-NFR-21, DOM-PDPA-03, DOM-AUDIT-02, IF-UC04-01, IF-UC07-02, IF-DEADLINE-01
 - ตรวจด้วย: AC-LATE-01, AC-LATE-02, AC-LATE-03, AC-LATE-04, AC-LATE-05, AC-LATE-06, AC-LATE-07
-- ไฟล์ที่แตะ: `frontend/src/api/client.js`, `frontend/src/pages/LateSubmissionPage.jsx`, `frontend/src/pages/LateSubmissionForm.jsx`, `frontend/src/pages/LateSubmissionStatus.jsx`, `frontend/src/pages/LateSubmissionAuditLog.jsx`, `backend/app/api/late_submissions.py`
+- ไฟล์ที่แตะ: `frontend/src/services/client.js`, `frontend/src/pages/LateSubmissionPage.jsx`, `frontend/src/pages/LateSubmissionForm.jsx`, `frontend/src/pages/LateSubmissionStatus.jsx`, `frontend/src/pages/LateSubmissionAuditLog.jsx`, `backend/app/api/late_submissions.py`
 - แบบหน้าจอ: ไม่มี mockup; ใช้ข้อความตาม spec
 - ต้องทำหลัง: T-05, T-08, T-09, T-10, T-11, T-12, T-13, T-14, T-15, T-16, T-17, T-18, T-19
 - เสร็จเมื่อ: flow ปกติของหน้าจอใช้ API จริงตั้งแต่เลือกกิจกรรม ส่งคำขอ ติดตามสถานะ อัปโหลด Excel ส่งต่อ UC-07 และดู log ได้ตาม contract ที่ทีมยืนยัน โดย test AC ที่เกี่ยวข้องผ่าน

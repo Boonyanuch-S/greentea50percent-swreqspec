@@ -92,7 +92,7 @@
 ### T-11 สร้างหน้าจอส่งชั่วโมงด้วย API จำลอง
 - รองรับ: FR-SBH-01, FR-SBH-03, FR-SBH-04, FR-SBH-06
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-12, T-13 และ T-16
-- ไฟล์ที่แตะ: `frontend/src/pages/HoursSubmission.jsx`, `frontend/src/api/hoursSubmissionMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/HoursSubmission.jsx`, `frontend/src/services/hoursSubmissionMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: หน้าจอเลือกกิจกรรมที่จบแล้ว แสดง preview ไฟล์ สถานะเลขสรุป และปุ่มส่งที่ถูกบล็อกเมื่อเลขยังไม่พร้อมจาก mock API ตาม plan.md
 - สถานะ: เสร็จ รอทีมตรวจ
@@ -100,7 +100,7 @@
 ### T-12 สร้างหน้าจอจัดการ template สำหรับแอดมิน
 - รองรับ: IF-TPL-01, ASM-04
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-16
-- ไฟล์ที่แตะ: `frontend/src/pages/TemplateAdmin.jsx`, `frontend/src/api/hoursSubmissionMock.js`
+- ไฟล์ที่แตะ: `frontend/src/pages/TemplateAdmin.jsx`, `frontend/src/services/hoursSubmissionMock.js`
 - ต้องทำหลัง: T-09
 - เสร็จเมื่อ: หน้าแอดมินแสดง template ID/เวอร์ชันที่พร้อมใช้งานและรองรับการเลือก template จาก registry โดยไม่ฝัง template ในหน้า
 - สถานะ: พร้อมทำ
@@ -124,7 +124,7 @@
 ### T-15 ต่อ flow ยืนยันส่งในหน้าจอ
 - รองรับ: FR-SBH-04, FR-SBH-05, Q-02, Q-03
 - ตรวจด้วย: AC-SBH-01
-- ไฟล์ที่แตะ: `frontend/src/pages/HoursSubmission.jsx`, `frontend/src/api/hoursSubmissionMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/HoursSubmission.jsx`, `frontend/src/services/hoursSubmissionMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: T-08, T-11, T-14
 - เสร็จเมื่อ: หน้าจอให้ตรวจข้อมูลก่อนส่งและดำเนินขั้นตอนยืนยัน/ส่งเข้าคิวตามคำตอบ Q-02 และ Q-03 ได้ครบ
 - สถานะ: รอ Q-02 และ Q-03

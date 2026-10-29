@@ -668,3 +668,35 @@
 - `showDocument` ใน `utils/alerts.js`: PDF แสดงใน iframe, รูปแสดงเป็นภาพ, ไฟล์ตัวอย่าง (ไม่มีเนื้อหา) แจ้งว่าไม่มีไฟล์จริง
 - เอกสารแนบใน mock เปลี่ยนเป็น `{ name, type, url }` (url จาก `URL.createObjectURL` ของไฟล์ที่แนบในรอบนี้) เพิ่ม `getProject` ใน mock
 - ผลทดสอบ: `npx vitest run` ผ่าน 3 tests; ลอง flow ดูรายละเอียด/ดูเอกสาร/แก้ไขจากหน้ารายละเอียด ผ่านแล้วลบทิ้ง; ตรวจภาพหน้าจอ 1440 และ 390 px; `vite build` ผ่าน
+
+## 2569-10-29 คำสั่ง: "อัพเดตข้อมูล 009 ที่ทำไปแล้วลงใน q ต่างๆ"
+
+- ตีความ "q" เป็น Open Questions (Q-01 ถึง Q-08) ของ specs/009
+- `spec.md`: บันทึกคำตอบทีมบางส่วนของ Q-01 (กรรมการสโมสร -> UC-01) และสถานะ "ยังเปิด" ของ Q-02 ถึง Q-08 พร้อมพฤติกรรมปัจจุบันของ prototype (ไม่ถือเป็นคำตอบทีม), เพิ่ม CHANGELOG และข้อเสนอ FR ออกจากระบบ/หน้าโปรไฟล์ (ยังไม่มี ID)
+- `tasks.md`: T-02 อัปเดต path `services/auth.js`; T-04 และ T-05 เปลี่ยนเป็น "ทำบางส่วน" (รอ Q-01 / Q-03); เพิ่ม Q-07, Q-08 และข้อเสนอในหัวข้อ "สิ่งที่ยังไม่ทำ"
+- `plan.md`: อัปเดตหมายเหตุใต้ Q-01 และ Q-03
+- ไม่สร้าง ID ใหม่ ไม่แก้โค้ด
+
+## 2569-10-29 คำสั่ง: "อัพเดตข้อมูลที่ทำไปแล้วทุกอย่างตอนนี้ลง spec.md หรือ plan หรือ task"
+
+- specs/001 `spec.md`: บันทึกสถานะ Q-01 (ตอบบางส่วนตาม plan v2) ถึง Q-05 และเพิ่ม CHANGELOG (ข้อสังเกต spec v1 vs plan v2, ข้อเสนอ FR ดูรายละเอียด/เปิดดูเอกสาร ยังไม่มี ID)
+- specs/001 `tasks.md`: T-06, T-08, T-12 -> ทำแล้วใน prototype รอทีมตรวจ; T-11 -> ทำบางส่วน (frontend+mock); หมายเหตุ T-02, T-03, T-09; เพิ่มหัวข้อ "งานนอก spec ที่ทีมสั่งเพิ่ม"
+- tasks.md ของ 002-008, 011: แก้ path `frontend/src/api/` -> `frontend/src/services/` และ `frontend/src/auth/AuthGuard.jsx` -> `frontend/src/components/AuthGuard.jsx` ตามการจัดโครงสร้างใหม่ (commit bdcf79b)
+- specs/011 T-06: หมายเหตุว่า `App.jsx` ไม่เปิด `LateSubmissionPage` แล้วหลังเพิ่มหน้า login
+- ไม่สร้าง ID ใหม่ ไม่แก้โค้ด
+
+## 2569-10-29 คำสั่ง: "บอกไว้ว่าทำแค่บางส่วนแล้วลิสบอกด้วยทำอะไรบ้าง"
+
+- ตรวจซ้ำพบว่า specs/004 T-05 ระบุ "เสร็จ รอทีมตรวจ" แต่ไม่มี `backend/app/api/projects.py` และ `backend/app/api/summary_books.py` (ไม่เคยมีใน git history)
+- ทีมสั่งเปลี่ยนสถานะ T-05 เป็น "ทำบางส่วน" พร้อมรายการที่ทำแล้วและที่ยังไม่ทำ: มี `require_authenticated_user` ใน `backend/app/middleware/auth.py` แต่ใช้กับ specs/003 เท่านั้น; ยังไม่มี API ของ 004 และยังไม่มี test
+- ไม่แก้โค้ด
+
+## 2569-10-29 คำสั่ง: "มีข้อมูลไหนยังไม่ถูกบันทึกอีกไหม"
+
+- ตรวจโค้ดและ test เทียบกับ tasks.md อีกรอบ แล้วบันทึกเพิ่ม:
+  - specs/009 T-03: "พร้อมทำ" -> "ทำบางส่วน" (backend ตอบข้อความทั่วไปแล้ว frontend แจ้ง API error แล้ว แต่ backend ยังไม่จัดการแหล่งบัญชีล้มเหลว)
+  - specs/009 T-06: หมายเหตุว่ามี test backend ของ AC-AUTH-01..03 แล้ว แต่ยังไม่มี test ของ AC-AUTH-04 และ test frontend ของหน้า login
+  - specs/001 T-16: หมายเหตุว่ามี test ใกล้เคียงแล้ว แต่ยังไม่ได้ตั้งชื่อตาม AC-PRJ-03
+  - rtm.md F-005: smoke test ตอนนี้ตรวจ heading `เข้าสู่ระบบ`
+- ผลทดสอบ: `npx vitest run` ผ่าน 3 tests; `PYTHONPATH=. pytest -q backend/tests` รันไม่ได้ (ModuleNotFoundError: sqlalchemy ในเครื่องนี้)
+- ไม่แก้โค้ด

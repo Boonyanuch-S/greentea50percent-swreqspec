@@ -10,7 +10,7 @@
 | F-002 | AC-VDC-03: ไม่มี test เดิมจับการเรียงคิวผิด | ผลทำให้ `review_queue_service.py` พังแล้ว test เดิมยังผ่าน | AI เข้าใจผิด | ปิดแล้ว: เพิ่ม test ตามตารางใน TC-VDC-03-1 และโค้ดปัจจุบันตรง AC |
 | F-003 | TC-AUTH-02/03 เดิมตรวจแค่ `None` ไม่ตรวจข้อความผลลัพธ์ | รอบตรวจตาราง | ยังไม่ถึง | ปิดแล้ว: แก้ test ให้เรียก `login` และตรวจ `status_code` กับ `detail` ตรงตาม spec; ไม่แก้ระบบ |
 | F-004 | TC-VDC-03-2 กรณีวันส่งเท่ากันไม่มีเกณฑ์เรียงลำดับใน spec | AC-VDC-03 และ plan ข้อ 4 | ยังไม่ถึง | ปิดแล้ว: เพิ่ม Q-06 และ CHANGELOG ใน `specs/003-ตรวจเอกสารโครงการ/spec.md`; test ไม่ assert ลำดับที่ spec ยังไม่กำหนด |
-| F-005 | frontend test เดิม `setup.test.jsx` ยังหา “ระบบจองคิวตรวจสุขภาพ” แต่หน้าปัจจุบันเป็น “ขอบันทึกชั่วโมงย้อนหลัง” | `frontend/src/__tests__/setup.test.jsx` และผล `npm test -- --run` | คนเจอเอง | ปิดแล้ว: ปรับ smoke test ให้ตรวจ heading ของหน้าปัจจุบันตาม spec และรอ state update ด้วย `waitFor`; full suite ผ่าน 3 tests |
+| F-005 | frontend test เดิม `setup.test.jsx` ยังหา “ระบบจองคิวตรวจสุขภาพ” แต่หน้าปัจจุบันเป็น “ขอบันทึกชั่วโมงย้อนหลัง” | `frontend/src/__tests__/setup.test.jsx` และผล `npm test -- --run` | คนเจอเอง | ปิดแล้ว: ปรับ smoke test ให้ตรวจ heading ของหน้าปัจจุบันตาม spec และรอ state update ด้วย `waitFor`; full suite ผ่าน 3 tests. อัปเดต 2569-10-29: หน้าแรกเปลี่ยนเป็นหน้า login (FR-AUTH-01) smoke test จึงตรวจ heading `เข้าสู่ระบบ` แทน |
 
 ## หลักฐานตรวจครบ 5 AC
 

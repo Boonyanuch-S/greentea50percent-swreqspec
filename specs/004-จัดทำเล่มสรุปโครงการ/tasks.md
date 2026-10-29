@@ -48,7 +48,10 @@
 - ไฟล์ที่แตะ: `backend/app/middleware/auth.py`, `backend/app/api/projects.py`, `backend/app/api/summary_books.py`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: API ของฟีเจอร์ปฏิเสธคำขอที่ไม่มีบริบทผู้ใช้ยืนยันตัวตนตามแผน
-- สถานะ: เสร็จ รอทีมตรวจ
+- สถานะ: ทำบางส่วน (ตรวจซ้ำ 2569-10-29 เดิมระบุว่า "เสร็จ รอทีมตรวจ")
+  - ทำแล้ว: `backend/app/middleware/auth.py` มีฟังก์ชัน `require_authenticated_user` ที่ตอบ 401 เมื่อไม่มี header `Authorization` (CON-NFR-21, NFR-SEC-01) แต่ตอนนี้ใช้กับคิวตรวจเอกสารของ specs/003 เท่านั้น
+  - ยังไม่ทำ: ยังไม่มีไฟล์ `backend/app/api/projects.py` และ `backend/app/api/summary_books.py` จึงยังไม่มี API ของฟีเจอร์นี้ที่ผูกการตรวจตัวตนไว้
+  - ยังไม่ทำ: ยังไม่มี test ที่ยืนยันว่า API ของฟีเจอร์นี้ปฏิเสธคำขอที่ไม่ได้ยืนยันตัวตน
 
 ### T-06 บังคับยืนยันตัวตนก่อนเปิดหน้าฟีเจอร์
 - รองรับ: CON-NFR-21, NFR-SEC-01
@@ -101,7 +104,7 @@
 ### T-12 สร้างหน้ารายการโครงการและข้อมูลประกอบด้วย API จำลอง
 - รองรับ: FR-SUM-01, FR-SUM-02
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-18 และ T-22
-- ไฟล์ที่แตะ: `frontend/src/pages/ProjectSummary.jsx`, `frontend/src/api/projectSummaryMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/ProjectSummary.jsx`, `frontend/src/services/projectSummaryMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: T-06
 - เสร็จเมื่อ: หน้าจอแสดงรายการเฉพาะโครงการกิจกรรมจบแล้วและข้อมูลงบประมาณกับผลประเมินจาก mock API ตามสัญญาใน plan.md
 - สถานะ: พร้อมทำ
@@ -109,7 +112,7 @@
 ### T-13 สร้างหน้าอัปโหลดเล่มสรุปด้วย API จำลอง
 - รองรับ: FR-SUM-03
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-19 และ T-22
-- ไฟล์ที่แตะ: `frontend/src/pages/SummaryBookUpload.jsx`, `frontend/src/api/projectSummaryMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/SummaryBookUpload.jsx`, `frontend/src/services/projectSummaryMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: T-06
 - เสร็จเมื่อ: เจ้าหน้าที่ส่งไฟล์ผ่านหน้าจอและเห็นผลตอบกลับจาก mock API ตามสัญญาใน plan.md ได้ โดยไม่เพิ่มเงื่อนไขชนิดไฟล์หรือการอัปโหลดทับ
 - สถานะ: พร้อมทำ
@@ -117,7 +120,7 @@
 ### T-14 สร้างหน้าสถานะโครงการด้วย API จำลอง
 - รองรับ: FR-SUM-04, FR-SUM-05
 - ตรวจด้วย: AC-SUM-02
-- ไฟล์ที่แตะ: `frontend/src/pages/ProjectSummaryStatus.jsx`, `frontend/src/api/projectSummaryMock.js`, `frontend/src/App.jsx`
+- ไฟล์ที่แตะ: `frontend/src/pages/ProjectSummaryStatus.jsx`, `frontend/src/services/projectSummaryMock.js`, `frontend/src/App.jsx`
 - ต้องทำหลัง: T-06
 - เสร็จเมื่อ: กรรมการสโมสรเห็นสถานะ “รอสรุปงบ” หรือสถานะเล่มสรุปพร้อมใช้จาก mock API ได้
 - สถานะ: พร้อมทำ
@@ -181,7 +184,7 @@
 ### T-22 ต่อหน้ารายการ ข้อมูลประกอบ และอัปโหลดกับ API จริง
 - รองรับ: FR-SUM-01, FR-SUM-02, FR-SUM-03, FR-SUM-04, IF-UC02-01
 - ตรวจด้วย: AC-SUM-01, AC-SUM-03
-- ไฟล์ที่แตะ: `frontend/src/api/client.js`, `frontend/src/pages/ProjectSummary.jsx`, `frontend/src/pages/SummaryBookUpload.jsx`, `backend/app/api/projects.py`, `backend/app/api/summary_books.py`
+- ไฟล์ที่แตะ: `frontend/src/services/client.js`, `frontend/src/pages/ProjectSummary.jsx`, `frontend/src/pages/SummaryBookUpload.jsx`, `backend/app/api/projects.py`, `backend/app/api/summary_books.py`
 - ต้องทำหลัง: T-07, T-08, T-09, T-10, T-12, T-13, T-18, T-19, T-21
 - เสร็จเมื่อ: หน้ารายการ ข้อมูลประกอบ และอัปโหลดใช้ API จริงตามสัญญาใน plan.md ได้โดยไม่ใช้ mock ใน flow ปกติ
 - สถานะ: พร้อมทำ
@@ -189,7 +192,7 @@
 ### T-23 ต่อหน้าสถานะโครงการกับ API สถานะงบจริง
 - รองรับ: FR-SUM-05
 - ตรวจด้วย: AC-SUM-02
-- ไฟล์ที่แตะ: `frontend/src/api/client.js`, `frontend/src/pages/ProjectSummaryStatus.jsx`, `backend/app/api/projects.py`
+- ไฟล์ที่แตะ: `frontend/src/services/client.js`, `frontend/src/pages/ProjectSummaryStatus.jsx`, `backend/app/api/projects.py`
 - ต้องทำหลัง: T-14, T-15, T-20, T-21
 - เสร็จเมื่อ: หน้าสถานะกรรมการอ่านสถานะจาก `GET /projects/{project_id}/budget-status` จริงและแสดง “รอสรุปงบ” เมื่อสถานะงบยังไม่เสร็จตามคำตอบ Q-01
 - สถานะ: รอ Q-01

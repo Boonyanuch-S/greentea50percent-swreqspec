@@ -51,7 +51,7 @@
 ### T-06 สร้างหน้าคิวเอกสารด้วย API จำลอง
 - รองรับ: FR-HRS-01
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-18
-- ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/api/activityHoursMock.js`
+- ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/services/activityHoursMock.js`
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: หน้าคิวแสดงเอกสารรอตรวจจาก API จำลองและเรียงตามวันที่ส่งได้
 - สถานะ: เสร็จ รอทีมตรวจ
@@ -67,7 +67,7 @@
 ### T-08 สร้างหน้าตรวจสอบรายการชั่วโมงด้วย API จำลอง
 - รองรับ: FR-HRS-02, FR-HRS-03, FR-HRS-06
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-11 และ T-18
-- ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/api/activityHoursMock.js`
+- ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/services/activityHoursMock.js`
 - ต้องทำหลัง: T-06
 - เสร็จเมื่อ: หน้าจอแสดงรายชื่อ ประเภทชั่วโมง และตำแหน่งรายการที่ต้องแก้จากข้อมูลจำลองได้
 - สถานะ: รอ Q-05 และ Q-06
@@ -147,7 +147,7 @@
 ### T-18 เชื่อมหน้าจอคิวและตรวจสอบกับ API จำลอง
 - รองรับ: FR-HRS-01, FR-HRS-02, FR-HRS-03, FR-HRS-06
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-20
-- ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/api/activityHoursMock.js`
+- ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/services/activityHoursMock.js`
 - ต้องทำหลัง: T-06, T-08 และ T-11
 - เสร็จเมื่อ: workflow คิวและตรวจสอบทำงานครบด้วย API จำลองโดยไม่ต้องรอ API จริง
 - สถานะ: รอ Q-05 และ Q-06
@@ -163,7 +163,7 @@
 ### T-20 เชื่อมหน้าจอกับ API จริง
 - รองรับ: FR-HRS-01, FR-HRS-02, FR-HRS-03, FR-HRS-04, FR-HRS-05, FR-HRS-06, FR-HRS-07, FR-HRS-08, CON-NFR-21, DOM-PDPA-01, IF-REG-01, IF-XLS-01
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-21 ถึง T-24
-- ไฟล์ที่แตะ: `frontend/src/api/activityHoursClient.js`, `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/pages/ActivityHoursReview.jsx`
+- ไฟล์ที่แตะ: `frontend/src/services/activityHoursClient.js`, `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/pages/ActivityHoursReview.jsx`
 - ต้องทำหลัง: T-05, T-07, T-10, T-13, T-14, T-15, T-16, T-17 และ T-18
 - เสร็จเมื่อ: หน้าคิวและหน้าตรวจสอบทำงานกับ API จริงครบตามสัญญา และยังคงตรวจสิทธิ์กับ audit log ได้
 - สถานะ: รอ Q-01, Q-02, Q-03, Q-05 และ Q-06

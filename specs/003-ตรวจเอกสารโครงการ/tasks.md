@@ -11,7 +11,7 @@
 ### T-01 กำหนดสิทธิ์เข้าถึงและตรวจสอบ Login
 - รองรับ: CON-NFR-21, NFR-SEC-01
 - ตรวจด้วย: AC-VDC-06
-- ไฟล์ที่แตะ: backend/app/middleware/auth.py, backend/app/routers/review_queue.py, frontend/src/api/client.js
+- ไฟล์ที่แตะ: backend/app/middleware/auth.py, backend/app/routers/review_queue.py, frontend/src/services/client.js
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: ทุกการเข้าถึงคิวเอกสารและรายละเอียดเอกสารจะถูกปฏิเสธจนกว่าจะยืนยันตัวตนสำเร็จ
 - สถานะ: เสร็จ รอทีมตรวจ
@@ -27,7 +27,7 @@
 ### T-03 สร้างหน้า “คิวเอกสารรอตรวจ”
 - รองรับ: FR-VDC-01
 - ตรวจด้วย: AC-VDC-03
-- ไฟล์ที่แตะ: frontend/src/pages/ReviewQueuePage.jsx, frontend/src/api/reviewQueue.js
+- ไฟล์ที่แตะ: frontend/src/pages/ReviewQueuePage.jsx, frontend/src/services/reviewQueue.js
 - ต้องทำหลัง: T-02
 - เสร็จเมื่อ: เจ้าหน้าที่เปิดคิวแล้วเห็นลิสต์เอกสารเรียงตามวันที่ส่งเข้าก่อน-หลังและสามารถเลือกเอกสารได้
 - สถานะ: เสร็จ รอทีมตรวจ
