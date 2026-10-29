@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* ฟอนต์ไทย IBM Plex Sans Thai (ทีมเลือกเอง ไม่ได้มาจาก spec) */
+@theme {
+  --font-sans: "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ให้กล่อง SweetAlert ใช้ฟอนต์เดียวกับหน้าเว็บ */
+.swal2-popup {
+  font-family: inherit;
+}

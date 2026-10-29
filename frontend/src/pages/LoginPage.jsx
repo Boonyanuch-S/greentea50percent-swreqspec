@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import Button from '../components/Button.jsx'
+import TextField from '../components/TextField.jsx'
+import AuthLayout from '../layouts/AuthLayout.jsx'
 
 const GENERIC_INVALID_CREDENTIALS_MESSAGE = 'บัญชีหรือรหัสผ่านไม่ถูกต้อง'
 const API_ERROR_MESSAGE = 'เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง'
 
-// แสดงและส่งแบบฟอร์ม Login รองรับ FR-AUTH-01, FR-AUTH-02 และ FR-AUTH-03
-export default function LoginPage({ client }) {
+// แสดงและส่งแบบฟอร์ม Login รองรับ FR-AUTH-01, FR-AUTH-02, FR-AUTH-03 และ FR-AUTH-05
+// เมื่อสำเร็จส่ง token/role ให้ onLoginSuccess เพื่อเข้าหน้าตามบทบาท (FR-AUTH-04)
+export default function LoginPage({ client, onLoginSuccess }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -18,7 +22,7 @@ export default function LoginPage({ client }) {
     try {
       const result = await client.login({ username, password })
       if (result.status >= 200 && result.status < 300) {
-        setMessage('เข้าสู่ระบบสำเร็จ')
+        onLoginSuccess?.(result.body)
       } else if (result.status === 401) {
         setMessage(GENERIC_INVALID_CREDENTIALS_MESSAGE)
       } else {
@@ -32,54 +36,36 @@ export default function LoginPage({ client }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-900 sm:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center">
-        <section className="w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="login-heading">
-          <header className="mb-6">
-            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">University Activity System</p>
-            <h1 id="login-heading" className="text-3xl font-bold tracking-tight text-slate-950">เข้าสู่ระบบ</h1>
-            <p className="mt-2 text-slate-600">กรอกบัญชีผู้ใช้เพื่อเข้าใช้งานระบบ</p>
-          </header>
+    <AuthLayout labelledBy="login-heading">
+      <header className="mb-6">
+        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">Science SU · Activity &amp; Hours System</p>
+        <h1 id="login-heading" className="text-3xl font-bold tracking-tight text-slate-950">เข้าสู่ระบบ</h1>
+        <p className="mt-2 text-slate-600">ระบบจัดการเอกสารกิจกรรมและส่งชั่วโมงอัตโนมัติ</p>
+      </header>
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <label className="block text-sm font-semibold text-slate-700" htmlFor="username">
-              บัญชีผู้ใช้
-              <input
-                id="username"
-                name="username"
-                type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                className="mt-2 block w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-              />
-            </label>
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        <TextField
+          id="username"
+          label="บัญชีผู้ใช้"
+          type="text"
+          autoComplete="username"
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
+        />
+        <TextField
+          id="password"
+          label="รหัสผ่าน"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ'}
+        </Button>
+      </form>
 
-            <label className="block text-sm font-semibold text-slate-700" htmlFor="password">
-              รหัสผ่าน
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 block w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-              />
-            </label>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-            >
-              {isSubmitting ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ'}
-            </button>
-          </form>
-
-          {message && <p className="mt-5 rounded-lg bg-slate-50 p-3 text-sm text-slate-700" role="alert">{message}</p>}
-        </section>
-      </div>
-    </main>
+      {message && <p className="mt-5 rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">{message}</p>}
+    </AuthLayout>
   )
 }

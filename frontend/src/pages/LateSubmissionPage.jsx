@@ -36,7 +36,7 @@ export default function LateSubmissionPage({ client }) {
     <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-900 sm:px-8">
       <div className="mx-auto max-w-4xl">
         <header className="mb-8 border-b border-slate-200 pb-6">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">Science Club / Late Hours</p>
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">Science SU / Late Hours</p>
           <h1 className="text-3xl font-bold tracking-tight text-slate-950">ขอบันทึกชั่วโมงย้อนหลัง</h1>
           <p className="mt-2 text-slate-600">เลือกกิจกรรมที่เลยกำหนดเวลาปกติเพื่อเริ่มคำขอ</p>
         </header>

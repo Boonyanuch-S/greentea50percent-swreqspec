@@ -574,3 +574,36 @@
 - ทีมยืนยันว่าจุดตรวจเฟส 0 ผ่านแล้ว และเฟส 1 ผ่านการลองตาม `AC-LATE-03`
 - ยืนยันสถานะ `T-05` และ `T-06` เป็น `เสร็จ`; `T-09` เป็น `เสร็จ` อยู่แล้ว
 - ผลทดสอบหลังปิดเฟส: `PYTHONPATH=. pytest -q backend/tests` ผ่าน 16 tests และ `cd frontend && npm test -- --run` ผ่าน 3 tests
+
+## 2569-10-29 คำสั่ง: สร้างหน้า login (UC-09) พร้อมจัดโครงสร้าง frontend/src ใหม่
+
+- คำถามที่ AI ถาม และคำตอบของทีม:
+  - จัดโครงสร้างแค่ไหน -> ย้ายทั้ง src ตอนนี้ (assets, components, hooks, layouts, pages, services, store, styles, utils)
+  - ภาษา -> JavaScript/JSX ต่อ ไม่สร้าง types/ (ทีมเลือกเอง ไม่ได้มาจาก spec)
+  - หน้าหลังเข้าสู่ระบบ (FR-AUTH-04) -> หน้าชั่วคราวตามบทบาท ติดกล่อง "รอ Q-01"
+  - แหล่งข้อมูลบัญชี -> mock บัญชีตัวอย่าง 4 บทบาท (`services/authMock.js`) เพราะ backend ยังไม่มี verifier
+- ย้าย `api/` -> `services/`, `auth/AuthGuard.jsx` -> `components/`, `index.css` -> `styles/` และแก้ import ใน App, main และ test
+- เพิ่ม `store/AuthContext.jsx` + `hooks/useAuth.js` เก็บ Token/บทบาท และแจ้ง Token หมดอายุเมื่อครบ 30 นาที (ASM-02, AC-AUTH-04)
+- `setup.test.jsx` (smoke ไม่ใช่ test ของ AC) เปลี่ยนไปคาดหวัง heading `เข้าสู่ระบบ` เพราะหน้าแรกเป็น login ตาม FR-AUTH-01
+- ไม่เพิ่ม logout, remember me หรือ validation ช่องว่าง (Q-06, Q-07, Q-08 ยังเปิดอยู่)
+- ผลทดสอบ: `cd frontend && npx vitest run` ผ่าน 3 tests; `vite build` ผ่าน
+
+## 2569-10-29 คำสั่ง: ตั้งชื่อบัญชี mock ตามผู้ให้สัมภาษณ์
+
+- รูปแบบชื่อบัญชี: `<นามสกุล>_<อักษรแรกของชื่อ>@silpakorn.edu` (ทีมยืนยันการสะกดตามที่ AI เสนอ)
+- ที่มาของบัญชี (ข้อมูลตัวอย่างใน `frontend/src/services/authMock.js` เท่านั้น):
+  - กรรมการสโมสร `boonliang_t@silpakorn.edu` <- สัมภาษณ์นางสาวธิติมาพร บุญเลี้ยง นักศึกษาที่ทำงานในสโมสรนักศึกษา วันที่ 20/7/69
+  - อาจารย์ที่ปรึกษา `intuwet_p@silpakorn.edu` <- สัมภาษณ์ ผศ.ดร.พชรพล อินทุเวศ อาจารย์ที่ปรึกษาสโมสรนักศึกษา วันที่ 14/8/69
+  - เจ้าหน้าที่กองกิจ `preechawai_p@silpakorn.edu` <- สัมภาษณ์นางสาวปัทมรัตน์ ปรีชาไว กองกิจการนักศึกษา วันที่ 25/8/69
+  - เจ้าหน้าที่คณะ `faculty@silpakorn.edu` <- ยังไม่มีผู้ให้สัมภาษณ์ ทีมเลือกชื่อกลาง
+- คงรหัสผ่านเดิมทุกบัญชี
+
+## 2569-10-29 คำสั่ง: เพิ่มหน้า Profile, Logout และเปลี่ยนชื่อแท็บ
+
+- AI แจ้งว่า Profile/Logout ไม่อยู่ใน spec 009 (กฎข้อ 3) ทีมตอบ: ทำเลยใน prototype ไม่สร้าง ID ใหม่ เขียนกำกับ "นอก spec ทีมสั่งเพิ่ม" และทีมจะเพิ่มลง spec 009 เอง
+- คำถามเสนอทีม (ยังไม่มี ID): ควรเพิ่ม FR เรื่องออกจากระบบ และหน้าโปรไฟล์ (แสดงชื่อ-สกุล อีเมล บทบาท สังกัด แก้ไขไม่ได้) ลงใน specs/009 หรือไม่
+- หน้าโปรไฟล์ `pages/ProfilePage.jsx` แสดงชื่อ-สกุล อีเมล บทบาท สังกัด และเวลา Token หมดอายุ; ปุ่มโปรไฟล์/ออกจากระบบอยู่ในแถบหัว `layouts/AppLayout.jsx` ทุกบทบาท
+- `signOut` ใน `store/AuthContext.jsx`; ชื่อ-สกุล/สังกัดเพิ่มใน `services/authMock.js` เท่านั้น (backend LoginResponse ยังไม่มี profile)
+- ชื่อแท็บ `index.html`: "ระบบจัดการเอกสารกิจกรรมและส่งชั่วโมงอัตโนมัติ | Activity & Hours System · Science SU" และแก้ข้อความหัวหน้า login ให้ตรงกัน
+- ผลทดสอบ: `npx vitest run` ผ่าน 3 tests; ลอง flow login -> โปรไฟล์ -> กลับ -> ออกจากระบบ -> login บทบาทอื่น ผ่านแล้วลบทิ้ง; `vite build` ผ่าน
+

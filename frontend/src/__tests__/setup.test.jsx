@@ -5,6 +5,6 @@ import App from '../App.jsx'
 test('โครงหน้าจอเปิดได้', async () => {
   render(<App />)
   await waitFor(() => {
-    expect(screen.getByRole('heading', { name: 'ขอบันทึกชั่วโมงย้อนหลัง' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'เข้าสู่ระบบ' })).toBeTruthy()
   })
 })

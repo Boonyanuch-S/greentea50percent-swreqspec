@@ -41,7 +41,7 @@ export default function ActivityDashboard({ client }) {
         <header className="mb-8 flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
-              Science Club / Activity Overview
+              Science SU / Activity Overview
             </p>
             <h1 className="text-3xl font-bold tracking-tight text-slate-950">ภาพรวมกิจกรรม</h1>
             <p className="mt-2 text-slate-600">ข้อมูลกิจกรรมของสโมสรคณะวิทยาศาสตร์ที่คุณดูแล</p>

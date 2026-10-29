@@ -29,7 +29,7 @@ export default function LegacyDataImport({ client }) {
       <div className="mx-auto max-w-3xl">
         <header className="mb-8 border-b border-slate-200 pb-6">
           <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
-            Science Club / Legacy Data
+            Science SU / Legacy Data
           </p>
           <h1 className="text-3xl font-bold tracking-tight text-slate-950">นำเข้าข้อมูลเดิม</h1>
           <p className="mt-2 text-slate-600">อัปโหลดไฟล์กิจกรรมและรายชื่อผู้สมัครเดิมเพื่อเตรียมตรวจสอบ</p>

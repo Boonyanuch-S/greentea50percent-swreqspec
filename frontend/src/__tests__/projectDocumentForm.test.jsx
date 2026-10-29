@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import ProjectDocumentForm from '../pages/ProjectDocumentForm.jsx'
-import { projectDocumentMock } from '../api/projectDocumentMock.js'
+import { projectDocumentMock } from '../services/projectDocumentMock.js'
 
 test('T-03 แสดงฟอร์มโครงการใหม่พร้อมช่องข้อมูลหลักครบ', async () => {
   render(<ProjectDocumentForm client={projectDocumentMock} />)
