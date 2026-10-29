@@ -3,15 +3,23 @@ import { useAuth } from './hooks/useAuth.js'
 import AppLayout from './layouts/AppLayout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
+import ProjectDocumentsPage from './pages/ProjectDocumentsPage.jsx'
 import RoleHomePage from './pages/RoleHomePage.jsx'
 import { authMock } from './services/authMock.js'
+import { projectDocumentMock } from './services/projectDocumentMock.js'
 import { AuthProvider } from './store/AuthContext.jsx'
 import { confirmAction, showToast, showWarning } from './utils/alerts.js'
 
-// หน้าหลักตามบทบาท (FR-AUTH-04) ยังรอ Q-01 จึงใช้ RoleHomePage ชั่วคราว
-const homeSections = {}
+// หน้าหลักตามบทบาท (FR-AUTH-04) ทีมตอบ Q-01 แล้วเฉพาะกรรมการสโมสร -> UC-01
+// บทบาทอื่นยังรอ Q-01 จึงใช้ RoleHomePage ชั่วคราว
+const homeSections = {
+  club_committee: 'Project Document',
+}
 
 function RoleHome({ role }) {
+  if (role === 'club_committee') {
+    return <ProjectDocumentsPage client={projectDocumentMock} />
+  }
   return <RoleHomePage role={role} />
 }
 
