@@ -10,9 +10,13 @@ class ReviewQueueService:
         self._submissions = list(submissions)
 
     def list_pending(self) -> list[ProjectSubmission]:
+        """เรียงคิวรอตรวจตามเวลาส่งและ submission_id ตาม FR-VDC-01 และ Q-06."""
         return sorted(
             (submission for submission in self._submissions if submission.status == "รอตรวจสอบ"),
-            key=lambda submission: submission.submitted_at,
+            key=lambda submission: (
+                submission.submitted_at,
+                submission.submission_id,
+            ),
         )
 
     def get_submission(self, submission_id: int) -> ProjectSubmission | None:

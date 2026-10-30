@@ -1,30 +1,109 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from './hooks/useAuth.js'
 import AppLayout from './layouts/AppLayout.jsx'
+import ChecklistManagementPage from './pages/ChecklistManagementPage.jsx'
+import DocumentReviewPage from './pages/DocumentReviewPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import ProjectDocumentsPage from './pages/ProjectDocumentsPage.jsx'
+import ReviewQueuePage from './pages/ReviewQueuePage.jsx'
 import RoleHomePage from './pages/RoleHomePage.jsx'
 import { authMock } from './services/authMock.js'
+import { checklistApi } from './api/client.js'
 import { projectDocumentMock } from './services/projectDocumentMock.js'
+import { reviewQueueMock } from './services/reviewQueue.js'
 import { AuthProvider } from './store/AuthContext.jsx'
 import { confirmAction, showToast, showWarning } from './utils/alerts.js'
 
-// หน้าหลักตามบทบาท (FR-AUTH-04) ทีมตอบ Q-01 แล้วเฉพาะกรรมการสโมสร -> UC-01
-// บทบาทอื่นยังรอ Q-01 จึงใช้ RoleHomePage ชั่วคราว
+// หน้าหลักตามบทบาท (FR-AUTH-04) ตามคำตอบทีมใน Q-01
 const homeSections = {
   club_committee: 'Project Document',
+  faculty_officer: 'Project Review',
 }
 
-function RoleHome({ role }) {
+function RoleHome({ role, session, checklistClient, reviewClient }) {
+  const [facultyView, setFacultyView] = useState('queue')
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState(null)
+
   if (role === 'club_committee') {
     return <ProjectDocumentsPage client={projectDocumentMock} />
+  }
+  if (role === 'faculty_officer') {
+    return (
+      <>
+        <div className="mx-auto mb-6 max-w-5xl">
+          <nav
+            className="inline-flex max-w-full rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+            aria-label="เมนูเจ้าหน้าที่คณะ"
+          >
+            <button
+              type="button"
+              aria-pressed={facultyView === 'queue'}
+              onClick={() => {
+                setSelectedSubmissionId(null)
+                setFacultyView('queue')
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${
+                facultyView === 'queue'
+                  ? 'bg-teal-700 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-5 w-5">
+                <path d="M4 5.5h12M4 10h12M4 14.5h12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                <circle cx="2.5" cy="5.5" r=".7" fill="currentColor" />
+                <circle cx="2.5" cy="10" r=".7" fill="currentColor" />
+                <circle cx="2.5" cy="14.5" r=".7" fill="currentColor" />
+              </svg>
+              คิวเอกสาร
+            </button>
+            <button
+              type="button"
+              aria-pressed={facultyView === 'checklist'}
+              onClick={() => {
+                setSelectedSubmissionId(null)
+                setFacultyView('checklist')
+              }}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${
+                facultyView === 'checklist'
+                  ? 'bg-teal-700 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-5 w-5">
+                <rect x="3.5" y="3.5" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                <path d="m6.5 10 2.2 2.2 4.8-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Checklist กลาง
+            </button>
+          </nav>
+        </div>
+        {selectedSubmissionId ? (
+          <DocumentReviewPage
+            client={reviewClient}
+            session={session}
+            submissionId={selectedSubmissionId}
+            onBack={() => setSelectedSubmissionId(null)}
+          />
+        ) : facultyView === 'queue' ? (
+          <ReviewQueuePage
+            client={reviewClient}
+            onOpenSubmission={(submission) => setSelectedSubmissionId(submission.submission_id)}
+          />
+        ) : (
+          <ChecklistManagementPage
+            client={checklistClient}
+            session={session}
+          />
+        )}
+      </>
+    )
   }
   return <RoleHomePage role={role} />
 }
 
 // ยังไม่มี Token แสดงหน้า login (FR-AUTH-01) มี Token แล้วเข้าหน้าตามบทบาท (FR-AUTH-04)
-function AppRoutes({ authClient }) {
+function AppRoutes({ authClient, checklistClient, reviewClient }) {
   const { session, tokenExpired, signIn, signOut, dismissExpiredNotice } = useAuth()
   const [view, setView] = useState('home') // 'home' | 'profile' (หน้าโปรไฟล์: นอก spec ทีมสั่งเพิ่ม)
 
@@ -67,16 +146,29 @@ function AppRoutes({ authClient }) {
       {view === 'profile' ? (
         <ProfilePage session={session} onBack={() => setView('home')} onLogout={handleSignOut} />
       ) : (
-        <RoleHome role={session.role} />
+        <RoleHome
+          role={session.role}
+          session={session}
+          checklistClient={checklistClient}
+          reviewClient={reviewClient}
+        />
       )}
     </AppLayout>
   )
 }
 
-export default function App({ authClient = authMock }) {
+export default function App({
+  authClient = authMock,
+  checklistClient = checklistApi,
+  reviewClient = reviewQueueMock,
+}) {
   return (
     <AuthProvider>
-      <AppRoutes authClient={authClient} />
+      <AppRoutes
+        authClient={authClient}
+        checklistClient={checklistClient}
+        reviewClient={reviewClient}
+      />
     </AuthProvider>
   )
 }

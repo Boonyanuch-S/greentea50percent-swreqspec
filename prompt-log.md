@@ -700,3 +700,241 @@
   - rtm.md F-005: smoke test ตอนนี้ตรวจ heading `เข้าสู่ระบบ`
 - ผลทดสอบ: `npx vitest run` ผ่าน 3 tests; `PYTHONPATH=. pytest -q backend/tests` รันไม่ได้ (ModuleNotFoundError: sqlalchemy ในเครื่องนี้)
 - ไม่แก้โค้ด
+
+## 2569-10-29 คำสั่ง: "แก้ไขให้เปิดได้" (Vite import error)
+
+- ภาพแจ้งว่า Vite resolve `sweetalert2` จาก `frontend/src/utils/alerts.js` ไม่ได้
+- ตรวจพบว่า dependency มีอยู่ใน `frontend/package.json` และ `frontend/package-lock.json` แต่ยังไม่ได้ติดตั้งใน `frontend/node_modules`
+- ติดตั้งตาม lockfile ด้วย `npm ci --prefix frontend`; ไม่เปลี่ยนโค้ดหรือข้อกำหนดใน spec
+- ผลตรวจ: `npm --prefix frontend run build` ผ่าน และ `npm --prefix frontend test` ผ่าน 3 tests
+
+## 2569-10-29 คำสั่ง: "เจ้าหน้าที่คณะวิทยาศาสตร์ login แล้วให้ไปที่หน้าของ003ได้เลย"
+
+- ปรับ `frontend/src/App.jsx` ให้ role `faculty_officer` เปิดหน้า Review Queue ของ UC-03 (`ReviewQueuePage`) หลัง login สำเร็จ
+- บันทึกคำตอบทีมสำหรับ Q-01 ใน `specs/009-เข้าสู่ระบบ/spec.md` และอัปเดตสถานะ T-04 ใน `tasks.md`; บทบาทอาจารย์ที่ปรึกษาและเจ้าหน้าที่กองกิจยังรอคำตอบ
+- เพิ่ม test การ login ของเจ้าหน้าที่คณะและตรวจว่าหน้าคิวเอกสารรอตรวจเปิดขึ้น
+
+## 2569-10-30 คำสั่ง: "แก้ spec 003 ให้เลย" (ปรับตามคำชี้แจง Checklist)
+
+- `specs/003-ตรวจเอกสารโครงการ/spec.md`: ปรับเป็น Draft v2 ตามคำตอบทีมว่าเจ้าหน้าที่คณะทุกคนเพิ่ม/แก้รายการ Checklist ส่วนกลางได้ และผู้ตรวจเลือกชุดรายการที่เหมาะกับแต่ละโครงการเอง
+- ปรับ FR-VDC-03, FR-VDC-07, AC-VDC-04, AC-VDC-05 และ Scope โดยคง ID เดิม; บันทึกคำตอบ Q-01/Q-02 และลิงก์ DSA ที่ทีมให้เป็นแหล่งอ้างอิง โดยไม่กำหนดรายชื่อเอกสารตายตัว
+- ไม่แก้ `tasks.md` หรือ `plan.md`; สถานะและรายละเอียด T-04 ต้องปรับให้ตรงกับ spec v2 ก่อนเริ่ม implement
+- ไม่รัน test เนื่องจากแก้เอกสารข้อกำหนดเท่านั้น
+
+## 2569-10-30 คำสั่ง: "แก้ spec 003 ให้เลย" (ย้ำการเลือก Checklist ตามโครงการ)
+
+- ปรับ `specs/003-ตรวจเอกสารโครงการ/spec.md` ให้ระบุว่าผู้ตรวจทำเครื่องหมายเลือกรายการเอกสารจาก Checklist ส่วนกลางตามแต่ละโครงการได้ โดยไม่บังคับชุดหรือชื่อเรียกตายตัว
+- ระบุว่าเจ้าหน้าที่คณะทุกคนแก้ไขรายการ/ชื่อใน Checklist ส่วนกลางได้ และทุกคนเห็นรายการส่วนกลางฉบับล่าสุดชุดเดียวกัน; ลิงก์ DSA เป็นข้อมูลอ้างอิง ไม่ใช่รายการเอกสารบังคับ
+- คง FR/AC IDs เดิม; ไม่แก้ `tasks.md` หรือ `plan.md` และไม่รัน test เพราะแก้ข้อกำหนดเท่านั้น
+
+## 2569-10-30 คำสั่ง: "แก้ tasks และ plan ให้หน่อย" (ปรับงาน Checklist ของ 003)
+
+- บันทึกคำตอบทีมใน `specs/003-ตรวจเอกสารโครงการ/spec.md` ว่าการแก้ Checklist มีผลทันทีต่อเอกสารที่กำลังตรวจ และคงสถานะที่ผูกกับรายการเดิมตราบใดที่รายการนั้นยังอยู่ (ASM-03)
+- `tasks.md`: ปรับ T-04 ให้พ้นการรอ Q-01/Q-02 แต่ยังรอ T-01 ผ่านจุดตรวจ; ระบุผลต่อเอกสารที่กำลังตรวจ, เปลี่ยน T-05/T-06 เป็นรอ prerequisite และเพิ่มไฟล์ทดสอบ AC-VDC-04
+- `plan.md`: วางโมเดล Checklist แบบมีเวอร์ชันและ stable item identity, กำหนด API อ่าน/เพิ่ม/แก้รายการและเลือก Checklist รายโครงการ, ปรับแผนทดสอบ AC-VDC-04/05
+- Q-03 ถึง Q-05 ยังคงเป็น Open Questions และบล็อกงานที่เกี่ยวข้อง; ไม่รัน test เพราะปรับเอกสารเท่านั้น
+
+## 2569-10-30 คำสั่ง: /tasks specs/003-ตรวจเอกสารโครงการ/spec.md
+
+- จัด `specs/003-ตรวจเอกสารโครงการ/tasks.md` ใหม่เป็น 7 เฟสแนวตั้ง รวม 23 tasks ตาม AC และลำดับการใช้งาน
+- รักษาสถานะ “เสร็จ รอทีมตรวจ” สำหรับงานคิวและหน้าคิวที่มีอยู่; แยกงานที่ยังทำได้ออกจาก Q-03 ถึง Q-06 ซึ่งมี 4 tasks รอคำตอบทีม
+- เพิ่มตาราง traceability ครบ AC, FR และ Constraints; คง Q-01, Q-02 และ Q-07 เป็นคำตอบแล้ว
+- ระบุข้อค้นพบว่า repository ยังไม่มี FastAPI entrypoint โดยกำหนด T-02 ให้สร้างจุดเริ่มและใช้คำสั่งรันในจุดตรวจ; ไม่แก้โค้ดหรือรัน tests เพราะเป็นการแตก tasks
+
+## 2569-10-30 คำสั่ง: /implement-all specs/003-ตรวจเอกสารโครงการ/tasks.md เฟส 0
+
+- ทีมยืนยันให้ถือ T-01 ว่าเสร็จแล้ว จึงเริ่ม T-02 ได้
+- T-02: เพิ่ม `backend/app/main.py` เพื่อเปิด FastAPI และเชื่อม router คิวเอกสาร; เพิ่ม `backend/tests/test_app_startup.py`
+- ผลทดสอบ: backend `PYTHONPATH=. pytest -q backend/tests` ผ่าน 17 tests; frontend `cd frontend && npm test` ผ่าน 4 tests
+- สถานะ T-02: เสร็จ รอทีมตรวจ; commit: T-02 สร้างจุดเริ่ม FastAPI และเชื่อม router (implement-all)
+- T-03: เพิ่ม `backend/tests/test_AC_VDC_06_unauthenticated_user_blocked.py` ครอบคลุมการเรียกคิวและรายละเอียดโดยไม่ Login
+- ผลทดสอบรวม: backend `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. pytest -q -p no:cacheprovider backend/tests` ผ่าน 18 tests; frontend `cd frontend && npm test` ผ่าน 4 tests
+- สถานะ T-03: เสร็จ รอทีมตรวจ; commit: T-03 เพิ่มการทดสอบการปฏิเสธผู้ใช้ที่ยังไม่ Login (implement-all)
+- แก้จุดตรวจเฟส 0 ให้ระบุ test startup ของ T-02 เพิ่มเติม เพื่อให้รายการ test ครบทุก task ในเฟส
+
+## 2569-10-30 คำสั่ง: "ลองทำ T เท่าที่ทำได้ให้หน่อยของ 003" (/implement-all ต่อเฟส 1)
+
+- ทีมยืนยันว่าเฟส 0 และเฟส 1 ผ่านจุดตรวจ จึงปรับ T-02 ถึง T-05 จาก “เสร็จ รอทีมตรวจ” เป็น “เสร็จ”
+- T-06: เพิ่ม backend test สำหรับ API เรียงคิว และ frontend test สำหรับลำดับรายการในหน้าคิวตาม AC-VDC-03
+- ผลทดสอบ baseline ก่อนเริ่ม: backend 18 passed; frontend 4 passed
+- ผลทดสอบหลัง T-06: backend 19 passed; frontend 5 passed
+- สถานะ T-06: เสร็จ รอทีมตรวจ
+
+## 2569-10-30 คำสั่ง: /implement T-07
+
+- สร้าง `backend/app/models/checklist_rule.py`, `backend/app/models/checklist_item.py` และ `backend/app/services/checklist_service.py` สำหรับ Checklist กลางแบบเวอร์ชัน โดยคง identity ของรายการเดิมเมื่อแก้ชื่อ
+- เพิ่ม `backend/tests/test_checklist_versioning.py`; test `test_AC_VDC_05_checklist_versions_keep_stable_item_id` ตรวจเวอร์ชันเก่า/ล่าสุดและ stable item ID
+- ผลทดสอบ: `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. pytest -q -p no:cacheprovider backend/tests` ผ่าน 20 tests; test เฉพาะ T-07 ผ่าน
+- สิ่งที่เกือบต้องเดา: ไม่มีการระบุฐานข้อมูล/การสร้าง session ใน task; ใช้ SQLAlchemy ORM ตามรูปแบบที่มีใน repository และให้ service รับ `Session` จากผู้เรียก ไม่กำหนด engine หรือ database เพิ่ม
+- สถานะ T-07: เสร็จ รอทีมตรวจ
+
+## 2569-10-30 คำสั่ง: "ทำให้ครบ ทุก Tเลย"
+
+- ทีมยืนยันว่าตรวจผ่านจุดตรวจ T-06 และ T-07 แล้ว จึงปรับสถานะทั้งสอง task เป็น “เสร็จ”
+- Baseline ก่อนเฟส 2: backend 20 passed; frontend 5 passed
+- T-07 code จากรอบก่อนยังไม่ได้ commit; เตรียม commit แยกก่อนดำเนิน T-08
+- พบว่า repository ไม่มีการตั้งค่า database engine/session กลาง ขณะที่ T-08 ต้องให้ Checklist ใช้ร่วมกันผ่าน API; จึงถามทีมก่อนเลือกฐานข้อมูลหรือ lifecycle ของ session
+- ทีมระบุให้ Checklist ใช้ฐานข้อมูลจำลองเฉพาะงานนี้
+
+- ทีมยืนยันว่าผ่านจุดตรวจเฟส 2 และระบุให้ Checklist ใช้ฐานข้อมูลจำลองเท่านั้น
+- T-08: เพิ่ม API อ่าน/เพิ่ม/แก้ไข Checklist พร้อม SQLite in-memory ที่ใช้ร่วมกันภายใน process; เพิ่ม `backend/app/routers/checklists.py`, เชื่อม router ใน `backend/app/main.py` และเพิ่ม `backend/tests/test_checklist_api.py`
+- ผลทดสอบก่อนเริ่ม: backend 20 passed; frontend 5 passed
+- ผลทดสอบหลัง T-08: backend 21 passed; frontend 5 passed; test `test_checklist_api_uses_latest_and_requires_auth` ผ่าน
+- ขอบเขตฐานข้อมูล: ข้อมูล Checklist อยู่เฉพาะในหน่วยความจำของ backend process และหายเมื่อ restart ตามที่ทีมระบุว่าเป็น mock; ไม่ได้กำหนดฐานข้อมูลถาวร
+- สถานะ T-08: เสร็จ รอทีมตรวจ
+- T-09: เพิ่มหน้าและ component จัดการ Checklist กลาง, API client ที่ส่ง token, เมนูเข้าถึงจากหน้าหลักเจ้าหน้าที่ และ frontend test; ทีมอนุญาตเพิ่มไฟล์ test ใน scope
+- ผลทดสอบหลัง T-09: backend 21 passed; frontend 6 passed; `npm run build` ผ่าน; `test_checklist_management_adds_and_edits_items_AC_VDC_05` ผ่าน
+- สถานะ T-09: เสร็จ รอทีมตรวจ
+- ทีมเลือกให้ T-10 ตรวจว่าผู้ตรวจสองคนเห็น Checklist ล่าสุดเดียวกันและ item ID คงเดิม; เลื่อนการตรวจสถานะรายโครงการไปหลังมี storage ในเฟส 3
+- T-10: เพิ่ม `backend/tests/test_AC_VDC_05_all_reviewers_see_same_latest_rule.py` และขยาย `frontend/src/__tests__/checklist-management.test.jsx`
+- ผลทดสอบหลัง T-10: backend 22 passed; frontend 7 passed; test `test_AC_VDC_05_all_reviewers_see_same_latest_rule` ผ่านทั้ง backend และ frontend
+- สถานะ T-10: เสร็จ รอทีมตรวจ; ยังไม่ได้ทดสอบสถานะตรวจที่ผูกกับโครงการ เพราะ storage อยู่ในงานเฟส 3
+
+## 2569-10-30 คำสั่ง: "ทำให้ครบทุก T เลย" (ยืนยันจุดตรวจเฟส 2)
+
+- ทีมยืนยันว่าเฟส 2 ผ่านแล้ว จึงเปลี่ยนสถานะ T-08 ถึง T-10 เป็น “เสร็จ” ก่อนเริ่มเฟส 3
+- ดำเนินงานได้เฉพาะเฟส 3 ในรอบนี้ตามข้อกำหนด /implement-all ให้หยุดที่จุดตรวจของแต่ละเฟส
+
+## 2569-10-30 คำสั่ง: "ทำให้ครบทุก T เลย" (เฟส 3, T-11)
+
+- เพิ่ม API Checklist รายโครงการสำหรับอ่าน Checklist ฉบับล่าสุดและบันทึกรายการที่เลือกพร้อมผล “ครบ/ไม่ครบ”; ใช้ stable item ID เพื่อคงผลตรวจเมื่อแก้ชื่อรายการ และแยกผลตาม submission
+- ใช้ route รายละเอียด `/submissions/{submission_id}` ที่มีอยู่และตรวจว่า submission อยู่ในคิวก่อนอ่านหรือบันทึก Checklist; API ที่เพิ่มบังคับ Login ตาม CON-NFR-21 และ NFR-SEC-01
+- ไฟล์ของ T-11: `backend/app/routers/checklists.py`, `backend/app/routers/submissions.py`, `backend/app/services/project_review_service.py`, `backend/tests/test_project_review_checklist.py`
+- อัปเดตชื่อ test ใน T-11 และจุดตรวจเฟส 3 ให้ระบุ AC-VDC-04: `test_AC_VDC_04_project_details_and_checklist_api`
+- ผลทดสอบ: backend `23 passed, 5 warnings`; frontend `7 passed`
+- สถานะ T-11: เสร็จ รอทีมตรวจ
+
+## 2569-10-30 คำสั่ง: "ทำให้ครบทุก T เลย" (เฟส 3, T-12)
+
+- เนื่องจาก `ReviewQueuePage` เดิมไม่มีการเปิดหน้ารายละเอียด และ test ที่ T-12 ระบุยังไม่มี ทีมอนุญาตเพิ่ม `frontend/src/pages/ReviewQueuePage.jsx`, `frontend/src/services/reviewQueue.js` และ `frontend/src/__tests__/document-review-checklist.test.jsx`
+- ทีมเลือก flow จำลองใน browser; รายละเอียดและผลตรวจรายโครงการเก็บใน memory แยกตาม session และไม่คงข้าม reload/ผู้ใช้ ส่วน Checklist กลางยังอ่านรายการฉบับล่าสุดผ่าน API
+- เพิ่มหน้า `DocumentReviewPage` และ `ReviewerChecklistPanel` พร้อมทางเปิดจากคิว; test `test_AC_VDC_04_document_review_displays_details_and_checklist` ครอบคลุมการเปิดและแสดงข้อมูล
+- ไฟล์ของ T-12: `frontend/src/pages/DocumentReviewPage.jsx`, `frontend/src/components/ReviewerChecklistPanel.jsx`, `frontend/src/App.jsx`, `frontend/src/pages/ReviewQueuePage.jsx`, `frontend/src/services/reviewQueue.js`, `frontend/src/__tests__/document-review-checklist.test.jsx`
+- ผลทดสอบ: backend `23 passed, 5 warnings`; frontend `8 passed`; `npm run build` ผ่าน
+- สถานะ T-12: เสร็จ รอทีมตรวจ
+
+## 2569-10-30 คำสั่ง: "ทำให้ครบทุก T เลย" (เฟส 3, T-13)
+
+- เพิ่ม backend acceptance test และ frontend interaction test สำหรับ AC-VDC-04 โดยใช้ชุดรายการที่มาจากข้อมูลทดสอบ และตรวจว่าคนละโครงการเลือกคนละชุดพร้อมสถานะครบ/ไม่ครบได้
+- ไฟล์ของ T-13: `backend/tests/test_AC_VDC_04_reviewer_selects_relevant_checklist_items.py`, `frontend/src/__tests__/document-review-checklist.test.jsx`
+- ผลทดสอบหลัง T-13: backend `24 passed, 5 warnings`; frontend `9 passed`
+- สถานะ T-13: เสร็จ รอทีมตรวจ; ครบ task เฟส 3 แล้ว
+- เพิ่ม assertion ใน frontend test ให้ตรวจสถานะที่แสดงใน UI โดยตรงสำหรับชุดที่ต่างกันของแต่ละโครงการ
+
+## 2569-10-30 คำสั่ง: "แก้ให้คลิกแล้วไปหน้ารายละเอียดเลย ไม่ได้ไปกดปุ่มเปิดรายละเอียด"
+
+- ปรับการ์ดเอกสารในคิวให้เรียกเปิดหน้ารายละเอียดทันทีเมื่อ `ReviewQueuePage` ได้รับ `onOpenSubmission`; ลบปุ่ม “เปิดรายละเอียด”
+- ปรับ `test_AC_VDC_04_document_review_displays_details_and_checklist` ให้คลิกการ์ดครั้งเดียวแล้วตรวจหน้าเนื้อหารายละเอียด
+- ผลทดสอบเฉพาะส่วน: `npx vitest run src/__tests__/document-review-checklist.test.jsx src/__tests__/review-queue.test.jsx` ผ่าน 3 tests
+
+## 2569-10-30 คำสั่ง: "เอาออกให้หน่อย"
+
+- ลบ panel “เอกสารที่เลือก” ออกจากหน้า Review Queue และเอา state สำหรับ preview ที่ไม่ใช้แล้วออก; การ์ดโครงการยังเปิดหน้ารายละเอียดทันทีเมื่อคลิก
+- เพิ่ม assertion ว่าไม่แสดงหัวข้อ “เอกสารที่เลือก”
+- ผลทดสอบ: `npx vitest run src/__tests__/review-queue.test.jsx src/__tests__/document-review-checklist.test.jsx` ผ่าน 3 tests
+
+## 2569-10-30 คำสั่ง: "หน้านี้ให้มีปุ่มย้อนกลับและทำให้ Checklist กลางดีกว่านี้"
+
+- เพิ่มปุ่ม “กลับคิวเอกสาร” ในหน้า Checklist กลางและเชื่อมกลับไปที่คิวเอกสาร
+- ปรับการแสดง Checklist ให้เห็นเวอร์ชัน/จำนวนรายการ มี placeholder สำหรับเพิ่มรายการ และจัดแต่ละรายการให้อ่านง่ายขึ้น
+- แก้ API client ให้อธิบายกรณี backend ตอบ HTML หรือ response ว่าง แทนการแสดง JSON parse error
+- เพิ่ม tests สำหรับการย้อนกลับถึงหน้าคิวจริงและกรณี API ตอบ HTML
+- ผลทดสอบ: frontend `11 passed`; `npm run build` ผ่าน
+
+## 2569-10-30 คำสั่ง: "หน้านี้เอาปุ่มย้อนกลับออก"
+
+- ลบปุ่ม “กลับคิวเอกสาร” ออกจากหน้า Checklist กลางตามภาพ; คงแท็บเมนู “คิวเอกสาร” ด้านบนไว้สำหรับเปลี่ยนหน้า
+- ปรับ test ให้ยืนยันว่าไม่มีปุ่มย้อนกลับและเปลี่ยนกลับหน้าคิวผ่านแท็บเมนู
+
+## 2569-10-30 คำสั่ง: "จัดเลเอาทั้ง2หน้าให้สวยหน่อย"
+
+- ปรับแถบเมนูให้จัดแนวเดียวกับเนื้อหาหน้าคิวและ Checklist; เพิ่มตัวบอกจำนวน, hover/focus และ spacing บนการ์ดคิว
+- จัดหน้า Checklist ใหม่ด้วย badge ฉบับกลาง, แสดงเวอร์ชัน/จำนวนรายการ, จัดฟอร์มเพิ่มรายการและ empty state ให้เป็นสัดส่วน
+- ไฟล์ที่แก้: `frontend/src/App.jsx`, `frontend/src/pages/ReviewQueuePage.jsx`, `frontend/src/pages/ChecklistManagementPage.jsx`, `frontend/src/components/ChecklistManagementPanel.jsx`
+- ผลทดสอบ: frontend `11 passed`; `npm run build` ผ่าน
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (ยืนยันจุดตรวจเฟส 3)
+
+- ทีมยืนยันว่าลองเฟส 3 ผ่านแล้ว จึงเปลี่ยน T-11, T-12 และ T-13 จาก “เสร็จ รอทีมตรวจ” เป็น “เสร็จ”
+- เริ่มทำต่อได้ที่เฟส 4, T-14 ตามลำดับใน `tasks.md`; ยังไม่เริ่มเฟส 5
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (T-14)
+
+- ทีมเลือกใช้ mock in-memory สำหรับบันทึกคำตัดสินและจำลองคิว UC-05 โดยไม่สร้างการแจ้งกรรมการที่ยังรอ Q-03
+- ทีมอนุญาตเพิ่ม `backend/tests/test_approval_service.py` ในขอบเขต T-14 แม้เดิมระบุไฟล์ test ไว้ใน T-16
+- เพิ่ม API อนุมัติที่บันทึกคำตัดสิน เปลี่ยนสถานะเป็น “ส่งต่ออาจารย์” และส่งรายการเข้า mock queue ของ UC-05
+- ผลทดสอบก่อนเริ่ม: backend `24 passed, 5 warnings` (ใช้ `PYTHONPATH=..` เพราะ tests import จาก package `backend`); frontend `11 passed`
+- ผลทดสอบหลัง T-14: backend `25 passed, 5 warnings`; frontend `11 passed`
+- ทีมอนุญาตเพิ่ม `frontend/src/__tests__/approval-action.test.jsx` ใน scope ของ T-15 แม้เดิมระบุไฟล์ test ไว้ใน T-16
+- ทีมยืนยันให้ prototype ใช้ `session.profile.username` เป็น `reviewer_user_id`; Login API จริงยังคืนเพียง token/role จึงต้องกำหนดสัญญา user ID ก่อนเชื่อมระบบจริง
+- เพิ่มปุ่มอนุมัติในหน้ารายละเอียดและแสดงสถานะ/ผล handoff จาก API; ไม่สร้างการแจ้งกรรมการที่ยังรอ Q-03
+- ผลทดสอบหลัง T-15: backend `25 passed, 5 warnings`; frontend `12 passed`; `npm run build` ผ่าน
+- สถานะ T-14 และ T-15: เสร็จ รอทีมตรวจ; ยังไม่เริ่ม T-16
+- ทวน T-16: `test_approval_status_and_advisor_handoff` และ `test_approval_action_displays_result` ผ่าน โดย test แยกการแจ้งกรรมการไว้เพราะ Q-03 ยังไม่ตอบ
+- ผลทดสอบจุดตรวจเฟส 4: backend `25 passed, 5 warnings`; frontend `12 passed`; `npm run build` ผ่าน
+- สถานะ T-16: เสร็จ รอทีมตรวจ; ครบ task เฟส 4 แล้วและหยุดที่จุดตรวจ
+- ทีมยืนยันในคำสั่ง "ทำ T ต่อไป" ว่าลองเฟส 4 ผ่านแล้ว จึงปิดสถานะ T-14 ถึง T-16 เป็น “เสร็จ” และเริ่มเฟส 5
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (เฟส 5, T-17)
+
+- ทีมอนุญาตใช้ mock in-memory สำหรับส่งเหตุผลกลับเข้า UC-01 โดยให้ผล API ระบุว่าเข้าคิวจำลองแล้ว ไม่อ้างว่าส่งแจ้งจริง
+- ทีมอนุญาตเพิ่ม `backend/tests/test_rejection_service.py` ใน scope ของ T-17 เพื่อทดสอบตาม DoD
+- เพิ่มบริการและ API ตีกลับ เปลี่ยนสถานะเป็น “ตีกลับให้แก้ไข” และเก็บเหตุผล/ผู้รับใน mock queue; ไม่กำหนดการแก้ไขทั้งฉบับหรือเฉพาะจุดตาม Q-04
+- ผลทดสอบหลัง T-17: backend `26 passed, 5 warnings`; frontend `12 passed`
+- สถานะ T-17: เสร็จ รอทีมตรวจ; พร้อมทำ T-18 ในเฟสเดียวกัน
+- ทีมอนุญาตเพิ่ม `frontend/src/__tests__/reject-dialog.test.jsx` ใน scope ของ T-18
+- เพิ่ม dialog ให้ระบุเหตุผลก่อนยืนยันตีกลับและแสดงสถานะ/เหตุผลที่ API ส่งกลับ; หน้ารายละเอียดอัปเดตสถานะ และไม่แสดง action ที่ขัดกับสถานะผล
+- ผลทดสอบหลัง T-18: backend `26 passed, 5 warnings`; frontend `13 passed`; `npm run build` ผ่าน
+- สถานะ T-18: เสร็จ รอทีมตรวจ; พร้อมทำ T-19 ในเฟสเดียวกัน
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (เฟส 5, T-19)
+
+- เพิ่ม acceptance tests สำหรับ AC-VDC-02 ทั้ง API backend และหน้าจอยืนยันตีกลับ
+- ผลทดสอบหลัง T-19: backend `27 passed, 5 warnings`; frontend `14 passed`
+- สถานะ T-19: เสร็จ รอทีมตรวจ; ครบ task เฟส 5 แล้วและหยุดที่จุดตรวจ
+- ทีมยืนยันในคำสั่ง "ทำ T ต่อไป" ว่าลองเฟส 5 ผ่านแล้ว จึงปิดสถานะ T-17 ถึง T-19 เป็น “เสร็จ”
+- ตรวจงานต่อพบว่า T-20 ถึง T-23 อยู่ในเฟสสุดท้าย “รอคำตอบ” ตาม Q-03 ถึง Q-06 จึงยังเริ่ม implementation ไม่ได้
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (เฟสสุดท้าย, T-20)
+
+- ทีมตอบ Q-03 ให้แจ้งกรรมการสโมสรเมื่ออนุมัติแบบ synchronous; Q-04 ให้แก้เฉพาะจุดตามเหตุผล; Q-05 ให้คำตัดสินล่าสุดแทนที่คำตัดสินก่อนหน้า; Q-06 ให้เรียง `submission_id` จากน้อยไปมากเมื่อวันเวลาส่งเท่ากัน
+- เพิ่ม `NotificationMessage` และบันทึกข้อความแจ้งอนุมัติใน mock integration ก่อนตอบผลอนุมัติ โดยไม่อ้างว่ามีการส่งผ่านช่องทางภายนอก
+- เพิ่ม `test_AC_VDC_01_approve_forwards_to_advisor` ตรวจสถานะ ส่งต่อ UC-05 และข้อความแจ้งกรรมการ
+- ผลทดสอบหลัง T-20: backend `28 passed, 5 warnings`; frontend `14 passed`; `npm run build` ผ่าน
+- สถานะ T-20: เสร็จ รอทีมตรวจ; พร้อมทำ T-21 ในเฟสเดียวกัน
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (เฟสสุดท้าย, T-21)
+
+- ทีมยืนยันให้ T-21 ทำเฉพาะการส่งเหตุผลกลับและคงเอกสารเดิมไว้; ไม่ขยายไปแก้หน้ากรรมการ UC-01
+- เพิ่ม `submission_id` ในข้อความส่งกลับจำลอง เพื่อเชื่อมเหตุผลกับเอกสารฉบับเดิม; API ยังคงรูปแบบ `notification` เดิมและคืน `submission_id` ที่ระดับผลลัพธ์
+- เพิ่ม `test_return_flow_after_rejection` ตรวจการส่งเหตุผล/รหัสเอกสารเดิมและการคงข้อมูลโครงการเดิม; หน้าเดิมแสดงสถานะและเหตุผลผ่าน `RejectDialog` อยู่แล้ว
+- ผลทดสอบหลัง T-21: backend `29 passed, 5 warnings`; frontend `14 passed`; `npm run build` ผ่าน
+- สถานะ T-21: เสร็จ รอทีมตรวจ; พร้อมทำ T-22 ในเฟสเดียวกัน
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (เฟสสุดท้าย, T-22)
+
+- ทำให้บริการอนุมัติและตีกลับใช้ lock ร่วมกันใน process และแทนที่คำตัดสิน/ข้อความของ submission เดิมด้วยผลล่าสุด
+- เพิ่ม `test_concurrent_review_decisions` ตรวจการตัดสินพร้อมกันและยืนยันว่าคำตัดสิน/การแจ้งที่เปิดเผยตรงกับสถานะล่าสุด
+- ขอบเขตการล็อกเป็น in-process ตาม mock store ปัจจุบัน; ไม่อ้างว่าประสานข้ามหลาย process
+- ผลทดสอบหลัง T-22: backend `30 passed, 5 warnings`; frontend `14 passed`; `npm run build` ผ่าน
+- สถานะ T-22: เสร็จ รอทีมตรวจ; พร้อมทำ T-23 ในเฟสเดียวกัน
+
+## 2569-10-30 คำสั่ง: "ทำ T ต่อไป" (เฟสสุดท้าย, T-23)
+
+- ปรับคิวให้เรียง `submitted_at` ก่อน และใช้ `submission_id` จากน้อยไปมากเมื่อเวลาเท่ากันตาม Q-06
+- เพิ่ม `test_AC_VDC_03_queue_uses_submission_id_for_equal_submission_times` โดยไม่แก้ test เดิมที่ขึ้นต้นด้วย `test_TC_`
+- ผลทดสอบหลัง T-23: backend `31 passed, 5 warnings`; frontend `14 passed`; `npm run build` ผ่าน
+- สถานะ T-23: เสร็จ รอทีมตรวจ; ครบ task เฟสสุดท้ายแล้วและหยุดที่จุดตรวจ
+- เพิ่มจุดตรวจเฟสสุดท้ายใน `tasks.md` เนื่องจากเดิมยังไม่มีบล็อกจุดตรวจสำหรับเฟสนี้
+
+## 2569-10-30 คำสั่ง: "ถ้าอยู่หน้านี้จะกดปุ่ม Checklist กลางไม่ได้"
+
+- แก้เมนูเจ้าหน้าที่คณะให้เมื่อเลือก “Checklist กลาง” จากหน้ารายละเอียดเอกสาร ระบบออกจากรายละเอียดและแสดงหน้าจัดการ Checklist; เลือก “คิวเอกสาร” จะกลับไปหน้าคิว
+- เพิ่ม regression test ตรวจเส้นทางจากคิว → รายละเอียด → Checklist กลาง
+- ผลทดสอบเฉพาะไฟล์: `frontend/src/__tests__/checklist-management.test.jsx` ผ่าน 5 tests; ผล frontend ทั้งชุด 8 files / 15 tests ผ่าน; `npm run build` ผ่าน
+
+## 2569-10-30 ตรวจความครบถ้วนของเอกสาร 003
+
+- ตรวจ `spec.md`, `plan.md` และ `tasks.md` เทียบกับงาน T-20 ถึง T-23 และการแก้ navigation
+- ปรับ test plan และ tasks ให้บันทึกผลทดสอบล่าสุด/การนำทางจากหน้ารายละเอียดไป Checklist กลาง
+- ระบุข้อจำกัด Q-04 อย่างชัดเจน: T-21 ที่ทีมเลือก scope ทำการส่งเหตุผลและอ้าง submission เดิม แต่ยังไม่มี flow ให้กรรมการแก้/ส่งเฉพาะจุดกลับเข้าระบบ จึงยังไม่ครอบคลุม Q-04 ใน `spec.md` ทั้งหมด

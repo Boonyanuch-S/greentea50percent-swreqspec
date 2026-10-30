@@ -221,3 +221,20 @@ def test_TC_LATE_03_3_no_late_activities_returns_empty_list():
     # When เปิดหน้าคำขอ
     # Then คืนรายการว่าง
     assert result == []
+
+
+def test_AC_VDC_03_queue_uses_submission_id_for_equal_submission_times():
+    # Given มีเอกสารรอตรวจที่เวลาส่งเท่ากันแต่มี submission_id ต่างกัน
+    submitted_at = datetime(2026, 10, 1)
+    service = ReviewQueueService(
+        [
+            submission(2, submitted_at),
+            submission(1, submitted_at),
+        ]
+    )
+
+    # When เจ้าหน้าที่เปิดคิวเอกสาร
+    result = service.list_pending()
+
+    # Then เอกสารเรียงตาม submission_id จากน้อยไปมาก
+    assert [item.submission_id for item in result] == [1, 2]
