@@ -13,7 +13,7 @@ async function authenticatedJsonFetch(path, session, options = {}, resource = 'C
   const response = await fetch(`${BASE}${path}`, {
     ...options,
     headers: {
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.body && !(options.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
       ...(options.headers ?? {}),
       Authorization: token,
     },
@@ -108,6 +108,82 @@ export async function rejectSubmission(
     },
     'การตีกลับ',
   )
+}
+
+// ชุดเอกสารตัวอย่างของหลังบ้าน เพราะ plan.md ยังไม่มี API รายการเอกสารรออนุมัติ
+export const SAMPLE_APPROVAL_ID = 'approval-005-001'
+
+function toApprovalView(body) {
+  return {
+    id: body.id,
+    status: body.status,
+    contentApprovedAt: body.content_approved_at,
+    completedAt: body.completed_at,
+    coverSheet: body.cover_sheet ? { fileName: body.cover_sheet.file_name } : null,
+    documents: body.documents.map((document) => ({
+      id: document.id,
+      type: document.document_type,
+      title: document.title,
+      reference: document.document_reference,
+    })),
+  }
+}
+
+function toDocumentView(body) {
+  return {
+    id: body.id,
+    type: body.document_type,
+    title: body.title,
+    reference: body.document_reference,
+    objectives: body.objectives,
+    indicators: body.indicators,
+    format: body.format,
+  }
+}
+
+// เรียก API อนุมัติเอกสารด้วย session ของผู้ใช้ตาม FR-APR-01 ถึง FR-APR-06 และ CON-NFR-21
+export function createProjectApprovalClient(session, approvalId = SAMPLE_APPROVAL_ID) {
+  const resource = 'การอนุมัติเอกสาร'
+  const basePath = `/project-approvals/${approvalId}`
+  const request = (path, options) => authenticatedJsonFetch(`${basePath}${path}`, session, options, resource)
+  const actorUserId = () => {
+    const username = session?.profile?.username
+    if (!username?.trim()) {
+      throw new Error('ไม่พบข้อมูลผู้ใช้ใน session')
+    }
+    return username
+  }
+  const postAsActor = (path, fields = {}) =>
+    request(path, {
+      method: 'POST',
+      body: JSON.stringify({ actor_user_id: actorUserId(), ...fields }),
+    })
+
+  return {
+    async getApproval() {
+      return toApprovalView(await request(''))
+    },
+    async getDocument(documentId) {
+      return toDocumentView(await request(`/documents/${documentId}`))
+    },
+    async approveContent() {
+      const result = await postAsActor('/content-approval')
+      return { contentApprovedAt: result.content_approved_at, printMessage: result.print_message }
+    },
+    async uploadCoverSheet(file) {
+      const body = new FormData()
+      body.append('file', file)
+      body.append('uploaded_by', actorUserId())
+      const result = await request('/cover-sheet', { method: 'POST', body })
+      return { fileName: result.file_name, status: result.status }
+    },
+    async passReview() {
+      return postAsActor('/review')
+    },
+    async returnDocuments(commentText) {
+      return postAsActor('/return', { comment_text: commentText })
+    },
+  }
 }
 
 export const checklistApi = {

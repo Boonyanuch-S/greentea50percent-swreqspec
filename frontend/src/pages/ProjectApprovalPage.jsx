@@ -1,4 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import Button from '../components/Button.jsx'
+import StatusBadge from '../components/StatusBadge.jsx'
+import { confirmAction } from '../utils/alerts.js'
+
+const PENDING_STATUS = 'รออนุมัติ'
 
 function formatDateTime(value) {
   if (!value) return 'ยังไม่ได้อนุมัติเนื้อหา'
@@ -14,144 +19,221 @@ export default function ProjectApprovalPage({ client }) {
   const [selectedDocument, setSelectedDocument] = useState(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
+  const latestDocumentId = useRef(null)
 
   useEffect(() => {
     let active = true
-    client.getApproval().then((result) => {
-      if (!active) return
-      setApproval(result)
-      setSelectedDocument(result.documents[0])
-      setLoading(false)
-    })
+    async function load() {
+      try {
+        const result = await client.getApproval()
+        const firstDocument = await client.getDocument(result.documents[0].id)
+        if (!active) return
+        setApproval(result)
+        setSelectedDocument(firstDocument)
+      } catch (requestError) {
+        if (active) setError(requestError.message)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    load()
     return () => {
       active = false
     }
   }, [client])
 
-  async function handleApproveContent() {
-    const result = await client.approveContent()
-    setApproval((current) => ({ ...current, contentApprovedAt: result.contentApprovedAt }))
-    setMessage(result.printMessage)
+  // เปิดเฉพาะเอกสารที่เลือกตาม FR-APR-01 และ AC-APR-03
+  async function handleSelectDocument(documentId) {
+    latestDocumentId.current = documentId
+    setError('')
+    try {
+      const document = await client.getDocument(documentId)
+      if (latestDocumentId.current === documentId) setSelectedDocument(document)
+    } catch (requestError) {
+      setError(requestError.message)
+    }
   }
 
+  // บันทึกเวลาอนุมัติและแจ้งพิมพ์ใบปะหน้าตาม FR-APR-03 (กล่องยืนยัน: นอก spec ทีมสั่งเพิ่ม)
+  async function handleApproveContent() {
+    const confirmed = await confirmAction({
+      title: 'อนุมัติเนื้อหา?',
+      text: 'ระบบจะบันทึกวันเวลาอนุมัติ จากนั้นต้องพิมพ์ใบปะหน้าเพื่อขอลายเซ็นจริง',
+      confirmText: 'อนุมัติเนื้อหา',
+    })
+    if (!confirmed) return
+    setError('')
+    try {
+      const result = await client.approveContent()
+      setApproval((current) => ({ ...current, contentApprovedAt: result.contentApprovedAt }))
+      setMessage(result.printMessage)
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
+
+  // ส่งใบปะหน้าที่เซ็นแล้วตาม FR-APR-04 และ IF-UPLOAD-01 (กล่องยืนยัน: นอก spec ทีมสั่งเพิ่ม)
   async function handleUpload(event) {
     event.preventDefault()
     if (!selectedFile) return
-    const result = await client.uploadCoverSheet(selectedFile)
-    setApproval((current) => ({ ...current, status: result.status }))
-    setMessage(`รับไฟล์ ${result.fileName} แล้ว และเปลี่ยนสถานะเป็น ${result.status}`)
+    const confirmed = await confirmAction({
+      title: 'ส่งใบปะหน้า?',
+      text: `ส่งไฟล์ ${selectedFile.name} เข้าสู่ระบบ`,
+      confirmText: 'ส่งไฟล์',
+    })
+    if (!confirmed) return
+    setError('')
+    try {
+      const result = await client.uploadCoverSheet(selectedFile)
+      setApproval((current) => ({
+        ...current,
+        status: result.status,
+        coverSheet: { fileName: result.fileName },
+      }))
+      setMessage(`รับไฟล์ ${result.fileName} แล้ว และเปลี่ยนสถานะเป็น ${result.status}`)
+    } catch (requestError) {
+      setError(requestError.message)
+    }
   }
 
   if (loading) {
-    return <main className="min-h-screen bg-slate-100 p-8 text-slate-900">กำลังโหลดหน้าอนุมัติ...</main>
+    return (
+      <div className="mx-auto max-w-5xl rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-600">
+        กำลังโหลดหน้าอนุมัติ...
+      </div>
+    )
   }
 
+  if (!approval) {
+    return <p role="alert" className="p-6 text-red-700">{error}</p>
+  }
+
+  const isPending = approval.status === PENDING_STATUS
+  const canUpload = isPending && Boolean(approval.contentApprovedAt)
+
   return (
-    <main className="min-h-screen bg-[#f4f1ea] px-4 py-8 text-slate-900 sm:px-8">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-8 border-b border-slate-300 pb-6">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">Project approval / UC-05</p>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-950">อนุมัติเอกสารโครงการ</h1>
-              <p className="mt-2 max-w-2xl text-slate-600">ตรวจรายการเอกสารทั้งชุด อนุมัติเนื้อหา และส่งใบปะหน้าที่เซ็นแล้วกลับเข้าสู่ระบบ</p>
-            </div>
-            <span className="inline-flex w-fit items-center border border-amber-300 bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-900">
-              สถานะ: {approval.status}
-            </span>
+    <div className="mx-auto max-w-5xl">
+      <header className="mb-8 border-b border-slate-200 pb-6">
+        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
+          Advisor Approval / Project Documents
+        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950">อนุมัติเอกสารโครงการ</h1>
+            <p className="mt-2 text-slate-600">ตรวจรายการเอกสารทั้งชุด อนุมัติเนื้อหา และส่งใบปะหน้าที่เซ็นแล้วกลับเข้าสู่ระบบ</p>
           </div>
-        </header>
+          <span className="rounded-full bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800">
+            สถานะ: {approval.status}
+          </span>
+        </div>
+      </header>
 
-        <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
-          <aside aria-label="รายการเอกสารโครงการ" className="border border-slate-300 bg-white p-4 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold text-slate-950">เอกสารทั้งชุด</h2>
-            <nav className="space-y-2">
-              {approval.documents.map((document) => {
-                const selected = selectedDocument?.id === document.id
-                return (
-                  <button
-                    key={document.id}
-                    type="button"
-                    className={`w-full border px-4 py-3 text-left transition ${selected ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-amber-500 hover:bg-amber-50'}`}
-                    onClick={() => setSelectedDocument(document)}
-                  >
-                    <span className="block text-xs font-semibold uppercase tracking-wide opacity-70">{document.type}</span>
-                    <span className="mt-1 block font-semibold">{document.title}</span>
-                  </button>
-                )
-              })}
-            </nav>
-          </aside>
+      <div className="grid items-start gap-6 lg:grid-cols-[16rem_1fr]">
+        <aside aria-label="รายการเอกสารโครงการ" className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="mb-4 text-lg font-bold text-slate-950">เอกสารทั้งชุด</h2>
+          <nav className="space-y-2">
+            {approval.documents.map((document) => {
+              const selected = selectedDocument?.id === document.id
+              return (
+                <button
+                  key={document.id}
+                  type="button"
+                  aria-pressed={selected}
+                  className={`w-full rounded-lg border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${selected ? 'border-teal-700 bg-teal-700 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-300 hover:bg-slate-50'}`}
+                  onClick={() => handleSelectDocument(document.id)}
+                >
+                  <span className="block text-xs font-semibold uppercase tracking-wide opacity-70">{document.type}</span>
+                  <span className="mt-1 block font-semibold">{document.title}</span>
+                </button>
+              )
+            })}
+          </nav>
+        </aside>
 
-          <section className="space-y-6">
-            <article className="border border-slate-300 bg-white p-6 shadow-sm">
-              <div className="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-amber-700">{selectedDocument.type}</p>
-                  <h2 className="mt-1 text-2xl font-bold text-slate-950">{selectedDocument.title}</h2>
-                  <p className="mt-2 text-sm text-slate-500">ไฟล์อ้างอิง: {selectedDocument.reference}</p>
-                </div>
-                <span className="border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">พร้อมตรวจสอบ</span>
+        <div className="space-y-6">
+          <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-6 flex flex-col gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-teal-700">{selectedDocument.type}</p>
+                <h2 className="mt-1 text-xl font-bold text-slate-950">{selectedDocument.title}</h2>
+                <p className="mt-2 text-sm text-slate-500">ไฟล์อ้างอิง: {selectedDocument.reference}</p>
               </div>
-
-              <div className="grid gap-6 md:grid-cols-3">
-                <div>
-                  <h3 className="mb-3 font-bold text-slate-950">วัตถุประสงค์</h3>
-                  <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
-                    {selectedDocument.objectives.map((item) => <li key={item}>{item}</li>)}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="mb-3 font-bold text-slate-950">ตัวชี้วัด</h3>
-                  <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
-                    {selectedDocument.indicators.map((item) => <li key={item}>{item}</li>)}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="mb-3 font-bold text-slate-950">รูปแบบเอกสาร</h3>
-                  <p className="text-sm leading-6 text-slate-700">{selectedDocument.format}</p>
-                </div>
+              <div className="shrink-0">
+                <StatusBadge status="พร้อมตรวจสอบ" />
               </div>
+            </div>
+
+            {/* ข้อความทั่วไปทุกครั้งตามคำตอบ Q-02 ไม่บล็อกการอนุมัติตาม FR-APR-07 */}
+            <p role="note" className="mb-6 rounded-lg bg-amber-50 p-4 text-sm text-amber-800">
+              กรุณาตรวจสอบเนื้อหาอย่างละเอียด หากเนื้อหามีลักษณะคล้ายถูกสร้างจาก AI โดยไม่ผ่านการตรวจสอบ
+            </p>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              <div>
+                <h3 className="mb-3 font-bold text-slate-950">วัตถุประสงค์</h3>
+                <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
+                  {selectedDocument.objectives.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              </div>
+              <div>
+                <h3 className="mb-3 font-bold text-slate-950">ตัวชี้วัด</h3>
+                <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-700">
+                  {selectedDocument.indicators.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              </div>
+              <div>
+                <h3 className="mb-3 font-bold text-slate-950">รูปแบบเอกสาร</h3>
+                <p className="text-sm leading-6 text-slate-700">{selectedDocument.format}</p>
+              </div>
+            </div>
+          </article>
+
+          <section className="grid gap-6 md:grid-cols-2">
+            <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-semibold text-teal-700">ขั้นที่ 1</p>
+              <h2 className="mt-1 text-xl font-bold text-slate-950">อนุมัติเนื้อหาออนไลน์</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">วันเวลาที่อนุมัติ: {formatDateTime(approval.contentApprovedAt)}</p>
+              <Button
+                type="button"
+                className="mt-5 sm:w-auto"
+                onClick={handleApproveContent}
+                disabled={!isPending || Boolean(approval.contentApprovedAt)}
+              >
+                {approval.contentApprovedAt ? 'อนุมัติเนื้อหาแล้ว' : 'อนุมัติเนื้อหา'}
+              </Button>
             </article>
 
-            <section className="grid gap-6 md:grid-cols-2">
-              <article className="border border-slate-300 bg-white p-6 shadow-sm">
-                <p className="text-sm font-semibold text-amber-700">ขั้นที่ 1</p>
-                <h2 className="mt-1 text-xl font-bold text-slate-950">อนุมัติเนื้อหาออนไลน์</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">วันเวลาที่อนุมัติ: {formatDateTime(approval.contentApprovedAt)}</p>
-                <button
-                  type="button"
-                  className="mt-5 bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-                  onClick={handleApproveContent}
-                  disabled={Boolean(approval.contentApprovedAt)}
-                >
-                  {approval.contentApprovedAt ? 'อนุมัติเนื้อหาแล้ว' : 'อนุมัติเนื้อหา'}
-                </button>
-                {message && <p role="status" className="mt-4 border-l-4 border-amber-500 bg-amber-50 px-3 py-2 text-sm text-amber-900">{message}</p>}
-              </article>
+            <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-semibold text-teal-700">ขั้นที่ 2</p>
+              <h2 className="mt-1 text-xl font-bold text-slate-950">อัปโหลดใบปะหน้าที่เซ็นแล้ว</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {approval.coverSheet
+                  ? `ไฟล์ล่าสุด: ${approval.coverSheet.fileName}`
+                  : 'เลือกไฟล์สแกนหรือรูปถ่ายใบปะหน้าที่เซ็นแล้วเพื่อส่งกลับเข้าสู่ระบบ'}
+              </p>
+              <form className="mt-5" onSubmit={handleUpload}>
+                <label className="block text-sm font-semibold text-slate-700" htmlFor="cover-sheet">ไฟล์ใบปะหน้า</label>
+                <input
+                  id="cover-sheet"
+                  className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal file:mr-4 file:rounded-md file:border-0 file:bg-teal-50 file:px-3 file:py-2 file:font-semibold file:text-teal-800 hover:file:bg-teal-100"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  disabled={!canUpload}
+                  onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+                />
+                <Button type="submit" className="mt-4 sm:w-auto" disabled={!canUpload || !selectedFile}>
+                  รับไฟล์ใบปะหน้า
+                </Button>
+              </form>
+            </article>
 
-              <article className="border border-slate-300 bg-white p-6 shadow-sm">
-                <p className="text-sm font-semibold text-amber-700">ขั้นที่ 2</p>
-                <h2 className="mt-1 text-xl font-bold text-slate-950">อัปโหลดใบปะหน้าที่เซ็นแล้ว</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">เลือกไฟล์สแกนหรือรูปถ่ายใบปะหน้าที่เซ็นแล้วเพื่อส่งกลับเข้าสู่ระบบ</p>
-                <form className="mt-5" onSubmit={handleUpload}>
-                  <label className="block text-sm font-semibold text-slate-700" htmlFor="cover-sheet">ไฟล์ใบปะหน้า</label>
-                  <input
-                    id="cover-sheet"
-                    className="mt-2 block w-full border border-slate-300 bg-white px-3 py-2 text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:font-semibold"
-                    type="file"
-                    onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
-                  />
-                  <button type="submit" className="mt-4 border border-slate-950 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-950 hover:text-white" disabled={!selectedFile}>
-                    รับไฟล์ใบปะหน้า
-                  </button>
-                </form>
-              </article>
-            </section>
+            {message && <p role="status" className="rounded-lg bg-teal-50 p-4 text-sm text-teal-900 md:col-span-2">{message}</p>}
+            {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-700 md:col-span-2">{error}</p>}
           </section>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

@@ -26,7 +26,7 @@ Spec ID: `SPEC-AUTH-009` | สถานะของ spec: `Draft v2`
 |---|---|---|
 | UserAccount | `user_id`, `username`, `password_verification_reference`, `role` | `FR-AUTH-02`, `FR-AUTH-03`, `FR-AUTH-04`, `ASM-01` |
 | AuthToken | `token_id`, `user_id`, `issued_at`, `expires_at`, `role` | `FR-AUTH-04`, `IF-TOKEN-01`, `DOM-PDPA-02`, `ASM-02` |
-| RoleHomeRoute | `role`, `home_route` | `FR-AUTH-04`, `ASM-03`; ค่าเส้นทางของแต่ละบทบาทยังรอคำตอบ `Q-01` |
+| RoleHomeRoute | `role`, `home_route` | `FR-AUTH-04`, `ASM-03`; ค่าเส้นทางตามคำตอบ `Q-01`: UC-01, UC-03 และ UC-05 |
 | LoginErrorResponse | `error_type`, `message` | `FR-AUTH-03`, `FR-AUTH-05`, `SEC-AUTHMSG-01`, `ASM-04` |
 
 ไม่เพิ่มฟิลด์สำหรับการสร้างบัญชีใหม่หรือการรีเซ็ตรหัสผ่าน เพราะอยู่นอกขอบเขตตาม Scope และยังไม่เพิ่มฟิลด์สำหรับ remember me, refresh token, multi-device หรือ multi-session จนกว่าจะได้คำตอบ `Q-06`.
@@ -38,7 +38,7 @@ Spec ID: `SPEC-AUTH-009` | สถานะของ spec: `Draft v2`
 | `GET /login` | Input: สถานะการมี Token; Output: หน้า login เมื่อเปิดระบบครั้งแรกหรือไม่มี Token ที่ใช้งานได้ | `FR-AUTH-01`, `FR-AUTH-02` |
 | `POST /api/login` | Input: `username`, `password`; Output: Token, วันหมดอายุ และบทบาทเมื่อสำเร็จ หรือข้อความทั่วไปเมื่อข้อมูลรับรองไม่ถูกต้อง | `FR-AUTH-03`, `FR-AUTH-04`, `FR-AUTH-05`, `IF-TOKEN-01`, `SEC-AUTHMSG-01` |
 | `GET /api/auth/me` | Input: Token; Output: ผู้ใช้และบทบาทที่ผ่านการยืนยัน หรือผล Token หมดอายุ/ใช้ไม่ได้ | `DOM-PDPA-02`, `FR-AUTH-04`, `IF-TOKEN-01`, `NFR-SEC-02`; การจัดการ Token ไม่ถูกต้องยังรอ `Q-03` |
-| `GET /home/{role}` | Input: บทบาทจาก Token; Output: หน้าหลักของบทบาทนั้น | `FR-AUTH-04`, `AC-AUTH-01`, `ASM-03`; ชื่อหรือเส้นทางจริงยังรอ `Q-01` |
+| `GET /home/{role}` | Input: บทบาทจาก Token; Output: หน้าหลักของบทบาทนั้น | `FR-AUTH-04`, `AC-AUTH-01`, `ASM-03`; prototype เลือกหน้าตามบทบาทใน `frontend/src/App.jsx` ตามคำตอบ `Q-01` ยังไม่มี route นี้ |
 | ตัวตรวจสอบ Token ก่อนเรียกฟังก์ชัน | Input: Token จาก session; Output: อนุญาตให้ทำงาน หรือแสดงหน้าต่างแจ้งเตือนแล้วนำไป `GET /login` เมื่อหมดอายุ | `FR-AUTH-01`, `AC-AUTH-04`, `IF-TOKEN-01`, `ASM-02` |
 
 การแจ้งเตือนแบบ in-app ตามบทบาทไม่อยู่ในแผนนี้ตาม Out of scope; ฟีเจอร์นี้ส่งต่อบทบาทหลัง login สำเร็จเท่านั้นจนกว่าจะตอบ `Q-04` ตาม `NFR-SEC-02`.
@@ -55,7 +55,7 @@ Spec ID: `SPEC-AUTH-009` | สถานะของ spec: `Draft v2`
 
 | AC ID | ชื่อ test | ทดสอบอย่างไร |
 |---|---|---|
-| `AC-AUTH-01` | `test_AC_AUTH_01_login_success_routes_by_role` | ใช้บัญชีและรหัสผ่านที่ถูกต้อง ตรวจว่าได้รับ Token ที่มีวันหมดอายุและถูกนำไปหน้าหลักของบทบาทที่กำหนด โดยรายละเอียดเส้นทางจริงยังรอ `Q-01` |
+| `AC-AUTH-01` | `test_AC_AUTH_01_login_success_routes_by_role` | ใช้บัญชีและรหัสผ่านที่ถูกต้อง ตรวจว่าได้รับ Token ที่มีวันหมดอายุและถูกนำไปหน้าหลักของบทบาทที่กำหนด ตามหน้าหลักในคำตอบ `Q-01` |
 | `AC-AUTH-02` | `test_AC_AUTH_02_wrong_password_uses_generic_message` | ใช้ username ที่มีอยู่แต่ password ผิด ตรวจว่า login ไม่สำเร็จและแสดงข้อความ `บัญชีหรือรหัสผ่านไม่ถูกต้อง` |
 | `AC-AUTH-03` | `test_AC_AUTH_03_unknown_username_uses_same_generic_message` | ใช้ username ที่ไม่มีอยู่ ตรวจว่าข้อความเหมือน `AC-AUTH-02` และไม่เปิดเผยว่าบัญชีไม่มีอยู่จริง |
 | `AC-AUTH-04` | `test_AC_AUTH_04_expired_token_redirects_immediately` | ใช้ Token ที่หมดอายุระหว่าง session แล้วเรียกฟังก์ชัน ตรวจว่ามีหน้าต่างแจ้งเตือนและกลับหน้า login ทันที โดยใช้อายุ 30 นาทีตาม `ASM-02` |
@@ -77,7 +77,7 @@ Spec ID: `SPEC-AUTH-009` | สถานะของ spec: `Draft v2`
 ## 8. สิ่งที่ยังไม่ทำ
 
 - `Q-01` ต้องกำหนดชื่อหรือเส้นทางหน้าหลักของกรรมการสโมสร เจ้าหน้าที่คณะ อาจารย์ที่ปรึกษา และเจ้าหน้าที่กองกิจอย่างไร? เกี่ยวกับ `FR-AUTH-04`, `AC-AUTH-01`  
-  ตอบแล้วบางส่วน (2569-10-29): กรรมการสโมสร -> หน้าเอกสารโครงการ UC-01; อีก 3 บทบาทยังใช้หน้าชั่วคราวจนกว่าจะได้คำตอบ
+  ตอบแล้ว (2569-10-31): กรรมการสโมสร -> หน้าเอกสารโครงการ UC-01; เจ้าหน้าที่คณะ -> คิวตรวจเอกสาร UC-03; อาจารย์ที่ปรึกษาสโมสร -> หน้าอนุมัติเอกสาร UC-05; เจ้าหน้าที่กองกิจ -> แผงตรวจเอกสาร UC-05
 - `Q-02` เมื่อเปิดระบบครั้งแรกโดยยังไม่มี Token ต้องแสดงหน้า login ทันทีหรือมีหน้าต่างแจ้งเตือนร่วมด้วย? เกี่ยวกับ `FR-AUTH-01`  
   ส่วนที่เกี่ยวข้องกับข้อนี้จะยังไม่สร้างจนกว่าจะได้คำตอบ
 - `Q-03` Token ไม่ถูกต้องหรือถูกยกเลิก ต้องจัดการเหมือน Token หมดอายุหรือไม่? เกี่ยวกับ `IF-TOKEN-01`, `FR-AUTH-01`, `AC-AUTH-04`  

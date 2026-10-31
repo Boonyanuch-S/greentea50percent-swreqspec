@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from './hooks/useAuth.js'
 import AppLayout from './layouts/AppLayout.jsx'
 import ChecklistManagementPage from './pages/ChecklistManagementPage.jsx'
 import DocumentReviewPage from './pages/DocumentReviewPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
+import ProjectApprovalPage from './pages/ProjectApprovalPage.jsx'
 import ProjectDocumentsPage from './pages/ProjectDocumentsPage.jsx'
+import ProjectOfficeReviewPanel from './pages/ProjectOfficeReviewPanel.jsx'
 import ReviewQueuePage from './pages/ReviewQueuePage.jsx'
 import RoleHomePage from './pages/RoleHomePage.jsx'
 import { authMock } from './services/authMock.js'
-import { checklistApi } from './api/client.js'
+import { checklistApi, createProjectApprovalClient } from './api/client.js'
 import { projectDocumentMock } from './services/projectDocumentMock.js'
 import { reviewQueueMock } from './services/reviewQueue.js'
 import { AuthProvider } from './store/AuthContext.jsx'
@@ -19,14 +21,23 @@ import { confirmAction, showToast, showWarning } from './utils/alerts.js'
 const homeSections = {
   club_committee: 'Project Document',
   faculty_officer: 'Project Review',
+  advisor: 'Project Approval',
+  student_affairs_officer: 'Project Approval Review',
 }
 
-function RoleHome({ role, session, checklistClient, reviewClient }) {
+function RoleHome({ role, session, checklistClient, reviewClient, approvalClient }) {
   const [facultyView, setFacultyView] = useState('queue')
   const [selectedSubmissionId, setSelectedSubmissionId] = useState(null)
+  const sessionApprovalClient = useMemo(() => createProjectApprovalClient(session), [session])
 
   if (role === 'club_committee') {
     return <ProjectDocumentsPage client={projectDocumentMock} />
+  }
+  if (role === 'advisor') {
+    return <ProjectApprovalPage client={approvalClient ?? sessionApprovalClient} />
+  }
+  if (role === 'student_affairs_officer') {
+    return <ProjectOfficeReviewPanel client={approvalClient ?? sessionApprovalClient} />
   }
   if (role === 'faculty_officer') {
     return (
@@ -103,7 +114,7 @@ function RoleHome({ role, session, checklistClient, reviewClient }) {
 }
 
 // ยังไม่มี Token แสดงหน้า login (FR-AUTH-01) มี Token แล้วเข้าหน้าตามบทบาท (FR-AUTH-04)
-function AppRoutes({ authClient, checklistClient, reviewClient }) {
+function AppRoutes({ authClient, checklistClient, reviewClient, approvalClient }) {
   const { session, tokenExpired, signIn, signOut, dismissExpiredNotice } = useAuth()
   const [view, setView] = useState('home') // 'home' | 'profile' (หน้าโปรไฟล์: นอก spec ทีมสั่งเพิ่ม)
 
@@ -151,6 +162,7 @@ function AppRoutes({ authClient, checklistClient, reviewClient }) {
           session={session}
           checklistClient={checklistClient}
           reviewClient={reviewClient}
+          approvalClient={approvalClient}
         />
       )}
     </AppLayout>
@@ -161,6 +173,7 @@ export default function App({
   authClient = authMock,
   checklistClient = checklistApi,
   reviewClient = reviewQueueMock,
+  approvalClient,
 }) {
   return (
     <AuthProvider>
@@ -168,6 +181,7 @@ export default function App({
         authClient={authClient}
         checklistClient={checklistClient}
         reviewClient={reviewClient}
+        approvalClient={approvalClient}
       />
     </AuthProvider>
   )

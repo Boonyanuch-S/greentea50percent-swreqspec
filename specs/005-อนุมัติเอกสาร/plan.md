@@ -1,6 +1,8 @@
 # แผนทางเทคนิค: อนุมัติเอกสารโครงการ
 
-อ้างอิง: `SPEC-APR-005` | สถานะต้นทาง: `Draft v2`
+อ้างอิง: `SPEC-APR-005` | สถานะต้นทาง: `Draft v2` | อัปเดตตามงานจริง: 2569-10-31
+
+สถานะการทำ: T-01 ถึง T-17 ใน `tasks.md` ทำแล้ว รอทีมตรวจที่จุดตรวจ แผนส่วนที่ทำจริงต่างจากฉบับแรกบันทึกไว้ในแต่ละหัวข้อด้านล่าง
 
 ## 1. สรุปแนวทาง
 1. อาจารย์ที่ปรึกษาเปิดหน้าอนุมัติและเลือกดูเอกสารโครงการแต่ละรายการตาม `FR-APR-01`.
@@ -15,48 +17,58 @@
 |---|---|---|
 | React (Vite) | ทีมเลือกเอง ไม่ได้มาจาก spec | ใช้สร้างหน้าอนุมัติและหน้าแสดงสถานะ |
 | Python FastAPI | ทีมเลือกเอง ไม่ได้มาจาก spec | ใช้สร้าง API ของฟีเจอร์ |
-| ฐานข้อมูลเชิงสัมพันธ์ | ทีมเลือกเอง ไม่ได้มาจาก spec | ใช้เก็บเอกสาร สถานะ การอนุมัติ และคอมเมนต์ |
-| Object storage หรือพื้นที่เก็บไฟล์ของระบบ | ทีมเลือกเอง ไม่ได้มาจาก spec | ใช้เก็บไฟล์ใบปะหน้าที่อัปโหลดตาม `IF-UPLOAD-01`; รายละเอียดชนิดไฟล์และขนาดยังรอ `Q-03` |
+| ฐานข้อมูลเชิงสัมพันธ์ | ทีมเลือกเอง ไม่ได้มาจาก spec | ใช้เก็บเอกสาร สถานะ การอนุมัติ และคอมเมนต์; prototype ปัจจุบันยังเก็บแบบ in-memory ใน `ProjectApprovalService` ตามแนวของ UC-03 ข้อมูลกลับเป็นค่าเริ่มต้นเมื่อเริ่ม backend ใหม่ |
+| Object storage หรือพื้นที่เก็บไฟล์ของระบบ | ทีมเลือกเอง ไม่ได้มาจาก spec | ใช้เก็บไฟล์ใบปะหน้าที่อัปโหลดตาม `IF-UPLOAD-01`; prototype เก็บใน memory ผ่าน `CoverSheetStorage`; รับ PDF, JPG, PNG สูงสุด 10 MB ตาม `Q-03` ค่าอยู่ใน `backend/app/config.py` |
+| `python-multipart` | ทีมเลือกเอง ไม่ได้มาจาก spec | FastAPI ใช้รับไฟล์อัปโหลดตาม `IF-UPLOAD-01` |
+| SweetAlert2 (`confirmAction`) | ทีมเลือกเอง ไม่ได้มาจาก spec | กล่องยืนยันก่อนกดปุ่มดำเนินการ ซึ่งเป็นสิ่งที่นอก spec ทีมสั่งเพิ่ม |
 
 ## 3. โมเดลข้อมูล
 
 | Entity | ฟิลด์หลัก | รองรับ |
 |---|---|---|
 | `ProjectApproval` | `id`, `project_id`, `status`, `content_approved_at`, `completed_at`, `created_at`, `updated_at` | `FR-APR-03`, `FR-APR-04`, `FR-APR-05`, `ASM-01`, `ASM-02` |
-| `ProjectDocumentItem` | `id`, `approval_id`, `document_type`, `document_reference`, `display_order` | `FR-APR-01`, `AC-APR-03` |
+| `ProjectDocumentItem` | `id`, `approval_id`, `document_type`, `title`, `document_reference`, `display_order`, `objectives`, `indicators`, `document_format` | `FR-APR-01`, `FR-APR-02`, `AC-APR-03` |
 | `ApprovalAction` | `id`, `approval_id`, `actor_id`, `action`, `action_at` | `FR-APR-02`, `FR-APR-03`, `FR-APR-05`, `FR-APR-06` |
-| `CoverSheetUpload` | `id`, `approval_id`, `file_reference`, `uploaded_by`, `uploaded_at`, `validation_status` | `FR-APR-04`, `IF-UPLOAD-01`, `AC-APR-02` |
+| `CoverSheetUpload` | `id`, `approval_id`, `file_name`, `file_reference`, `uploaded_by`, `uploaded_at`, `validation_status` | `FR-APR-04`, `IF-UPLOAD-01`, `AC-APR-02` |
 | `ReviewComment` | `id`, `approval_id`, `author_id`, `comment_text`, `created_at`, `resolved_at` | `FR-APR-06`, `AC-APR-04`, `ASM-02` |
 | `NotificationRequest` | `id`, `approval_id`, `target_use_case`, `requested_at`, `delivery_status` | `FR-APR-05`, `IF-UC10-01` |
 | `AuthenticatedUserContext` | `user_id`, `role`, `authenticated_at` | `CON-NFR-21`, `NFR-SEC-01`, `AC-APR-06` |
 
-สถานะที่วางแผนรองรับคือ `รออนุมัติ`, `อนุมัติสมบูรณ์` และสถานะตีกลับที่ระบบต้นทางกำหนดไว้ตาม `FR-APR-06`; ชื่อสถานะเพิ่มเติมและพฤติกรรมเมื่อยังไม่อัปโหลดใบปะหน้าจะยังไม่ออกแบบเพิ่มจนกว่าจะได้คำตอบ `Q-01`.
+สถานะที่รองรับคือ `รออนุมัติ`, `อนุมัติสมบูรณ์` และสถานะตีกลับ `ตีกลับให้แก้ไข` (ค่า `RETURNED_STATUS` เดิมของระบบ) ตาม `FR-APR-06`; ชื่อสถานะเพิ่มเติมและพฤติกรรมเมื่อยังไม่อัปโหลดใบปะหน้าจะยังไม่ออกแบบเพิ่มจนกว่าจะได้คำตอบ `Q-01`.
+
+prototype ไม่เพิ่มชื่อสถานะก่อนอัปโหลด เอกสารเริ่มที่ `รออนุมัติ` และใช้การมี `CoverSheetUpload` แยกว่าอัปโหลดแล้วหรือยัง
 
 ## 4. API / หน้าจอ
 
+route หลังบ้านจริงไม่มีคำนำหน้า `/api` เพราะ Vite ตัดออกก่อนส่งต่อ และหน้าจอเรียกผ่าน `createProjectApprovalClient` ใน `frontend/src/api/client.js`
+
 | รายการ | Input / Output หลัก | รองรับ |
 |---|---|---|
-| `GET /api/project-approvals/{approvalId}` | Input: `approvalId`; Output: รายการเอกสาร สถานะ และสิทธิ์ผู้ใช้ | `FR-APR-01`, `CON-NFR-21` |
-| `GET /api/project-approvals/{approvalId}/documents/{documentId}` | Input: `documentId`; Output: เอกสารรายการที่เลือก | `FR-APR-01`, `AC-APR-03` |
-| `POST /api/project-approvals/{approvalId}/content-approval` | Input: ผู้อนุมัติ; Output: เวลาที่อนุมัติและข้อความให้พิมพ์ใบปะหน้า | `FR-APR-02`, `FR-APR-03`, `AC-APR-01` |
-| `POST /api/project-approvals/{approvalId}/cover-sheet` | Input: ไฟล์ใบปะหน้าที่เซ็นแล้ว; Output: สถานะ `รออนุมัติ` หรือข้อผิดพลาดไฟล์ | `FR-APR-04`, `IF-UPLOAD-01`, `AC-APR-02` |
-| `POST /api/project-approvals/{approvalId}/review` | Input: ผลตรวจของกองกิจ; Output: สถานะ `อนุมัติสมบูรณ์` หรือสถานะตีกลับ | `FR-APR-05`, `FR-APR-06`, `AC-APR-02`, `AC-APR-04` |
-| `POST /api/project-approvals/{approvalId}/return` | Input: คอมเมนต์รายละเอียดที่ต้องแก้ไข; Output: เอกสารทั้งชุดและคอมเมนต์ที่ส่งกลับ `UC-01` | `FR-APR-06`, `IF-UC01-02`, `AC-APR-04` |
-| `POST /api/project-approvals/{approvalId}/notifications/uc-10` | Input: `approvalId`, สถานะอนุมัติสมบูรณ์; Output: ผลการเรียก `UC-10` | `FR-APR-05`, `IF-UC10-01` |
-| หน้า `ProjectApprovalPage` | แสดงรายการเอกสาร เลือกดู ตรวจสอบ อนุมัติ และอัปโหลด | `FR-APR-01` ถึง `FR-APR-04`, `FR-APR-07` |
-| หน้า `ProjectOfficeReviewPanel` | แสดงเอกสารรอตรวจ รับผลผ่าน หรือตีกลับพร้อมคอมเมนต์ | `FR-APR-05`, `FR-APR-06` |
-| `AuthGuard` | ตรวจ session/login ก่อนเรียกหน้าจอและ API | `CON-NFR-21`, `NFR-SEC-01`, `AC-APR-06` |
+| `GET /api/project-approvals/{approvalId}` | Input: `approvalId`; Output: รายการเอกสาร สถานะ และใบปะหน้าล่าสุด; ยังไม่คืนสิทธิ์ผู้ใช้เพราะ spec ยังไม่กำหนดสิทธิ์ตามบทบาท | `FR-APR-01`, `CON-NFR-21` |
+| `GET /api/project-approvals/{approvalId}/documents/{documentId}` | Input: `documentId`; Output: เอกสารรายการที่เลือก พร้อมวัตถุประสงค์ ตัวชี้วัด และรูปแบบเอกสาร | `FR-APR-01`, `AC-APR-03` |
+| `POST /api/project-approvals/{approvalId}/content-approval` | Input: ผู้อนุมัติ (`actor_user_id`); Output: เวลาที่อนุมัติและข้อความให้พิมพ์ใบปะหน้า; กดซ้ำเก็บเวลาครั้งแรก | `FR-APR-02`, `FR-APR-03`, `AC-APR-01` |
+| `POST /api/project-approvals/{approvalId}/cover-sheet` | Input: ไฟล์ใบปะหน้าที่เซ็นแล้วและ `uploaded_by`; Output: สถานะ `รออนุมัติ` หรือข้อผิดพลาดไฟล์ (409); ต้องอนุมัติเนื้อหาก่อนตาม `ASM-01` และอัปโหลดซ้ำแทนไฟล์เดิม | `FR-APR-04`, `IF-UPLOAD-01`, `AC-APR-02` |
+| `POST /api/project-approvals/{approvalId}/review` | Input: ผู้ตรวจ (`actor_user_id`); ใช้สำหรับผลตรวจผ่าน ส่วนการตีกลับใช้ `POST /return`; Output: สถานะ `อนุมัติสมบูรณ์`; ต้องมีใบปะหน้าก่อน | `FR-APR-05`, `AC-APR-02`, `AC-APR-04` |
+| `POST /api/project-approvals/{approvalId}/return` | Input: ผู้ตรวจและคอมเมนต์รายละเอียดที่ต้องแก้ไข; Output: เอกสารทั้งชุดและคอมเมนต์ที่ส่งกลับ `UC-01`; ต้องมีใบปะหน้าก่อน | `FR-APR-06`, `IF-UC01-02`, `AC-APR-04` |
+| `POST /api/project-approvals/{approvalId}/notifications/uc-10` | Input: `approvalId` ของเอกสารที่อนุมัติสมบูรณ์แล้ว; Output: ผลการเรียก `UC-10`; เรียกซ้ำใช้คำขอเดิมเพื่อไม่แจ้งซ้ำ | `FR-APR-05`, `IF-UC10-01` |
+| หน้า `ProjectApprovalPage` | หน้าหลักของอาจารย์ที่ปรึกษาสโมสร แสดงรายการเอกสาร เลือกดู ตรวจสอบ อนุมัติ และอัปโหลด | `FR-APR-01` ถึง `FR-APR-04`, `FR-APR-07` |
+| หน้า `ProjectOfficeReviewPanel` | หน้าหลักของเจ้าหน้าที่กองกิจ แสดงเอกสารรอตรวจ รับผลผ่าน หรือตีกลับพร้อมคอมเมนต์ | `FR-APR-05`, `FR-APR-06` |
+| การตรวจ session | `App.jsx` แสดงหน้า login เมื่อไม่มี session, `client.js` ไม่เรียก API เมื่อไม่มี Token และ router ใช้ `require_authenticated_user` ซึ่งตรวจการมี header `Authorization` | `CON-NFR-21`, `NFR-SEC-01`, `AC-APR-06` |
 
-การแสดงคำเตือน AI จะเป็นจุดแสดงข้อความ/ธงเตือนที่ไม่บล็อกปุ่มอนุมัติตาม `FR-APR-07`; กลไกตรวจจับจริงจะยังไม่สร้างจนกว่าจะได้คำตอบ `Q-02`.
+การแสดงคำเตือน AI เป็นข้อความทั่วไปที่แสดงทุกครั้งใน `ProjectApprovalPage` และไม่บล็อกปุ่มอนุมัติตาม `FR-APR-07` และคำตอบ `Q-02` จึงไม่มีกลไกตรวจจับ
+
+ปุ่มอนุมัติเนื้อหา รับไฟล์ใบปะหน้า ตรวจผ่าน และตีกลับ มีกล่องยืนยันก่อนทำงาน (นอก spec ทีมสั่งเพิ่ม)
+
+prototype เปิดได้เฉพาะเอกสารตัวอย่างชุดเดียว (`approval-005-001`) เพราะแผนนี้ยังไม่มี API รายการเอกสารรออนุมัติ
 
 ## 5. ตารางตรวจ Constraints
 
 | Constraint ID | ถูกนำไปใช้ที่ไหนใน plan | สถานะ |
 |---|---|---|
-| `CON-NFR-21` | `AuthGuard`, `AuthenticatedUserContext`, API ทุก endpoint ของฟีเจอร์ | ใช้แล้ว |
+| `CON-NFR-21` | การตรวจ session ในหน้าจอและ `require_authenticated_user` ของทุก endpoint ของฟีเจอร์ | ใช้แล้ว |
 | `IF-UC10-01` | `NotificationRequest` และ `POST /notifications/uc-10` หลัง `FR-APR-05` | ใช้แล้ว |
 | `IF-UC01-02` | `POST /return` ส่งเอกสารทั้งชุดพร้อม `ReviewComment` ไป `UC-01` | ใช้แล้ว |
-| `IF-UPLOAD-01` | `CoverSheetUpload`, `POST /cover-sheet` และพื้นที่เก็บไฟล์ | ใช้แล้ว; ชนิดไฟล์/ขนาดรอ `Q-03` |
+| `IF-UPLOAD-01` | `CoverSheetUpload`, `POST /cover-sheet` และพื้นที่เก็บไฟล์ | ใช้แล้ว; ชนิดไฟล์/ขนาดตามคำตอบ `Q-03` |
 
 ## 6. แผนทดสอบจาก Acceptance Criteria
 
@@ -69,9 +81,13 @@
 | `AC-APR-05` | `test_AC_APR_05_ai_warning_does_not_block` | จัดข้อมูลให้แสดงคำเตือน ตรวจว่าคำเตือนปรากฏและปุ่มอนุมัติยังทำงานได้ |
 | `AC-APR-06` | `test_AC_APR_06_reject_unauthenticated_access` | เรียกหน้าและ API โดยไม่มี session ตรวจว่าถูกปฏิเสธจนกว่าจะยืนยันตัวตนสำเร็จ |
 
-ข้อจำกัดของการทดสอบ: `AC-APR-02` ต้องใช้ stub/mock ของกองกิจและ `UC-10`; `AC-APR-05` ยังทดสอบได้เฉพาะการแสดงคำเตือนตาม `Q-02` ไม่ใช่ความแม่นยำของการตรวจจับ AI.
+ข้อจำกัดของการทดสอบ: `AC-APR-02` ใช้คิวจำลองของ `UC-10`; `AC-APR-04` ใช้คิวจำลองของ `UC-01`; `AC-APR-05` ทดสอบการแสดงคำเตือนและการไม่บล็อกการอนุมัติตาม `Q-02`.
+
+ผลล่าสุด (2569-10-31): backend 58 passed; frontend 15 files / 32 tests ผ่าน; `npm run build` ผ่าน ยังไม่ได้ลองหน้าจอจริงในเบราว์เซอร์ครบทุกจุดตรวจ
 
 ## 7. ลำดับงาน
+
+ลำดับด้านล่างเป็นแผนฉบับแรก ลำดับที่ทำจริงเป็นเฟสแนวตั้งตาม `tasks.md` และ `AuthGuard` ทำจริงเป็นการตรวจ session ตามหัวข้อ 4
 
 1. กำหนดสถานะและ transition ของ `ProjectApproval` ตั้งแต่รออนุมัติถึงอนุมัติสมบูรณ์ตาม `FR-APR-04`, `FR-APR-05`, `ASM-02`.
 2. ออกแบบโมเดลเอกสาร รายการไฟล์ การอัปโหลด และคอมเมนต์ตาม `FR-APR-01`, `FR-APR-04`, `FR-APR-06`.
@@ -86,8 +102,8 @@
 ## 8. สิ่งที่ยังไม่ทำ
 
 - **Q-01:** หากอาจารย์กดอนุมัติเนื้อหาแล้ว แต่ไม่อัปโหลดใบปะหน้าที่เซ็นแล้วภายในเวลาที่กำหนด ระบบมีการติดตาม/แจ้งเตือนอย่างไร
-  ส่วนที่เกี่ยวข้องกับการติดตาม แจ้งเตือน หรือสถานะเพิ่มเติมจะยังไม่สร้างจนกว่าจะได้คำตอบ
+  ยังเปิด: ส่วนที่เกี่ยวข้องกับการติดตาม แจ้งเตือน หรือสถานะเพิ่มเติมจะยังไม่สร้างจนกว่าจะได้คำตอบ
 - **Q-02:** เกณฑ์การตรวจจับเนื้อหาที่คล้ายถูกสร้างจาก AI เป็นการตรวจจับอัตโนมัติหรือดุลพินิจของอาจารย์
-  ส่วนที่เกี่ยวข้องกับกลไกตรวจจับจริงจะยังไม่สร้างจนกว่าจะได้คำตอบ
+  ตอบแล้ว (2569-10-31): ข้อความเตือนทั่วไปที่แสดงทุกครั้ง การตัดสินเป็นดุลพินิจของอาจารย์ จึงไม่สร้างกลไกตรวจจับ
 - **Q-03:** รูปแบบไฟล์ใบปะหน้าที่อัปโหลดได้และขนาดไฟล์สูงสุด
-  ส่วนที่เกี่ยวข้องกับการกำหนดชนิดไฟล์และขนาดสูงสุดจะยังไม่สร้างจนกว่าจะได้คำตอบ
+  ตอบแล้ว (2569-10-31): รับ PDF, JPG และ PNG ขนาดสูงสุด 10 MB ค่าอยู่ใน `backend/app/config.py`
