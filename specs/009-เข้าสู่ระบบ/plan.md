@@ -36,7 +36,7 @@ Spec ID: `SPEC-AUTH-009` | สถานะของ spec: `Draft v2`
 | รายการ | Input / Output หลัก | รองรับ |
 |---|---|---|
 | `GET /login` | Input: สถานะการมี Token; Output: หน้า login เมื่อเปิดระบบครั้งแรกหรือไม่มี Token ที่ใช้งานได้ | `FR-AUTH-01`, `FR-AUTH-02` |
-| `POST /api/login` | Input: `username`, `password`; Output: Token, วันหมดอายุ และบทบาทเมื่อสำเร็จ หรือข้อความทั่วไปเมื่อข้อมูลรับรองไม่ถูกต้อง | `FR-AUTH-03`, `FR-AUTH-04`, `FR-AUTH-05`, `IF-TOKEN-01`, `SEC-AUTHMSG-01` |
+| `POST /api/login` | Input: `username`, `password`; ใช้ `SampleAccountVerifier` บัญชีตัวอย่างใน `auth_service.py` ตามคำสั่งทีม และหลังบ้านจริงเป็น `POST /login`; Output: Token, วันหมดอายุ บทบาท และ profile เมื่อสำเร็จ หรือข้อความทั่วไปเมื่อข้อมูลรับรองไม่ถูกต้อง | `FR-AUTH-03`, `FR-AUTH-04`, `FR-AUTH-05`, `IF-TOKEN-01`, `SEC-AUTHMSG-01` |
 | `GET /api/auth/me` | Input: Token; Output: ผู้ใช้และบทบาทที่ผ่านการยืนยัน หรือผล Token หมดอายุ/ใช้ไม่ได้ | `DOM-PDPA-02`, `FR-AUTH-04`, `IF-TOKEN-01`, `NFR-SEC-02`; การจัดการ Token ไม่ถูกต้องยังรอ `Q-03` |
 | `GET /home/{role}` | Input: บทบาทจาก Token; Output: หน้าหลักของบทบาทนั้น | `FR-AUTH-04`, `AC-AUTH-01`, `ASM-03`; prototype เลือกหน้าตามบทบาทใน `frontend/src/App.jsx` ตามคำตอบ `Q-01` ยังไม่มี route นี้ |
 | ตัวตรวจสอบ Token ก่อนเรียกฟังก์ชัน | Input: Token จาก session; Output: อนุญาตให้ทำงาน หรือแสดงหน้าต่างแจ้งเตือนแล้วนำไป `GET /login` เมื่อหมดอายุ | `FR-AUTH-01`, `AC-AUTH-04`, `IF-TOKEN-01`, `ASM-02` |

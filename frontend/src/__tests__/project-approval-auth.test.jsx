@@ -12,5 +12,5 @@ test('test_AC_APR_06_reject_unauthenticated_access ผู้ไม่มี sess
   // Then ระบบแสดงหน้า login แทนหน้าอนุมัติ และไม่เรียก API
   expect(heading).toBeTruthy()
   expect(screen.queryByRole('heading', { name: 'อนุมัติเอกสารโครงการ' })).toBeNull()
-  await expect(createProjectApprovalClient(null).getApproval()).rejects.toThrow('ต้องยืนยันตัวตน')
+  await expect(createProjectApprovalClient(null).listApprovals()).rejects.toThrow('ต้องยืนยันตัวตน')
 })

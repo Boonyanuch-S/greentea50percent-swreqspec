@@ -5,7 +5,7 @@ import { confirmAction } from '../utils/alerts.js'
 const PENDING_STATUS = 'รออนุมัติ'
 
 // แผงตรวจของกองกิจ รองรับ FR-APR-05, FR-APR-06 และ IF-UC01-02
-export default function ProjectOfficeReviewPanel({ client }) {
+export default function ProjectOfficeReviewPanel({ client, onBack }) {
   const [approval, setApproval] = useState(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
@@ -44,7 +44,7 @@ export default function ProjectOfficeReviewPanel({ client }) {
     }
   }
 
-  // ตรวจผ่านแล้วเป็นอนุมัติสมบูรณ์ตาม FR-APR-05 (กล่องยืนยัน: นอก spec ทีมสั่งเพิ่ม)
+  // ตรวจผ่านแล้วเป็นอนุมัติสมบูรณ์ตาม FR-APR-05 (กล่องยืนยันตาม FR-APR-08)
   async function handlePass() {
     const confirmed = await confirmAction({
       title: 'ยืนยันตรวจผ่าน?',
@@ -58,7 +58,7 @@ export default function ProjectOfficeReviewPanel({ client }) {
     )
   }
 
-  // ส่งเอกสารทั้งชุดกลับพร้อมคอมเมนต์ตาม FR-APR-06 และ IF-UC01-02 (กล่องยืนยัน: นอก spec ทีมสั่งเพิ่ม)
+  // ส่งเอกสารทั้งชุดกลับพร้อมคอมเมนต์ตาม FR-APR-06 และ IF-UC01-02 (กล่องยืนยันตาม FR-APR-08)
   async function handleReturn(event) {
     event.preventDefault()
     const confirmed = await confirmAction({
@@ -90,6 +90,15 @@ export default function ProjectOfficeReviewPanel({ client }) {
 
   return (
     <div className="mx-auto max-w-5xl">
+      {onBack && (
+        <button
+          type="button"
+          className="mb-5 rounded-lg px-2 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-200"
+          onClick={onBack}
+        >
+          ← กลับรายการเอกสาร
+        </button>
+      )}
       <header className="mb-8 border-b border-slate-200 pb-6">
         <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
           Student Affairs Review / Project Documents
@@ -97,6 +106,7 @@ export default function ProjectOfficeReviewPanel({ client }) {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-950">ตรวจเอกสารโครงการ</h1>
+            {approval.projectName && <p className="mt-2 font-semibold text-slate-800">{approval.projectName}</p>}
             <p className="mt-2 text-slate-600">ตรวจเอกสารทั้งชุดและใบปะหน้าที่เซ็นแล้ว ก่อนให้ผ่านหรือตีกลับ</p>
           </div>
           <span className="rounded-full bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800">

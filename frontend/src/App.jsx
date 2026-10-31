@@ -5,12 +5,13 @@ import ChecklistManagementPage from './pages/ChecklistManagementPage.jsx'
 import DocumentReviewPage from './pages/DocumentReviewPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
+import ProjectApprovalListPage from './pages/ProjectApprovalListPage.jsx'
 import ProjectApprovalPage from './pages/ProjectApprovalPage.jsx'
 import ProjectDocumentsPage from './pages/ProjectDocumentsPage.jsx'
 import ProjectOfficeReviewPanel from './pages/ProjectOfficeReviewPanel.jsx'
 import ReviewQueuePage from './pages/ReviewQueuePage.jsx'
 import RoleHomePage from './pages/RoleHomePage.jsx'
-import { authMock } from './services/authMock.js'
+import { authApi } from './services/auth.js'
 import { checklistApi, createProjectApprovalClient } from './api/client.js'
 import { projectDocumentMock } from './services/projectDocumentMock.js'
 import { reviewQueueMock } from './services/reviewQueue.js'
@@ -25,6 +26,28 @@ const homeSections = {
   student_affairs_officer: 'Project Approval Review',
 }
 
+// รายการเอกสารและหน้ารายละเอียดของ UC-05 ตาม FR-APR-01 และ FR-APR-05
+function ProjectApprovalHome({ client, DetailPage, eyebrow, heading, description }) {
+  const [selectedId, setSelectedId] = useState(null)
+  const detailClient = useMemo(
+    () => (selectedId ? client.forApproval(selectedId) : null),
+    [client, selectedId],
+  )
+
+  if (detailClient) {
+    return <DetailPage client={detailClient} onBack={() => setSelectedId(null)} />
+  }
+  return (
+    <ProjectApprovalListPage
+      client={client}
+      eyebrow={eyebrow}
+      heading={heading}
+      description={description}
+      onOpen={setSelectedId}
+    />
+  )
+}
+
 function RoleHome({ role, session, checklistClient, reviewClient, approvalClient }) {
   const [facultyView, setFacultyView] = useState('queue')
   const [selectedSubmissionId, setSelectedSubmissionId] = useState(null)
@@ -34,10 +57,26 @@ function RoleHome({ role, session, checklistClient, reviewClient, approvalClient
     return <ProjectDocumentsPage client={projectDocumentMock} />
   }
   if (role === 'advisor') {
-    return <ProjectApprovalPage client={approvalClient ?? sessionApprovalClient} />
+    return (
+      <ProjectApprovalHome
+        client={approvalClient ?? sessionApprovalClient}
+        DetailPage={ProjectApprovalPage}
+        eyebrow="Advisor Approval / Project Documents"
+        heading="อนุมัติเอกสารโครงการ"
+        description="เลือกโครงการที่ส่งต่อมาเพื่อตรวจเอกสารทั้งชุด"
+      />
+    )
   }
   if (role === 'student_affairs_officer') {
-    return <ProjectOfficeReviewPanel client={approvalClient ?? sessionApprovalClient} />
+    return (
+      <ProjectApprovalHome
+        client={approvalClient ?? sessionApprovalClient}
+        DetailPage={ProjectOfficeReviewPanel}
+        eyebrow="Student Affairs Review / Project Documents"
+        heading="ตรวจเอกสารโครงการ"
+        description="เอกสารที่อาจารย์ส่งใบปะหน้าแล้วและรอการตรวจ"
+      />
+    )
   }
   if (role === 'faculty_officer') {
     return (
@@ -170,7 +209,7 @@ function AppRoutes({ authClient, checklistClient, reviewClient, approvalClient }
 }
 
 export default function App({
-  authClient = authMock,
+  authClient = authApi,
   checklistClient = checklistApi,
   reviewClient = reviewQueueMock,
   approvalClient,

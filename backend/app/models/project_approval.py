@@ -11,6 +11,7 @@ class ProjectApproval:
 
     id: str
     project_id: int
+    project_name: str
     status: str
     created_at: datetime
     updated_at: datetime

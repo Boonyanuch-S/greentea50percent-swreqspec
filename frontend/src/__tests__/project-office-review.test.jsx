@@ -38,7 +38,7 @@ test('test_AC_APR_02_review_requires_cover_sheet ยังตรวจผ่า�
   expect((await screen.findByRole('button', { name: 'ตรวจผ่าน' })).disabled).toBe(true)
 })
 
-test('กดยกเลิกในกล่องยืนยันแล้วไม่ตรวจผ่าน', async () => {
+test('test_AC_APR_08_cancel_keeps_review_undecided กดยกเลิกแล้วไม่ตรวจผ่าน', async () => {
   // Given มีเอกสารที่มีใบปะหน้าแล้ว
   const client = {
     getApproval: async () => ({ status: 'รออนุมัติ', coverSheet: { fileName: 'cover.pdf' }, documents }),

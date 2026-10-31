@@ -2,7 +2,12 @@ from collections.abc import Iterable
 from datetime import datetime, timezone
 from threading import RLock
 
-from ..config import COVER_SHEET_ALLOWED_EXTENSIONS, COVER_SHEET_MAX_BYTES
+from ..config import (
+    COVER_SHEET_ALLOWED_EXTENSIONS,
+    COVER_SHEET_MAX_BYTES,
+    COVER_SHEET_MAX_MEGABYTES,
+    COVER_SHEET_SIGNATURES,
+)
 from ..integrations.uc01 import UC01_USE_CASE, UC01ReturnPackage, UC01ReturnQueue
 from ..integrations.uc10 import UC10Integration
 from ..models.cover_sheet_upload import CoverSheetUpload
@@ -16,9 +21,13 @@ from ..models.project_approval import (
 )
 from ..models.review_comment import ReviewComment
 from ..storage.cover_sheet import CoverSheetStorage
+from .approval_service import FORWARDED_STATUS
 from .rejection_service import RETURNED_STATUS
 
 SAMPLE_APPROVAL_ID = "approval-005-001"
+INCOMPLETE_SAMPLE_APPROVAL_ID = "approval-005-003"
+# เอกสารที่ต้องมีครบก่อนอนุมัติเนื้อหา ตาม FR-APR-01, AC-APR-01 และ ASM-03
+REQUIRED_DOCUMENT_TYPES = ("เล่มโครงการ", "กส 002", "ใบแนบกิจกรรม")
 PRINT_COVER_SHEET_MESSAGE = "กรุณาพิมพ์เฉพาะใบปะหน้าเพื่อขอลายเซ็นจริง"
 RECEIVED_VALIDATION_STATUS = "received"
 
@@ -49,6 +58,14 @@ class ProjectApprovalService:
         self.uc01 = UC01ReturnQueue()
         self._lock = RLock()
 
+    def list_approvals(self, status: str | None = None) -> list[ProjectApproval]:
+        """คืนรายการเอกสารให้เลือกเปิด ตาม FR-APR-01 และ FR-APR-05."""
+        return [
+            approval
+            for approval in sorted(self._approvals.values(), key=lambda item: item.id)
+            if status is None or approval.status == status
+        ]
+
     def get_approval(self, approval_id: str) -> ProjectApproval | None:
         return self._approvals.get(approval_id)
 
@@ -76,12 +93,13 @@ class ProjectApprovalService:
         return [item for item in self._comments if item.approval_id == approval_id]
 
     def approve_content(self, approval_id: str, actor_id: str) -> ProjectApproval | None:
-        """บันทึกเวลาอนุมัติเนื้อหาครั้งแรก ตาม FR-APR-03 และ ASM-01."""
+        """บันทึกเวลาอนุมัติเนื้อหาครั้งแรกเมื่อเอกสารครบชุด ตาม FR-APR-03, ASM-01 และ ASM-03."""
         with self._lock:
             approval = self._approvals.get(approval_id)
             if approval is None:
                 return None
-            self._require_pending(approval)
+            self._require_status(approval, FORWARDED_STATUS)
+            self._require_complete_documents(approval_id)
             if approval.content_approved_at is None:
                 now = datetime.now(timezone.utc)
                 approval.content_approved_at = now
@@ -101,7 +119,7 @@ class ProjectApprovalService:
             approval = self._approvals.get(approval_id)
             if approval is None:
                 return None
-            self._require_pending(approval)
+            self._require_status(approval, FORWARDED_STATUS, PENDING_STATUS)
             if approval.content_approved_at is None:
                 raise ProjectApprovalConflict("ต้องอนุมัติเนื้อหาก่อนอัปโหลดใบปะหน้า")
             self._require_valid_cover_sheet(file_name, content)
@@ -153,13 +171,17 @@ class ProjectApprovalService:
         approval_id: str,
         reviewer_id: str,
         comment_text: str,
+        by_advisor: bool = False,
     ) -> UC01ReturnPackage | None:
         """ส่งเอกสารทั้งชุดพร้อมคอมเมนต์กลับ UC-01 ตาม FR-APR-06, IF-UC01-02 และ ASM-02."""
         with self._lock:
             approval = self._approvals.get(approval_id)
             if approval is None:
                 return None
-            self._require_reviewable(approval)
+            if by_advisor:
+                self._require_status(approval, FORWARDED_STATUS)
+            else:
+                self._require_reviewable(approval)
 
             now = datetime.now(timezone.utc)
             self._comments.append(
@@ -185,20 +207,35 @@ class ProjectApprovalService:
             self.uc01.send(package)
             return package
 
-    def _require_valid_cover_sheet(self, file_name: str, content: bytes) -> None:
-        """ตรวจชนิดและขนาดไฟล์ใบปะหน้าตาม IF-UPLOAD-01 และ Q-03."""
-        if not file_name.lower().endswith(COVER_SHEET_ALLOWED_EXTENSIONS):
-            raise InvalidCoverSheet("รับเฉพาะไฟล์ PDF, JPG หรือ PNG")
-        if len(content) > COVER_SHEET_MAX_BYTES:
-            raise InvalidCoverSheet("ไฟล์ใบปะหน้าต้องมีขนาดไม่เกิน 10 MB")
+    def require_cover_sheet_size(self, size: int | None) -> None:
+        """ปฏิเสธไฟล์เกินขนาดก่อนอ่านเนื้อไฟล์ตาม IF-UPLOAD-01 และ Q-03."""
+        if size is not None and size > COVER_SHEET_MAX_BYTES:
+            raise InvalidCoverSheet(f"ไฟล์ใบปะหน้าต้องมีขนาดไม่เกิน {COVER_SHEET_MAX_MEGABYTES} MB")
 
-    def _require_pending(self, approval: ProjectApproval) -> None:
-        if approval.status != PENDING_STATUS:
+    def _require_valid_cover_sheet(self, file_name: str, content: bytes) -> None:
+        """ตรวจชนิดจากนามสกุลและต้นไฟล์ และตรวจขนาด ตาม IF-UPLOAD-01 และ Q-03."""
+        self.require_cover_sheet_size(len(content))
+        extension = next(
+            (item for item in COVER_SHEET_ALLOWED_EXTENSIONS if file_name.lower().endswith(item)),
+            None,
+        )
+        if extension is None or not content.startswith(COVER_SHEET_SIGNATURES[extension]):
+            allowed = ", ".join(COVER_SHEET_ALLOWED_EXTENSIONS)
+            raise InvalidCoverSheet(f"รับเฉพาะไฟล์ชนิด {allowed}")
+
+    def _require_complete_documents(self, approval_id: str) -> None:
+        """เอกสารต้องครบชุดก่อนอนุมัติ ตาม AC-APR-01 และ ASM-03."""
+        document_types = {item.document_type for item in self.list_documents(approval_id)}
+        if not set(REQUIRED_DOCUMENT_TYPES) <= document_types:
+            raise ProjectApprovalConflict("เอกสารยังไม่ครบทั้งชุด")
+
+    def _require_status(self, approval: ProjectApproval, *statuses: str) -> None:
+        if approval.status not in statuses:
             raise ProjectApprovalConflict(f"เอกสารอยู่ในสถานะ {approval.status} แล้ว")
 
     def _require_reviewable(self, approval: ProjectApproval) -> None:
         """กองกิจตรวจได้เมื่อมีใบปะหน้าที่เซ็นแล้วตาม ASM-01 และ ASM-02."""
-        self._require_pending(approval)
+        self._require_status(approval, PENDING_STATUS)
         if approval.id not in self._cover_sheets:
             raise ProjectApprovalConflict("ยังไม่มีใบปะหน้าที่เซ็นแล้ว")
 
@@ -220,22 +257,18 @@ class ProjectApprovalService:
         )
 
 
-def create_sample_project_approval_service() -> ProjectApprovalService:
-    """สร้างข้อมูลตัวอย่าง 1 ชุดสำหรับลองระบบ ตาม FR-APR-01 และ FR-APR-02."""
-    now = datetime.now(timezone.utc)
-    approval = ProjectApproval(
-        id=SAMPLE_APPROVAL_ID,
-        project_id=5001,
-        status=PENDING_STATUS,
-        created_at=now,
-        updated_at=now,
-    )
+def _sample_documents(
+    approval_id: str,
+    project_name: str,
+    *,
+    include_attachment: bool = True,
+) -> list[ProjectDocumentItem]:
     documents = [
         ProjectDocumentItem(
             id="project-book",
-            approval_id=SAMPLE_APPROVAL_ID,
+            approval_id=approval_id,
             document_type="เล่มโครงการ",
-            title="เล่มโครงการค่ายวิทยาศาสตร์ 2569",
+            title=f"เล่ม{project_name}",
             document_reference="project-book-2569.pdf",
             display_order=1,
             objectives=(
@@ -250,7 +283,7 @@ def create_sample_project_approval_service() -> ProjectApprovalService:
         ),
         ProjectDocumentItem(
             id="ks-002",
-            approval_id=SAMPLE_APPROVAL_ID,
+            approval_id=approval_id,
             document_type="กส 002",
             title="แบบ กส 002",
             document_reference="ks-002-2569.pdf",
@@ -259,16 +292,50 @@ def create_sample_project_approval_service() -> ProjectApprovalService:
             indicators=("ข้อมูลกิจกรรมและผู้รับผิดชอบครบถ้วน",),
             document_format="แบบฟอร์ม กส 002 พร้อมตรวจสอบ",
         ),
-        ProjectDocumentItem(
-            id="activity-attachment",
-            approval_id=SAMPLE_APPROVAL_ID,
-            document_type="ใบแนบกิจกรรม",
-            title="ใบแนบรายละเอียดกิจกรรม",
-            document_reference="activity-attachment-2569.pdf",
-            display_order=3,
-            objectives=("แสดงรายละเอียดกิจกรรมและกำหนดการ",),
-            indicators=("กำหนดการสอดคล้องกับวัตถุประสงค์โครงการ",),
-            document_format="ตารางกิจกรรมและกำหนดการจัดรูปแบบแล้ว",
-        ),
     ]
-    return ProjectApprovalService([approval], documents)
+    if include_attachment:
+        documents.append(
+            ProjectDocumentItem(
+                id="activity-attachment",
+                approval_id=approval_id,
+                document_type="ใบแนบกิจกรรม",
+                title="ใบแนบรายละเอียดกิจกรรม",
+                document_reference="activity-attachment-2569.pdf",
+                display_order=3,
+                objectives=("แสดงรายละเอียดกิจกรรมและกำหนดการ",),
+                indicators=("กำหนดการสอดคล้องกับวัตถุประสงค์โครงการ",),
+                document_format="ตารางกิจกรรมและกำหนดการจัดรูปแบบแล้ว",
+            )
+        )
+    return documents
+
+
+def create_sample_project_approval_service() -> ProjectApprovalService:
+    """สร้างข้อมูลตัวอย่างที่ถือว่า UC-03 ส่งต่อแล้ว ตาม FR-APR-01 และ FR-APR-02."""
+    now = datetime.now(timezone.utc)
+    samples = (
+        (SAMPLE_APPROVAL_ID, 5001, "โครงการค่ายวิทยาศาสตร์ 2569", True),
+        ("approval-005-002", 5002, "โครงการอบรมทักษะห้องปฏิบัติการ", True),
+        (INCOMPLETE_SAMPLE_APPROVAL_ID, 5003, "โครงการวันวิทยาศาสตร์", False),
+    )
+    approvals = [
+        ProjectApproval(
+            id=approval_id,
+            project_id=project_id,
+            project_name=project_name,
+            status=FORWARDED_STATUS,
+            created_at=now,
+            updated_at=now,
+        )
+        for approval_id, project_id, project_name, _ in samples
+    ]
+    documents = [
+        document
+        for approval_id, _, project_name, include_attachment in samples
+        for document in _sample_documents(
+            approval_id,
+            project_name,
+            include_attachment=include_attachment,
+        )
+    ]
+    return ProjectApprovalService(approvals, documents)

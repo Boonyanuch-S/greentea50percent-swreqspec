@@ -91,3 +91,7 @@
 - Q-07 เมื่อกรอก password ว่าง ระบบต้องใช้ข้อความทั่วไปเดียวกับกรณี password ผิดหรือมี validation แยกต่างหาก? เกี่ยวกับ `AC-AUTH-02` — ยังไม่มี task (prototype ยังไม่มี validation ช่องว่าง)
 - Q-08 เมื่อ username ว่างหรือมี whitespace ระบบต้องใช้ข้อความทั่วไปเดียวกับกรณี username ไม่พบหรือมี validation แยกต่างหาก? เกี่ยวกับ `AC-AUTH-03` — ยังไม่มี task (prototype ยังไม่มี validation ช่องว่าง)
 - ข้อเสนอรอทีมตัดสิน (ยังไม่มี ID): เพิ่ม FR ออกจากระบบ และหน้าโปรไฟล์ ลงใน spec หรือไม่ — ตอนนี้ทำใน prototype กำกับ "นอก spec ทีมสั่งเพิ่ม"
+
+## งานเพิ่มตามคำสั่งทีม (2569-10-31)
+- ย้าย login ไปหลังบ้าน: `backend/app/routers/auth.py`, `backend/app/services/auth_service.py`, `backend/app/models/authenticated_user_context.py`, `backend/app/middleware/auth.py`, `backend/app/main.py`, `frontend/src/App.jsx` และลบ `frontend/src/services/authMock.js`
+- `frontend` ต้องเปิดหลังบ้านก่อนจึงจะ login ได้ และ login ใหม่ทุกครั้งที่หลังบ้านเริ่มใหม่ เพราะ Token อยู่ใน memory

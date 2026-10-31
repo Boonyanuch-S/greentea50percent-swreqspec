@@ -29,13 +29,25 @@ test('test_AC_APR_03_select_project_document เปิดเอกสารท�
   // When อาจารย์เปิดหน้าอนุมัติและเลือกเอกสารรายการหนึ่ง
   fireEvent.click(within(list).getByRole('button', { name: /แบบ กส 002/ }))
 
-  // Then ระบบเปิดแสดงเอกสารที่เลือก พร้อมหัวข้อตรวจตาม FR-APR-02 และยังมีรายการทั้งชุด
+  // Then ระบบเปิดแสดงเอกสารที่เลือก และยังมีรายการทั้งชุด
   expect(await screen.findByText('วัตถุประสงค์ของ ks-002')).toBeTruthy()
-  expect(screen.getByText('ตัวชี้วัดของ ks-002')).toBeTruthy()
-  expect(screen.getByText('รูปแบบของ ks-002')).toBeTruthy()
   expect(screen.queryByText('วัตถุประสงค์ของ project-book')).toBeNull()
   expect(within(list).getAllByRole('button')).toHaveLength(3)
   expect(client.getDocument).toHaveBeenLastCalledWith('ks-002')
+})
+
+test('test_AC_APR_07_review_items_displayed แสดงหัวข้อตรวจของเอกสารที่เลือก', async () => {
+  // Given อาจารย์เปิดเอกสารที่รออนุมัติ
+  render(<ProjectApprovalPage client={createClient()} />)
+  const list = await screen.findByRole('complementary', { name: 'รายการเอกสารโครงการ' })
+
+  // When เลือกเอกสารรายการหนึ่ง
+  fireEvent.click(within(list).getByRole('button', { name: /แบบ กส 002/ }))
+
+  // Then ระบบแสดงวัตถุประสงค์ ตัวชี้วัด และรูปแบบของเอกสารรายการนั้น
+  expect(await screen.findByText('วัตถุประสงค์ของ ks-002')).toBeTruthy()
+  expect(screen.getByText('ตัวชี้วัดของ ks-002')).toBeTruthy()
+  expect(screen.getByText('รูปแบบของ ks-002')).toBeTruthy()
 })
 
 test('test_AC_APR_03_load_error_is_shown แจ้งเมื่อโหลดเอกสารไม่สำเร็จ', async () => {

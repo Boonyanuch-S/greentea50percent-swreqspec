@@ -1,8 +1,12 @@
 from collections.abc import Awaitable, Callable
 
-from fastapi import HTTPException, Request
+from fastapi import Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
+
+from ..models.auth_token import UserRole
+from ..models.authenticated_user_context import AuthenticatedUserContext
+from ..services.auth_service import token_registry
 
 
 class ReviewAuthenticationMiddleware:
@@ -34,6 +38,27 @@ def require_authenticated_user(request: Request) -> str:
     if not authorization:
         raise HTTPException(status_code=401, detail="ต้องยืนยันตัวตนก่อนเข้าถึงเอกสาร")
     return authorization
+
+
+def require_authenticated_context(request: Request) -> AuthenticatedUserContext:
+    """ตรวจ Token ที่ออกจาก Login จริงตาม CON-NFR-21, NFR-SEC-01 และ IF-TOKEN-01."""
+    context = token_registry.resolve(request.headers.get("Authorization"))
+    if context is None:
+        raise HTTPException(status_code=401, detail="ต้องยืนยันตัวตนก่อนเข้าถึงเอกสาร")
+    return context
+
+
+def require_roles(*roles: UserRole) -> Callable[..., AuthenticatedUserContext]:
+    """จำกัดฟังก์ชันตามบทบาทจาก Token ตาม FR-APR-03, FR-APR-05, FR-APR-06 และ DOM-PDPA-02."""
+
+    def dependency(
+        context: AuthenticatedUserContext = Depends(require_authenticated_context),
+    ) -> AuthenticatedUserContext:
+        if context.role not in roles:
+            raise HTTPException(status_code=403, detail="บทบาทนี้ไม่มีสิทธิ์ดำเนินการ")
+        return context
+
+    return dependency
 
 
 def require_late_submission_user(request: Request) -> str:

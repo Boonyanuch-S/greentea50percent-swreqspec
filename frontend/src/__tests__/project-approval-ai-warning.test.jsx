@@ -17,7 +17,7 @@ const document = {
 test('test_AC_APR_05_ai_warning_does_not_block แสดงคำเตือนโดยไม่บล็อกการอนุมัติ', async () => {
   // Given ระบบแสดงคำเตือนทั่วไปทุกครั้งตาม Q-02
   const client = {
-    getApproval: async () => ({ status: 'รออนุมัติ', contentApprovedAt: null, coverSheet: null, documents: [document] }),
+    getApproval: async () => ({ status: 'ส่งต่ออาจารย์', contentApprovedAt: null, coverSheet: null, documents: [document] }),
     getDocument: async () => document,
     approveContent: async () => ({
       contentApprovedAt: '2026-10-30T09:00:00+07:00',

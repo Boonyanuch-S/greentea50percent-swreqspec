@@ -1,58 +1,46 @@
-import pytest
-from fastapi.testclient import TestClient
-
-from backend.app.main import app
-from backend.app.routers.project_approvals import get_project_approval_service
-from backend.app.services.project_approval_service import (
-    SAMPLE_APPROVAL_ID,
-    create_sample_project_approval_service,
-)
+from backend.app.config import COVER_SHEET_SIGNATURES
+from backend.app.services.project_approval_service import SAMPLE_APPROVAL_ID
 
 BASE_URL = f"/project-approvals/{SAMPLE_APPROVAL_ID}"
-ACTOR = {"actor_user_id": "intuwet_p@silpakorn.edu"}
 
 
-@pytest.fixture
-def service():
-    sample_service = create_sample_project_approval_service()
-    app.dependency_overrides[get_project_approval_service] = lambda: sample_service
-    yield sample_service
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def client(service):
-    return TestClient(app, headers={"Authorization": "test-session"})
-
-
-def upload_cover_sheet(client):
-    return client.post(
+def submit_cover_sheet(advisor):
+    advisor.post(f"{BASE_URL}/content-approval")
+    advisor.post(
         f"{BASE_URL}/cover-sheet",
-        files={"file": ("cover-sheet.pdf", b"signed", "application/pdf")},
-        data={"uploaded_by": ACTOR["actor_user_id"]},
+        files={"file": ("cover-sheet.pdf", COVER_SHEET_SIGNATURES[".pdf"] + b"signed")},
     )
 
 
-def test_AC_APR_02_office_approval_completes(client, service):
+def test_AC_APR_02_office_approval_completes(advisor, office, service):
     # Given อาจารย์อัปโหลดใบปะหน้าที่เซ็นแล้ว และระบบรับไฟล์
-    client.post(f"{BASE_URL}/content-approval", json=ACTOR)
-    upload_cover_sheet(client)
-    assert client.get(BASE_URL).json()["status"] == "รออนุมัติ"
+    submit_cover_sheet(advisor)
+    assert office.get(BASE_URL).json()["status"] == "รออนุมัติ"
     # When กองกิจตรวจสอบเอกสารและให้ผ่าน
-    response = client.post(f"{BASE_URL}/review", json={"actor_user_id": "preechawai_p@silpakorn.edu"})
+    response = office.post(f"{BASE_URL}/review")
     # Then สถานะเปลี่ยนเป็นอนุมัติสมบูรณ์ และระบบเรียก UC-10 เพื่อแจ้งกรรมการสโมสร
     assert response.status_code == 200
     assert response.json()["status"] == "อนุมัติสมบูรณ์"
     assert response.json()["completed_at"]
     assert [item.approval_id for item in service.uc10.list_requests()] == [SAMPLE_APPROVAL_ID]
+    assert service.list_actions(SAMPLE_APPROVAL_ID)[-1].actor_id == "preechawai_p@silpakorn.edu"
 
 
-def test_AC_APR_02_review_requires_cover_sheet(client, service):
+def test_AC_APR_02_review_requires_cover_sheet(advisor, office, service):
     # Given อาจารย์อนุมัติเนื้อหาแล้วแต่ยังไม่มีใบปะหน้าตาม ASM-01
-    client.post(f"{BASE_URL}/content-approval", json=ACTOR)
+    advisor.post(f"{BASE_URL}/content-approval")
     # When กองกิจให้ผ่าน
-    response = client.post(f"{BASE_URL}/review", json=ACTOR)
+    response = office.post(f"{BASE_URL}/review")
     # Then สถานะไม่เปลี่ยนและไม่เรียก UC-10
     assert response.status_code == 409
-    assert client.get(BASE_URL).json()["status"] == "รออนุมัติ"
+    assert office.get(BASE_URL).json()["status"] == "ส่งต่ออาจารย์"
     assert service.uc10.list_requests() == []
+
+
+def test_AC_APR_02_office_list_shows_only_pending(advisor, office):
+    # Given มีเอกสารที่อาจารย์ส่งใบปะหน้าแล้ว 1 ชุด
+    submit_cover_sheet(advisor)
+    # When กองกิจเปิดรายการเอกสาร
+    response = office.get("/project-approvals")
+    # Then เห็นเฉพาะเอกสารสถานะรออนุมัติ
+    assert [item["id"] for item in response.json()] == [SAMPLE_APPROVAL_ID]

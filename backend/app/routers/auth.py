@@ -1,11 +1,20 @@
 """Login API contract รองรับ FR-AUTH-03 และ FR-AUTH-04."""
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from backend.app.services.auth_service import CredentialVerifier, VerifiedUser, authenticate
+from ..models.authenticated_user_context import AuthenticatedUserContext
+from ..services.auth_service import (
+    CredentialVerifier,
+    SampleAccountVerifier,
+    authenticate,
+    token_registry,
+)
 
-router = APIRouter(prefix="/api", tags=["auth"])
+# หลังบ้านไม่มีคำนำหน้า /api เพราะ Vite ตัดออกก่อนส่งต่อ
+router = APIRouter(tags=["auth"])
 
 
 class LoginRequest(BaseModel):
@@ -13,25 +22,25 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class LoginProfile(BaseModel):
+    username: str
+    displayName: str
+    unit: str
+
+
 class LoginResponse(BaseModel):
     token: str
     expires_at: str
     role: str
+    profile: LoginProfile
 
 
 GENERIC_INVALID_CREDENTIALS_MESSAGE = "บัญชีหรือรหัสผ่านไม่ถูกต้อง"
 
 
-class _UnconfiguredVerifier:
-    """ตัวแทนรอแหล่งข้อมูลบัญชีจริงตาม Open Questions ของ spec."""
-
-    def verify(self, username: str, password: str) -> VerifiedUser | None:
-        raise NotImplementedError("ยังไม่มีแหล่งข้อมูลบัญชีผู้ใช้ที่ทีมยืนยัน")
-
-
 def get_credential_verifier() -> CredentialVerifier:
-    """จุด inject verifier เพื่อไม่เดาแหล่งข้อมูลบัญชีผู้ใช้."""
-    return _UnconfiguredVerifier()
+    """ใช้บัญชีตัวอย่างตามคำสั่งทีมจนกว่าจะมีแหล่งบัญชีจริง."""
+    return SampleAccountVerifier()
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -47,8 +56,23 @@ def login(
             detail=GENERIC_INVALID_CREDENTIALS_MESSAGE,
         )
 
+    token_registry.register(
+        result.token_value,
+        AuthenticatedUserContext(
+            user_id=result.user_id,
+            role=result.role,
+            authenticated_at=datetime.now(timezone.utc),
+        ),
+        result.expires_at,
+    )
     return LoginResponse(
         token=result.token_value,
-        expires_at=result.expires_at_iso,
+        # ระบุ UTC ให้ชัด เบราว์เซอร์จึงไม่อ่านเป็นเวลาท้องถิ่นตาม IF-TOKEN-01
+        expires_at=result.expires_at.replace(tzinfo=timezone.utc).isoformat(),
         role=result.role.value,
+        profile=LoginProfile(
+            username=result.user_id,
+            displayName=result.display_name,
+            unit=result.unit,
+        ),
     )

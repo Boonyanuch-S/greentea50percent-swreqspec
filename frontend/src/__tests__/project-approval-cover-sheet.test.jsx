@@ -17,7 +17,13 @@ const document = {
 
 function createClient(contentApprovedAt) {
   return {
-    getApproval: async () => ({ status: 'รออนุมัติ', contentApprovedAt, coverSheet: null, documents: [document] }),
+    getApproval: async () => ({
+      status: 'ส่งต่ออาจารย์',
+      contentApprovedAt,
+      coverSheet: null,
+      coverSheetAccept: '.pdf,.jpg,.jpeg,.png',
+      documents: [document],
+    }),
     getDocument: async () => document,
     uploadCoverSheet: async (file) => ({ fileName: file.name, status: 'รออนุมัติ' }),
   }
@@ -71,7 +77,7 @@ test('test_AC_APR_02_cover_sheet_upload_rejects_invalid_file แสดงข้�
   expect(input.accept).toBe('.pdf,.jpg,.jpeg,.png')
 })
 
-test('กดยกเลิกในกล่องยืนยันแล้วไม่ส่งใบปะหน้า', async () => {
+test('test_AC_APR_08_cancel_keeps_cover_sheet_unsent กดยกเลิกแล้วไม่ส่งใบปะหน้า', async () => {
   // Given อาจารย์อนุมัติเนื้อหาแล้วและเลือกไฟล์
   const client = { ...createClient('2026-10-30T09:00:00+07:00'), uploadCoverSheet: vi.fn() }
   confirmAction.mockClear()

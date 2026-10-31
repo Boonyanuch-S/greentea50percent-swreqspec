@@ -5,13 +5,14 @@
 - อ้างอิง: `specs/005-อนุมัติเอกสาร/plan.md`
 - วันที่: 2569-10-30 (อัปเดตตามงานจริง 2569-10-31)
 
-- สรุป: มี 7 เฟสที่ทำได้ (เฟส 0 ถึง 6) และเฟสรอคำตอบ 1 เฟส รวม 17 task
-- ทำแล้วครบ 17 task สถานะเสร็จ รอทีมตรวจ ยังไม่ผ่านจุดตรวจของคนและยังไม่ commit
+- สรุป: มีเฟส 0 ถึง 6 เฟสรอคำตอบ และเฟสแก้ข้อค้นพบจาก /verify รวม 24 task
+- ทำแล้วครบ 24 task สถานะเสร็จ รอทีมตรวจ ยังไม่ผ่านจุดตรวจของคน
 - ทีมตอบ Q-02, Q-03 และ Q-01 ของ specs/009 แล้ว (2569-10-31) ไม่มี task รอ Open Question; Q-01 ของ spec นี้ยังเปิดแต่ไม่มี task รอ
 - เฟสแรกที่ลองใช้งานได้จริงคือเฟส 1: อาจารย์เปิดหน้าอนุมัติจากข้อมูลหลังบ้านและเลือกดูเอกสารทั้งชุด (AC-APR-03)
 
 หมายเหตุการจัดไฟล์นี้
 - จัดใหม่จากฉบับ 19 task ที่เรียงตามชั้น จึงมีการจัดเลข task ใหม่ ดูตาราง "เทียบเลข task เดิม" ท้ายไฟล์
+- บล็อกจุดตรวจเฟส 0 ถึง 6 เขียนก่อนเฟสแก้ข้อค้นพบ ตอนลองจริงให้เลือกโครงการจากรายการก่อน และเอกสารเริ่มที่สถานะ `ส่งต่ออาจารย์`
 - หน้า `ProjectApprovalPage` มีอยู่แล้วและใช้ `projectApprovalMock` (T-10 ฉบับเดิม) งานหน้าจอในไฟล์นี้จึงเป็นการต่อหน้าเดิมเข้ากับ API ไม่ใช่สร้างหน้าใหม่
 - การเก็บข้อมูลใช้ in-memory แบบเดียวกับ `review_queue_service` ของ UC-03 ตามที่ทีมเลือกไว้ใน prompt-log ยังไม่ต่อฐานข้อมูลจริงตามตารางเทคโนโลยีใน plan.md (ทีมเลือกเอง ไม่ได้มาจาก spec)
 - route หลังบ้านไม่มีคำนำหน้า `/api` เพราะ Vite ตัด `/api` ออกก่อนส่งต่อ เช่น plan.md เขียน `GET /api/project-approvals/{approvalId}` หลังบ้านจะเป็น `GET /project-approvals/{approvalId}`
@@ -19,14 +20,14 @@
 
 งานนอก task ที่ทำเพิ่มตามคำสั่งทีม
 - ต่อ `ProjectApprovalPage` เป็นหน้าหลักของอาจารย์ และปรับหน้าตาให้เหมือนหน้าอื่นของระบบ
-- เพิ่มกล่องยืนยันก่อนอนุมัติเนื้อหา ส่งใบปะหน้า ตรวจผ่าน และตีกลับ (นอก spec ทีมสั่งเพิ่ม) กดยกเลิกแล้วไม่เรียก API
+- เพิ่มกล่องยืนยันก่อนอนุมัติเนื้อหา ส่งใบปะหน้า ตรวจผ่าน และส่งกลับ ตาม FR-APR-08 กดยกเลิกแล้วไม่เรียก API
 
-การตัดสินใจระหว่างทำที่ spec ไม่ระบุ รอทีมตรวจ
-- อนุมัติเนื้อหาซ้ำเก็บเวลาครั้งแรก, เรียก UC-10 ซ้ำใช้คำขอเดิม, อัปโหลดซ้ำแทนไฟล์เดิมระหว่างสถานะ `รออนุมัติ`, ตีกลับได้เมื่อมีใบปะหน้าแล้ว
-- ตรวจชนิดไฟล์จากนามสกุล และตอบข้อผิดพลาดไฟล์เป็น 409
+การตัดสินใจระหว่างทำ
+- กติกากดซ้ำ อัปโหลดซ้ำ เอกสารครบชุด และเงื่อนไขการส่งกลับ ทีมอนุมัติแล้วเป็น ASM-03
+- ตรวจชนิดไฟล์จากนามสกุลและต้นไฟล์ และตอบข้อผิดพลาดไฟล์เป็น 409
 - ถ้อยคำคำเตือน AI และข้อความในกล่องยืนยันเป็นร่างจาก AI
 
-ผล test ล่าสุด (2569-10-31): backend 58 passed; frontend 15 files / 32 tests ผ่าน; `npm run build` ผ่าน
+ผล test ล่าสุด (2569-10-31): backend 83 passed; frontend 17 files / 37 tests ผ่าน; `npm run build` ผ่าน
 
 ก่อนรัน test หลังบ้าน: `pip install -r backend/requirements.txt` แล้วรันจาก root ของ repo ด้วย `PYTHONPATH=. pytest -q backend/tests` (test import จาก package `backend`)
 
@@ -277,6 +278,90 @@
 - เสร็จเมื่อ: `test_AC_APR_05_ai_warning_does_not_block` ผ่าน โดยไม่ทดสอบความแม่นยำของการตรวจจับ AI
 - สถานะ: เสร็จ รอทีมตรวจ
 
+## เฟสแก้ข้อค้นพบจาก /verify
+
+ทีมสั่งแก้ F-001 ถึง F-011 ใน `rtm.md` และอนุมัติการตัดสินใจเมื่อ 2569-10-31
+
+### T-18 ให้ login ผ่านหลังบ้านและตรวจ Token จริง
+- รองรับ: CON-NFR-21, NFR-SEC-01, FR-AUTH-03, FR-AUTH-04, IF-TOKEN-01
+- ตรวจด้วย: AC-APR-06
+- ไฟล์ที่แตะ: `backend/app/routers/auth.py`, `backend/app/services/auth_service.py`, `backend/app/models/authenticated_user_context.py`, `backend/app/middleware/auth.py`, `backend/app/main.py`, `frontend/src/App.jsx`, `backend/tests/conftest.py`, `backend/tests/test_AC_APR_06_reject_unauthenticated_access.py`
+- แบบหน้าจอ: ไม่มี
+- ต้องทำหลัง: T-13
+- เสร็จเมื่อ: `test_AC_APR_06_reject_unauthenticated_access` ปฏิเสธ Token ปลอม และ `test_AC_APR_06_login_token_grants_access` ใช้ Token จาก `POST /login` ได้ (F-002)
+- สถานะ: เสร็จ รอทีมตรวจ
+
+### T-19 จำกัดฟังก์ชันตามบทบาทจาก Token
+- รองรับ: FR-APR-03, FR-APR-05, FR-APR-06
+- ตรวจด้วย: AC-APR-06
+- ไฟล์ที่แตะ: `backend/app/middleware/auth.py`, `backend/app/routers/project_approvals.py`, `backend/tests/test_AC_APR_06_reject_unauthenticated_access.py`
+- แบบหน้าจอ: ไม่มี
+- ต้องทำหลัง: T-18
+- เสร็จเมื่อ: `test_role_cannot_use_other_role_action` ผ่าน และผู้ดำเนินการมาจาก Token (F-003)
+- สถานะ: เสร็จ รอทีมตรวจ
+
+### T-20 ให้อาจารย์ส่งเอกสารกลับ UC-01
+- รองรับ: IF-UC01-02
+- ตรวจด้วย: ไม่มี AC เฉพาะ ใช้ test ตาม IF-UC01-02
+- ไฟล์ที่แตะ: `backend/app/services/project_approval_service.py`, `backend/app/routers/project_approvals.py`, `frontend/src/pages/ProjectApprovalPage.jsx`, `backend/tests/test_AC_APR_04_return_full_document_with_comment.py`, `frontend/src/__tests__/project-approval-advisor-return.test.jsx`
+- แบบหน้าจอ: ไม่มี
+- ต้องทำหลัง: T-19
+- เสร็จเมื่อ: `test_IF_UC01_02_advisor_returns_documents_with_comment` ผ่านทั้งหลังบ้านและหน้าจอ (F-001)
+- สถานะ: เสร็จ รอทีมตรวจ
+
+### T-21 เพิ่มรายการเอกสารให้เลือก
+- รองรับ: FR-APR-01, FR-APR-05
+- ตรวจด้วย: AC-APR-03
+- ไฟล์ที่แตะ: `backend/app/routers/project_approvals.py`, `backend/app/services/project_approval_service.py`, `backend/app/models/project_approval.py`, `frontend/src/api/client.js`, `frontend/src/App.jsx`, `frontend/src/pages/ProjectApprovalListPage.jsx`, `frontend/src/services/projectApprovalMock.js`, `frontend/src/__tests__/project-approval-list.test.jsx`
+- แบบหน้าจอ: ไม่มี
+- ต้องทำหลัง: T-19
+- เสร็จเมื่อ: `test_AC_APR_03_list_approvals_for_selection` ผ่าน และกองกิจเห็นเฉพาะเอกสาร `รออนุมัติ` (F-004)
+- สถานะ: เสร็จ รอทีมตรวจ
+
+### T-22 ใช้สถานะส่งต่ออาจารย์และกติกาตาม ASM-03
+- รองรับ: FR-APR-04, ASM-01, ASM-03
+- ตรวจด้วย: AC-APR-01, AC-APR-02
+- ไฟล์ที่แตะ: `backend/app/services/project_approval_service.py`, `frontend/src/pages/ProjectApprovalPage.jsx`, `backend/tests/test_AC_APR_01_content_approval.py`, `backend/tests/test_AC_APR_02_cover_sheet_upload.py`
+- แบบหน้าจอ: ไม่มี
+- ต้องทำหลัง: T-21
+- เสร็จเมื่อ: `test_AC_APR_02_cover_sheet_upload_accepted` ตรวจการเปลี่ยนสถานะจริง และ `test_AC_APR_01_incomplete_documents_cannot_be_approved` ผ่าน (F-005, F-008)
+- สถานะ: เสร็จ รอทีมตรวจ
+
+### T-23 ตรวจไฟล์จากต้นไฟล์และใช้ค่ากลาง
+- รองรับ: IF-UPLOAD-01, FR-APR-04
+- ตรวจด้วย: AC-APR-02
+- ไฟล์ที่แตะ: `backend/app/config.py`, `backend/app/services/project_approval_service.py`, `backend/app/routers/project_approvals.py`, `frontend/src/pages/ProjectApprovalPage.jsx`, `backend/tests/test_AC_APR_02_cover_sheet_upload.py`
+- แบบหน้าจอ: ไม่มี
+- ต้องทำหลัง: T-22
+- เสร็จเมื่อ: `test_AC_APR_02_cover_sheet_upload_rejects_invalid_file` ปฏิเสธไฟล์ปลอมนามสกุล และข้อความกับ `accept` มาจากค่าใน `config.py` (F-009, F-010)
+- สถานะ: เสร็จ รอทีมตรวจ
+
+### T-24 ปรับ spec และ test ตาม AC ใหม่
+- รองรับ: FR-APR-02, FR-APR-07, FR-APR-08
+- ตรวจด้วย: AC-APR-05, AC-APR-07, AC-APR-08
+- ไฟล์ที่แตะ: `specs/005-อนุมัติเอกสาร/spec.md`, `frontend/src/pages/ProjectApprovalPage.jsx`, `frontend/src/pages/ProjectOfficeReviewPanel.jsx`, `backend/tests/test_AC_APR_03_select_project_document.py`, `frontend/src/__tests__/project-approval-select-document.test.jsx`, test กล่องยืนยันในหน้าจอ
+- แบบหน้าจอ: ไม่มี
+- ต้องทำหลัง: T-16
+- เสร็จเมื่อ: `test_AC_APR_07_review_items_displayed` และ `test_AC_APR_08_cancel_*` ผ่าน และข้อความคำเตือนเป็นประโยคจบ (F-006, F-007, F-011)
+- สถานะ: เสร็จ รอทีมตรวจ
+
+#### จุดตรวจเฟสแก้ข้อค้นพบ
+- test ที่ต้องผ่านทั้งหมด: test ของทุก task ในไฟล์นี้
+- เปิดระบบ: หลังบ้าน `cd backend && PYTHONPATH=. uvicorn app.main:app --reload --port 8000`; หน้าจอ `cd frontend && npm run dev`
+- คนลองเองตาม AC-APR-06:
+  Given เปิดหลังบ้านแล้ว
+  When login ด้วยบัญชีตัวอย่าง และลองรหัสผ่านผิด
+  Then บัญชีถูกต้องเข้าได้ รหัสผิดขึ้น "บัญชีหรือรหัสผ่านไม่ถูกต้อง"
+- คนลองเองตาม AC-APR-01:
+  Given login ด้วยบัญชีอาจารย์
+  When เปิด "โครงการวันวิทยาศาสตร์" ซึ่งเอกสารไม่ครบ แล้วกดอนุมัติเนื้อหา
+  Then ขึ้นข้อผิดพลาดว่าเอกสารยังไม่ครบทั้งชุด
+- คนลองเองตาม IF-UC01-02:
+  Given login ด้วยบัญชีอาจารย์และเปิดโครงการที่ยังไม่อัปโหลดใบปะหน้า
+  When กรอกความเห็น กดส่งเอกสารกลับ แล้วยืนยัน
+  Then สถานะเป็น `ตีกลับให้แก้ไข`
+- ยังขาด: บัญชีเป็นตัวอย่าง, API ของฟีเจอร์อื่นยังตรวจแค่ header, เอกสารเป็นตัวอย่างไม่ได้มาจาก UC-03 และเอกสารที่ถูกตีกลับยังไม่กลับเข้ารอบ
+
 ## ตารางตรวจความครบ
 
 ### Acceptance Criteria
@@ -288,28 +373,31 @@
 | AC-APR-03 | T-02, T-03 |
 | AC-APR-04 | T-11, T-12, T-15 |
 | AC-APR-05 | T-16, T-17 |
-| AC-APR-06 | T-13 |
+| AC-APR-06 | T-13, T-18, T-19 |
+| AC-APR-07 | T-24 |
+| AC-APR-08 | T-24 |
 
 ### Constraints
 
 | Constraint ID | task ที่ทำให้เป็นจริง |
 |---|---|
-| CON-NFR-21 | T-02, T-13 |
+| CON-NFR-21 | T-02, T-13, T-18 |
 | IF-UC10-01 | T-08, T-09 |
-| IF-UC01-02 | T-11, T-12 |
-| IF-UPLOAD-01 | T-06, T-07, T-14 |
+| IF-UC01-02 | T-11, T-12, T-20 |
+| IF-UPLOAD-01 | T-06, T-07, T-14, T-23 |
 
 ### Functional Requirements
 
 | FR ID | AC ที่ตรวจ FR นี้ | เฟส |
 |---|---|---|
 | FR-APR-01 | AC-APR-03 | เฟส 1 |
-| FR-APR-02 | AC-APR-01 ตามตาราง Traceability ของ spec | เฟส 1, 2 |
+| FR-APR-02 | AC-APR-07 | เฟส 1, เฟสแก้ข้อค้นพบ |
 | FR-APR-03 | AC-APR-01 | เฟส 2 |
 | FR-APR-04 | AC-APR-02 | เฟส 3, เฟสรอคำตอบ |
 | FR-APR-05 | AC-APR-02 | เฟส 4, เฟสรอคำตอบ |
 | FR-APR-06 | AC-APR-04 | เฟส 5, เฟสรอคำตอบ |
 | FR-APR-07 | AC-APR-05 | เฟสรอคำตอบ |
+| FR-APR-08 | AC-APR-08 | เฟสแก้ข้อค้นพบ |
 
 ## สิ่งที่ยังไม่ทำ
 
@@ -326,14 +414,9 @@ Q-01 ยังเปิด จึงยังไม่มีการติด�
 
 ## เรื่องที่ต้องให้ทีมตัดสิน
 
-ข้อเหล่านี้ไม่มีคำตอบใน spec และยังไม่มี ID เป็นข้อเสนอให้ทีมพิจารณาเพิ่มลง spec ไม่ได้ตัดสินแทนทีม
+ทีมตัดสินข้อเสนอเดิมแล้วเมื่อ 2569-10-31 ดูผลใน CHANGELOG ของ spec.md เหลือเรื่องเดียว
 
-1. ใครเป็นผู้ส่งเอกสารกลับ UC-01: Scope และ IF-UC01-02 เขียนว่าอาจารย์ส่งกลับพร้อมความเห็น แต่ FR-APR-06, AC-APR-04 และ ASM-02 เขียนว่ากองกิจ ไฟล์นี้ทำเฉพาะกองกิจตามที่มี FR และ AC รองรับ ถ้าอาจารย์ต้องส่งกลับได้ด้วย ต้องเพิ่ม FR และ AC
-2. สถานะก่อนอัปโหลดใบปะหน้า: AC-APR-03 เรียกเอกสารที่เปิดดูว่า "รออนุมัติ" ส่วน FR-APR-04 ให้เปลี่ยนเป็น "รออนุมัติ" หลังอัปโหลด ไฟล์นี้ไม่เพิ่มชื่อสถานะใหม่ จึงใช้การมี `CoverSheetUpload` แยกว่าอัปโหลดแล้วหรือยัง
-3. การเลือกเอกสารที่ต้องอนุมัติ: plan.md มีเฉพาะ API ตาม `approvalId` ไม่มีรายการเอกสารรออนุมัติ และคิวส่งต่อจาก UC-03 ยังไม่เชื่อมกับฟีเจอร์นี้ หน้าจอจึงเปิดได้เฉพาะชุดตัวอย่าง
-4. สิทธิ์ตามบทบาท: spec กำหนดเฉพาะการ Login จึงยังไม่จำกัดว่า `POST /content-approval` เป็นของอาจารย์ หรือ `POST /review` และ `POST /return` เป็นของกองกิจ
-5. ฟิลด์ใน plan.md: `ProjectDocumentItem` ไม่มีวัตถุประสงค์ ตัวชี้วัด และรูปแบบเอกสาร แต่ FR-APR-02 ต้องใช้ T-01 จึงเพิ่มฟิลด์เหล่านี้ ควรปรับ plan.md ให้ตรงกัน
-6. กล่องยืนยันก่อนอนุมัติเนื้อหา ส่งใบปะหน้า ตรวจผ่าน และตีกลับ: ทำตามคำสั่งทีมแต่ยังไม่มีใน spec ควรเพิ่มลง spec หรือไม่
+1. IF-UC01-02 ฝั่งอาจารย์ยังไม่มี AC เฉพาะ ควรเพิ่มหรือไม่
 
 ## เทียบเลข task เดิม
 

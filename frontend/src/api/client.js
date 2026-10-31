@@ -110,16 +110,21 @@ export async function rejectSubmission(
   )
 }
 
-// ชุดเอกสารตัวอย่างของหลังบ้าน เพราะ plan.md ยังไม่มี API รายการเอกสารรออนุมัติ
-export const SAMPLE_APPROVAL_ID = 'approval-005-001'
-
-function toApprovalView(body) {
+function toApprovalSummary(body) {
   return {
     id: body.id,
+    projectName: body.project_name,
     status: body.status,
     contentApprovedAt: body.content_approved_at,
     completedAt: body.completed_at,
+  }
+}
+
+function toApprovalView(body) {
+  return {
+    ...toApprovalSummary(body),
     coverSheet: body.cover_sheet ? { fileName: body.cover_sheet.file_name } : null,
+    coverSheetAccept: body.cover_sheet_accept,
     documents: body.documents.map((document) => ({
       id: document.id,
       type: document.document_type,
@@ -141,47 +146,44 @@ function toDocumentView(body) {
   }
 }
 
-// เรียก API อนุมัติเอกสารด้วย session ของผู้ใช้ตาม FR-APR-01 ถึง FR-APR-06 และ CON-NFR-21
-export function createProjectApprovalClient(session, approvalId = SAMPLE_APPROVAL_ID) {
+// เรียก API อนุมัติเอกสารด้วย Token ของผู้ใช้ตาม FR-APR-01 ถึง FR-APR-06 และ CON-NFR-21
+export function createProjectApprovalClient(session) {
   const resource = 'การอนุมัติเอกสาร'
-  const basePath = `/project-approvals/${approvalId}`
-  const request = (path, options) => authenticatedJsonFetch(`${basePath}${path}`, session, options, resource)
-  const actorUserId = () => {
-    const username = session?.profile?.username
-    if (!username?.trim()) {
-      throw new Error('ไม่พบข้อมูลผู้ใช้ใน session')
-    }
-    return username
-  }
-  const postAsActor = (path, fields = {}) =>
-    request(path, {
-      method: 'POST',
-      body: JSON.stringify({ actor_user_id: actorUserId(), ...fields }),
-    })
+  const request = (path, options) => authenticatedJsonFetch(path, session, options, resource)
 
   return {
-    async getApproval() {
-      return toApprovalView(await request(''))
+    async listApprovals() {
+      return (await request('/project-approvals')).map(toApprovalSummary)
     },
-    async getDocument(documentId) {
-      return toDocumentView(await request(`/documents/${documentId}`))
-    },
-    async approveContent() {
-      const result = await postAsActor('/content-approval')
-      return { contentApprovedAt: result.content_approved_at, printMessage: result.print_message }
-    },
-    async uploadCoverSheet(file) {
-      const body = new FormData()
-      body.append('file', file)
-      body.append('uploaded_by', actorUserId())
-      const result = await request('/cover-sheet', { method: 'POST', body })
-      return { fileName: result.file_name, status: result.status }
-    },
-    async passReview() {
-      return postAsActor('/review')
-    },
-    async returnDocuments(commentText) {
-      return postAsActor('/return', { comment_text: commentText })
+    forApproval(approvalId) {
+      const basePath = `/project-approvals/${approvalId}`
+      return {
+        async getApproval() {
+          return toApprovalView(await request(basePath))
+        },
+        async getDocument(documentId) {
+          return toDocumentView(await request(`${basePath}/documents/${documentId}`))
+        },
+        async approveContent() {
+          const result = await request(`${basePath}/content-approval`, { method: 'POST' })
+          return { contentApprovedAt: result.content_approved_at, printMessage: result.print_message }
+        },
+        async uploadCoverSheet(file) {
+          const body = new FormData()
+          body.append('file', file)
+          const result = await request(`${basePath}/cover-sheet`, { method: 'POST', body })
+          return { fileName: result.file_name, status: result.status }
+        },
+        async passReview() {
+          return request(`${basePath}/review`, { method: 'POST' })
+        },
+        async returnDocuments(commentText) {
+          return request(`${basePath}/return`, {
+            method: 'POST',
+            body: JSON.stringify({ comment_text: commentText }),
+          })
+        },
+      }
     },
   }
 }

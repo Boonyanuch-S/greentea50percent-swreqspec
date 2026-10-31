@@ -1,6 +1,7 @@
 const approval = {
   id: 'approval-005-001',
-  status: 'รออนุมัติ',
+  projectName: 'โครงการค่ายวิทยาศาสตร์ 2569',
+  status: 'ส่งต่ออาจารย์',
   contentApprovedAt: null,
   documents: [
     {
@@ -39,6 +40,14 @@ function cloneApproval() {
 
 // จำลองข้อมูลหน้าอนุมัติ รองรับ FR-APR-01, FR-APR-02, FR-APR-03 และ FR-APR-04
 export const projectApprovalMock = {
+  async listApprovals() {
+    return [cloneApproval()]
+  },
+
+  forApproval() {
+    return projectApprovalMock
+  },
+
   async getApproval() {
     return cloneApproval()
   },

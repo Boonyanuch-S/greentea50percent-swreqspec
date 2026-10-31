@@ -30,7 +30,7 @@ test('test_AC_APR_04_return_full_document_with_comment กองกิจตี�
   expect(client.returnDocuments).toHaveBeenCalledWith('แก้ตัวชี้วัด')
 })
 
-test('กดยกเลิกในกล่องยืนยันแล้วไม่ตีกลับ', async () => {
+test('test_AC_APR_08_cancel_keeps_document_unreturned กดยกเลิกแล้วไม่ตีกลับ', async () => {
   // Given กองกิจกรอกคอมเมนต์แล้ว
   const client = {
     getApproval: async () => ({ status: 'รออนุมัติ', coverSheet: { fileName: 'cover.pdf' }, documents: [] }),
