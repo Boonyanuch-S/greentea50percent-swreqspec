@@ -2,6 +2,8 @@ from fastapi import FastAPI
 
 from .routers.auth import router as auth_router
 from .routers.checklists import checklist_router
+from .api.activity_data import activity_data_router
+from .api.hours_submission import hours_submission_router
 from .routers.project_approvals import project_approval_router
 from .routers.review_queue import review_queue_router
 from .routers.review_decisions import review_decision_router
@@ -12,5 +14,8 @@ app = FastAPI()
 app.include_router(auth_router)
 app.include_router(review_queue_router)
 app.include_router(checklist_router)
+app.include_router(activity_data_router)
+# เปิด API หน้าส่งข้อมูลชั่วโมงตาม FR-SBH-01 และ CON-NFR-21
+app.include_router(hours_submission_router)
 app.include_router(review_decision_router)
 app.include_router(project_approval_router)

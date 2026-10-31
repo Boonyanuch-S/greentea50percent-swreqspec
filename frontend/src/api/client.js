@@ -46,6 +46,33 @@ async function authenticatedJsonFetch(path, session, options = {}, resource = 'C
   return body
 }
 
+// แปลงข้อมูลกิจกรรมและ deadline จาก API ตาม FR-SBH-01, FR-SBH-07 และ ASM-03
+function toHoursSubmissionActivity(body) {
+  return {
+    id: String(body.activity_id),
+    name: body.activity_name,
+    status: body.status,
+    endDate: body.end_date,
+    deadlineExceeded: body.deadline_exceeded,
+  }
+}
+
+// เรียก API กิจกรรมจบแล้วสำหรับหน้าส่งชั่วโมงตาม FR-SBH-01, CON-NFR-21 และ NFR-SEC-01
+export function createHoursSubmissionClient(session) {
+  const request = (path) => authenticatedJsonFetch(path, session, {}, 'การส่งข้อมูลชั่วโมง')
+
+  return {
+    async getFinishedActivities() {
+      const activities = await request('/activities/hours-submission')
+      return activities.map(toHoursSubmissionActivity)
+    },
+    async getSubmission(activityId) {
+      const activity = await request(`/activities/${encodeURIComponent(activityId)}/hours-submission`)
+      return toHoursSubmissionActivity(activity)
+    },
+  }
+}
+
 // อ่าน Checklist กลางฉบับล่าสุดตาม FR-VDC-07, IF-CHK-02 และ CON-NFR-21
 export async function getLatestChecklist(session) {
   return authenticatedJsonFetch('/checklists/latest', session)

@@ -21,7 +21,7 @@ function ActivitySelector({ activities, selectedId, onChange }) {
   )
 }
 
-// แสดงหน้าส่งชั่วโมงด้วยข้อมูลจำลอง รองรับ FR-SBH-01, FR-SBH-03, FR-SBH-04 และ FR-SBH-06
+// แสดงหน้าส่งชั่วโมงตาม FR-SBH-01, FR-SBH-03, FR-SBH-04, FR-SBH-06 และ FR-SBH-07
 export default function HoursSubmission({ client }) {
   const [activities, setActivities] = useState([])
   const [selectedId, setSelectedId] = useState('')
@@ -31,11 +31,21 @@ export default function HoursSubmission({ client }) {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    let active = true
+    setLoading(true)
     client.getFinishedActivities().then((result) => {
+      if (!active) return
       setActivities(result)
       setSelectedId(result[0]?.id ?? '')
-      setLoading(false)
+    }).catch((reason) => {
+      if (active) setError(reason.message)
+    }).finally(() => {
+      if (active) setLoading(false)
     })
+
+    return () => {
+      active = false
+    }
   }, [client])
 
   useEffect(() => {
@@ -56,6 +66,10 @@ export default function HoursSubmission({ client }) {
 
   if (loading && !submission) {
     return <main className="min-h-screen bg-slate-100 p-8 text-center text-slate-600">กำลังโหลดข้อมูลการส่งชั่วโมง...</main>
+  }
+
+  if (error && activities.length === 0) {
+    return <main role="alert" className="min-h-screen bg-slate-100 p-8 text-center text-rose-800">{error}</main>
   }
 
   return (
@@ -82,26 +96,37 @@ export default function HoursSubmission({ client }) {
               <p role="alert" className="rounded-lg bg-rose-50 p-4 text-rose-800">{error}</p>
             ) : submission ? (
               <>
-                <section className="grid gap-4 sm:grid-cols-2">
+                <section className={`grid gap-4 ${submission.preview ? 'sm:grid-cols-2' : ''}`}>
                   <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <p className="text-sm text-slate-500">สถานะกิจกรรม</p>
                     <p className="mt-2 text-xl font-bold text-emerald-700">{submission.status}</p>
                   </article>
-                  <article className={`rounded-xl border p-5 shadow-sm ${submission.projectNumber ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
-                    <p className="text-sm text-slate-600">เลขสรุปโครงการ</p>
-                    <p className="mt-2 text-xl font-bold">{submission.projectNumberStatus}</p>
-                    {submission.projectNumber && <p className="mt-1 text-sm text-slate-600">{submission.projectNumber}</p>}
-                  </article>
+                  {submission.preview && (
+                    <article className={`rounded-xl border p-5 shadow-sm ${submission.projectNumber ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+                      <p className="text-sm text-slate-600">เลขสรุปโครงการ</p>
+                      <p className="mt-2 text-xl font-bold">{submission.projectNumberStatus}</p>
+                      {submission.projectNumber && <p className="mt-1 text-sm text-slate-600">{submission.projectNumber}</p>}
+                    </article>
+                  )}
                 </section>
 
-                {!submission.projectNumber && (
+                {submission.deadlineExceeded === true && (
+                  <section role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+                    <p className="font-semibold">กำหนดส่งของกองกิจผ่านแล้ว</p>
+                    <p className="mt-1 text-sm">
+                      สามารถไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า
+                    </p>
+                  </section>
+                )}
+
+                {submission.preview && !submission.projectNumber && (
                   <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
                     <p className="font-semibold">ขอเลขสรุปจากกองกิจ</p>
                     <p className="mt-1 text-sm">ยังไม่สามารถส่งข้อมูลชั่วโมงได้จนกว่าเลขสรุปโครงการจะพร้อม</p>
                   </div>
                 )}
 
-                <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                {submission.preview && <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div className="border-b border-slate-200 p-6">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
@@ -133,9 +158,9 @@ export default function HoursSubmission({ client }) {
                       </tbody>
                     </table>
                   </div>
-                </section>
+                </section>}
 
-                <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                {submission.preview && <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                   <label className="flex items-start gap-3 text-sm text-slate-700">
                     <input
                       type="checkbox"
@@ -152,7 +177,7 @@ export default function HoursSubmission({ client }) {
                   >
                     ยืนยันส่งข้อมูล
                   </button>
-                </section>
+                </section>}
               </>
             ) : null}
           </div>

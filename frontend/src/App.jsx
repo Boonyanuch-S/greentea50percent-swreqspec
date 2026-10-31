@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth.js'
 import AppLayout from './layouts/AppLayout.jsx'
 import ChecklistManagementPage from './pages/ChecklistManagementPage.jsx'
 import DocumentReviewPage from './pages/DocumentReviewPage.jsx'
+import HoursSubmission from './pages/HoursSubmission.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import ProjectApprovalListPage from './pages/ProjectApprovalListPage.jsx'
@@ -15,6 +16,7 @@ import { authApi } from './services/auth.js'
 import { checklistApi, createProjectApprovalClient } from './api/client.js'
 import { projectDocumentMock } from './services/projectDocumentMock.js'
 import { reviewQueueMock } from './services/reviewQueue.js'
+import { hoursSubmissionMock } from './services/hoursSubmissionMock.js'
 import { AuthProvider } from './store/AuthContext.jsx'
 import { confirmAction, showToast, showWarning } from './utils/alerts.js'
 
@@ -48,13 +50,63 @@ function ProjectApprovalHome({ client, DetailPage, eyebrow, heading, description
   )
 }
 
-function RoleHome({ role, session, checklistClient, reviewClient, approvalClient }) {
+function RoleHome({
+  role,
+  session,
+  checklistClient,
+  reviewClient,
+  approvalClient,
+  hoursSubmissionClient,
+}) {
   const [facultyView, setFacultyView] = useState('queue')
+  const [clubView, setClubView] = useState('projects')
   const [selectedSubmissionId, setSelectedSubmissionId] = useState(null)
   const sessionApprovalClient = useMemo(() => createProjectApprovalClient(session), [session])
+  // ใช้ข้อมูลจำลองชั่วคราวจนกว่าจะเชื่อมแหล่งข้อมูลกิจกรรมจริงตาม FR-SBH-01
+  const sessionHoursSubmissionClient = hoursSubmissionClient ?? hoursSubmissionMock
 
   if (role === 'club_committee') {
-    return <ProjectDocumentsPage client={projectDocumentMock} />
+    // สลับจาก UC-01 ไปหน้าส่งข้อมูลชั่วโมงตาม FR-SBH-01 และ FR-SBH-03
+    return (
+      <>
+        <div className="mx-auto mb-6 max-w-5xl">
+          <nav
+            className="inline-flex max-w-full rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+            aria-label="เมนูกรรมการสโมสร"
+          >
+            <button
+              type="button"
+              aria-pressed={clubView === 'projects'}
+              onClick={() => setClubView('projects')}
+              className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${
+                clubView === 'projects'
+                  ? 'bg-teal-700 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              เอกสารโครงการ
+            </button>
+            <button
+              type="button"
+              aria-pressed={clubView === 'hours'}
+              onClick={() => setClubView('hours')}
+              className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${
+                clubView === 'hours'
+                  ? 'bg-teal-700 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              ส่งข้อมูลชั่วโมงกิจกรรม
+            </button>
+          </nav>
+        </div>
+        {clubView === 'hours' ? (
+          <HoursSubmission client={sessionHoursSubmissionClient} />
+        ) : (
+          <ProjectDocumentsPage client={projectDocumentMock} />
+        )}
+      </>
+    )
   }
   if (role === 'advisor') {
     return (
@@ -153,7 +205,13 @@ function RoleHome({ role, session, checklistClient, reviewClient, approvalClient
 }
 
 // ยังไม่มี Token แสดงหน้า login (FR-AUTH-01) มี Token แล้วเข้าหน้าตามบทบาท (FR-AUTH-04)
-function AppRoutes({ authClient, checklistClient, reviewClient, approvalClient }) {
+function AppRoutes({
+  authClient,
+  checklistClient,
+  reviewClient,
+  approvalClient,
+  hoursSubmissionClient,
+}) {
   const { session, tokenExpired, signIn, signOut, dismissExpiredNotice } = useAuth()
   const [view, setView] = useState('home') // 'home' | 'profile' (หน้าโปรไฟล์: นอก spec ทีมสั่งเพิ่ม)
 
@@ -202,6 +260,7 @@ function AppRoutes({ authClient, checklistClient, reviewClient, approvalClient }
           checklistClient={checklistClient}
           reviewClient={reviewClient}
           approvalClient={approvalClient}
+          hoursSubmissionClient={hoursSubmissionClient}
         />
       )}
     </AppLayout>
@@ -213,6 +272,7 @@ export default function App({
   checklistClient = checklistApi,
   reviewClient = reviewQueueMock,
   approvalClient,
+  hoursSubmissionClient,
 }) {
   return (
     <AuthProvider>
@@ -221,6 +281,7 @@ export default function App({
         checklistClient={checklistClient}
         reviewClient={reviewClient}
         approvalClient={approvalClient}
+        hoursSubmissionClient={hoursSubmissionClient}
       />
     </AuthProvider>
   )

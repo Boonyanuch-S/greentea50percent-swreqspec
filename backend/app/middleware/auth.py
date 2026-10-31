@@ -29,7 +29,14 @@ class ReviewAuthenticationMiddleware:
 
     @staticmethod
     def _requires_authentication(path: str) -> bool:
-        return path == "/review-queue" or path.startswith("/submissions/")
+        return (
+            path == "/review-queue"
+            or path.startswith("/submissions/")
+            or (
+                path.startswith("/activities/")
+                and path.endswith("/hours-submission")
+            )
+        )
 
 
 def require_authenticated_user(request: Request) -> str:

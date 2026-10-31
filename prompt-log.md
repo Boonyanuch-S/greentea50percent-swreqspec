@@ -1028,3 +1028,98 @@
 - ผล test: backend 84 passed; frontend 17 files / 37 tests ผ่าน; `npm run build` ผ่าน
 - ตารางไปข้างหน้า: ครบ 12, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 1 (F-012)
 - ข้อค้นพบใหม่: F-013 Token หายเมื่อ backend เริ่มใหม่ หน้าจอไม่พากลับ login ขึ้นกับ Q-03 ของ specs/009
+
+## 2569-10-31 คำสั่ง: /implement T-01 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+
+- คำถามที่ AI ถามและคำตอบของทีม: ยืนยันให้โมเดล Activity ในฟีเจอร์ 002 ใช้ตาราง `activities` ร่วมกับโมเดลเดิม และอนุญาตเพิ่ม `backend/app/models/activity.py` ในไฟล์ที่แตะของ T-01; repository เชื่อมผ่านการนำเข้าโมเดลโดยยังไม่เพิ่ม query/service
+- ไฟล์ที่แก้: `backend/app/models/hours_submission.py`, `backend/app/models/activity.py` (เพิ่มตามที่ทีมอนุญาต), `backend/app/repositories/activity.py`, `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- ผลทดสอบ: smoke test โมเดล/ตาราง/การเชื่อม foreign key ผ่าน; `PYTHONPATH=.. python -m pytest -q tests/test_AC_LATE_03_list_all_late_activities.py` ผ่าน 1 test; `git diff --check` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามทีมก่อน: วิธีใช้ตาราง `activities` ร่วมกับ Activity เดิม และขอบเขตการเชื่อม repository; ทีมยืนยันแนวทางก่อนเริ่มแก้
+
+## 2569-10-31 คำสั่ง: /implement T-02 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+
+- สถานะ T-01: ทีมยืนยันว่าตรวจ T-01 แล้ว จึงปรับจาก “เสร็จ รอทีมตรวจ” เป็น “เสร็จ” เพื่อให้เป็น prerequisite ที่เสร็จสมบูรณ์
+- ไฟล์ที่แก้: `backend/app/repositories/activity.py`, `backend/app/services/activity_access.py`, `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`, `prompt-log.md`
+- ผลทดสอบ: smoke test ยืนยันว่าคืนเฉพาะกิจกรรมสถานะ “จบแล้ว” ผ่าน; `PYTHONPATH=.. python -m pytest -q tests/test_AC_LATE_03_list_all_late_activities.py` ผ่าน 1 test; ไม่มี test ล้ม; มี StarletteDeprecationWarning จากการใช้ httpx กับ TestClient
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้สถานะ “จบแล้ว” ตาม FR-SBH-01 และ criteria ของ T-02 โดยตรง
+
+## 2569-10-31 คำสั่ง: เชื่อมหน้าส่งข้อมูลชั่วโมง 002 จากหน้าหลักกรรมการสโมสร
+
+- เพิ่มแท็บใน `frontend/src/App.jsx` ให้กรรมการสโมสรสลับจากหน้าเอกสารโครงการ (001) ไปหน้าส่งข้อมูลชั่วโมง (002) และกลับได้ โดยใช้ mock API ที่มีอยู่
+- เพิ่ม `frontend/src/__tests__/hours-submission-navigation.test.jsx` ทดสอบ login ด้วย role กรรมการสโมสร สลับไป 002 และกลับหน้า 001
+- ผลทดสอบ: บันทึกผลหลังรันทดสอบ
+- อ้างอิง: FR-SBH-01, FR-SBH-03, FR-SBH-04, FR-SBH-06; ไม่เปลี่ยน flow ของ role อื่น
+
+## 2569-10-31 คำสั่ง: /implement T-03 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+
+- คำถามที่ AI ถามและคำตอบของทีม: ทีมยืนยันให้บริการคืนประเภทชั่วโมงทั้งหมดเมื่อมีหลายประเภท ไม่เลือกแทนทีม และอนุญาตเพิ่มไฟล์ test นอกช่องไฟล์ที่แตะของ task
+- ปรับเกณฑ์เสร็จเมื่อของ T-03 ให้คืนรายการประเภทชั่วโมงทั้งหมดระดับกิจกรรม ตามคำยืนยันทีม
+- ไฟล์ที่แก้: `backend/app/services/hours_data.py`, `backend/app/repositories/activity.py`, `backend/tests/test_hours_data_service.py` (เพิ่มตามที่ทีมอนุญาต), `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- ผลทดสอบ: `PYTHONPATH=.. python -m pytest -q tests/test_hours_data_service.py` ผ่าน 1 test; `PYTHONPATH=.. python -m pytest -q tests/test_AC_LATE_03_list_all_late_activities.py` ผ่าน 1 test; `git diff --check` ผ่าน; มี StarletteDeprecationWarning จาก TestClient/httpx
+- สิ่งที่เกือบต้องเดาแต่ถามทีมก่อน: พฤติกรรมเมื่อมีกิจกรรมที่มีหลายประเภทชั่วโมง (T-03 เดิมระบุประเภทเดียว) และการอนุญาตเพิ่ม test file นอกช่องไฟล์ที่แตะ
+
+## 2569-10-31 คำสั่ง: /implement T-04 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+
+- ไฟล์ที่แก้: `backend/app/models/hours_submission.py`, `backend/app/repositories/submission.py`, `backend/tests/test_submission_repository.py` (เพิ่มตามที่ทีมอนุญาต), `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- เพิ่มโมเดล ProjectNumberStatus, HoursSubmission และ ReviewQueueEntry พร้อม foreign key ไปยัง Activity และรายการคิวอ้างอิง HoursSubmission; repository เพิ่มการ persist โดยไม่ commit transaction แทนผู้เรียก
+- ผลทดสอบ: `PYTHONPATH=.. python -m pytest -q tests/test_submission_repository.py` ผ่าน 1 test; `PYTHONPATH=.. python -m pytest -q tests/test_hours_data_service.py tests/test_AC_LATE_03_list_all_late_activities.py` ผ่าน 2 tests; `git diff --check` ผ่าน; มี StarletteDeprecationWarning จาก TestClient/httpx
+- สิ่งที่เกือบต้องเดาแต่หลีกเลี่ยง: ไม่กำหนด enum/status values, timestamp defaults หรือ transaction commit behavior ที่ spec ไม่ระบุ; timestamp/ref/status ถูกส่งเข้าผ่านโมเดลและ repository ทำเพียง flush
+
+## 2569-10-31 คำสั่ง: /implement T-05 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+
+- คำถามที่ AI ถามและคำตอบของทีม: กิจกรรมไม่พบตอบ 404, กิจกรรมยังไม่จบตอบ 403; อนุญาตเพิ่ม test file และแก้ `backend/app/main.py` เพื่อ include router ให้ endpoint ใช้งานได้จริง
+- ไฟล์ที่แก้: `backend/app/middleware/auth.py`, `backend/app/api/hours_submission.py`, `backend/app/schemas/hours_submission.py`, `backend/app/main.py` (เพิ่มตามที่ทีมอนุญาต), `backend/tests/test_hours_submission_access.py` (เพิ่มตามที่ทีมอนุญาต), `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- ผลทดสอบ: `PYTHONPATH=.. python -m pytest -q tests/test_hours_submission_access.py` ผ่าน 2 tests; `PYTHONPATH=.. python -m pytest -q tests/test_AC_LATE_03_list_all_late_activities.py` ผ่าน 1 test; `git diff --check` ผ่าน; มี StarletteDeprecationWarning จาก TestClient/httpx
+- สิ่งที่เกือบต้องเดาแต่ถามทีมก่อน: HTTP status สำหรับกิจกรรมไม่เข้าเกณฑ์ และการขยายขอบเขตไฟล์เพื่อเชื่อม router/test ให้ทำงานจริง
+
+## 2569-10-31 คำสั่ง: /tasks specs/002-ส่งข้อมูลชั่วโมง
+
+- ผลลัพธ์: จัด `specs/002-ส่งข้อมูลชั่วโมง/tasks.md` ใหม่เป็น 6 เฟส รวม 17 tasks พร้อม dependency, จุดตรวจ Given/When/Then, ตาราง traceability ของ AC/Constraint/FR และรายการ Open Questions
+- จัดเฟสแรกให้เป็นการเปิดหน้าส่งชั่วโมงเฉพาะกิจกรรมจบแล้วและผู้ใช้ที่ Login; เฟส 0 จำกัดงานฐานรากไว้ 3 tasks
+- ระบุ Q-02/Q-03 ในเฟสรอคำตอบ และแยกงาน mapping สถานะเลขสรุปจาก UC-04 ที่ยังไม่กำหนดไว้โดยไม่สร้าง Q-ID ใหม่หรือเดาค่า
+- ไม่มีการเขียนโค้ดหรือรัน test เนื่องจากเป็นการจัดทำเอกสารงาน; ตรวจรูปแบบด้วย `git diff --check`
+
+## 2569-10-31 คำสั่ง: /implement-all เฟส 1 - T-05 เชื่อมหน้าส่งชั่วโมงกับ API จริง
+
+- คำถามที่ AI ถามและคำตอบของทีม: พบว่าไม่มี API คืนรายการกิจกรรมจบแล้ว จึงขอขยายขอบเขต T-05 ให้เพิ่ม route, schema และ test backend; ทีมอนุญาต
+- ไฟล์ที่แก้ใน task นี้: `backend/app/api/hours_submission.py`, `backend/tests/test_hours_submission_access.py`, `frontend/src/api/client.js`, `frontend/src/App.jsx`, `frontend/src/pages/HoursSubmission.jsx`, `frontend/src/__tests__/hours-submission-navigation.test.jsx`, `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- เพิ่ม API ที่คืนเฉพาะกิจกรรมจบแล้วโดยใช้ service เดิมและ role guard กรรมการสโมสร; client ส่ง Authorization token และหน้าเรียก API จริง ส่วน test หน้าจอยังคงฉีด mock client ได้
+- ผล test: baseline ก่อนเริ่ม backend 88 passed และ frontend 18 files / 38 tests passed; หลังแก้ backend 88 passed และ frontend 18 files / 39 tests passed; test backend T-05 2 passed และ test หน้าส่งชั่วโมง 2 passed; `git diff --check` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: API สำหรับรายการกิจกรรมจบแล้วไม่มีในโค้ดเดิม จึงถามทีมก่อนเพิ่ม route ใน backend; ไม่กำหนดความหมาย status เลขสรุปหรือเปิด flow preview/submit ที่เป็น task อื่น
+
+## 2569-10-31 คำสั่ง: แก้หน้า 002 ที่แจ้งว่ายังไม่มีแหล่งข้อมูลกิจกรรม
+
+- สาเหตุ: backend มี API แต่ `main.py` ยังไม่ได้เชื่อม `activity_session`/ฐานข้อมูลกิจกรรม ทำให้ API ตอบ 503 และหน้าแสดงข้อผิดพลาดเป็นข้อความว่ายังไม่มีแหล่งข้อมูล
+- คำถามที่ AI ถามและคำตอบของทีม: ทีมเลือกใช้ `hoursSubmissionMock.js` ชั่วคราว เพราะยังไม่ได้ระบุแหล่งข้อมูลจริง
+- ไฟล์ที่แก้: `frontend/src/App.jsx`, `frontend/src/__tests__/hours-submission-navigation.test.jsx`
+- เปลี่ยน default client ของหน้า 002 เป็น mock ที่มีอยู่แล้วชั่วคราว และยังเปิดทางให้ inject client API จริงได้เมื่อเชื่อมแหล่งข้อมูลในภายหลัง; ไม่ได้สร้างหรือเพิ่มข้อมูลตัวอย่างใหม่
+- ผล test: targeted frontend test ผ่าน (1 file, 2 tests); frontend suite ผ่านทั้งหมด (18 files, 39 tests); `git diff --check` ผ่าน
+## 2569-10-31 คำสั่ง: /implement-all เฟส 2 — T-06 เปิด API ข้อมูลผู้เข้าร่วม Staff และประเภทชั่วโมง
+
+- ไฟล์ที่แตะ: `backend/app/api/activity_data.py`, `backend/app/schemas/hours_submission.py`, `backend/app/main.py`, `backend/tests/test_AC_SBH_04_generate_excel_from_activity_data.py`, `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- ผลการทำงาน: เพิ่ม API แยกสำหรับข้อมูลผู้เข้าร่วม/Staff และประเภทชั่วโมง เฉพาะกิจกรรมจบแล้ว โดยต้องยืนยันตัวตนและมีบทบาทกรรมการสโมสร; ประเภทชั่วโมงยังคงผูกระดับกิจกรรมตาม ASM-05
+- ผล test: backend 90 passed; frontend 18 files / 39 tests passed; `git diff --check` ผ่าน
+- Commit: ไม่ทำตามคำยืนยันของทีมให้เก็บ changes ใน worktree โดยไม่ commit เนื่องจากมี changes จาก task ก่อนหน้าปะปนอยู่
+
+## 2569-10-31 คำสั่ง: /implement-all เฟส 2 — หยุดก่อน T-07
+
+- คำถามที่ AI ถามและคำตอบของทีม: ทีมให้ตรวจ worktree หาแหล่ง config/registry template จริง; หากไม่พบ ให้รายงานและหยุดโดยไม่สร้าง config, ID, version หรือกฎพร้อมใช้ขึ้นเอง
+- ผลตรวจ: `backend/app/config.py` มีเฉพาะ config ใบปะหน้า; `frontend/src/services/hoursSubmissionMock.js` มีค่า mock `HOURS-SCI` / `1.0` แต่ไม่มีสถานะพร้อมใช้และไม่ใช่ config registry ของระบบ; spec/plan ระบุรูปแบบ entity/API แต่ไม่ได้ระบุแหล่ง config หรือค่าจริง
+- การดำเนินการ: หยุดก่อน T-07 ตามคำสั่งทีม; ไม่สร้าง registry/config หรือเปลี่ยนสถานะ T-07
+- ผลตรวจของทีมต่อ T-06: ทีมยืนยันว่าทดลองแล้วผ่าน จึงเปลี่ยนสถานะ T-06 เป็น “เสร็จ” ก่อนกลับมาทำเฟสนี้ต่อ
+## 2569-10-31 คำสั่ง: /implement T-12 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+
+- คำตอบทีมก่อนเริ่ม: ใช้ `Activity.regular_submission_deadline` เป็น deadline ที่กองกิจระบุ; กรณีไม่มี deadline ยังแทนใน model ปัจจุบันไม่ได้
+- ไฟล์ที่แก้: `backend/app/services/deadline_check.py`, `backend/app/api/hours_submission.py`, `backend/app/schemas/hours_submission.py`, `backend/tests/test_AC_SBH_05_show_exception_link_when_deadline_exceeded.py`, `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- ผลการทำงาน: service ตรวจ deadline ที่มีอยู่และไม่สร้าง deadline ใหม่; endpoint รายละเอียดกิจกรรมจบแล้วส่ง `deadline_exceeded` ให้ client โดยวันที่ตรงกับกำหนดยังไม่ถือว่าเกิน; service คืน false เมื่อรับค่าไม่มี deadline
+- ผล test: test AC-SBH-05 เฉพาะ 2 passed; backend suite 92 passed, 7 warnings; `git diff --check` ผ่าน
+- ข้อจำกัดที่ต้องให้ทีมรับทราบ: `Activity.regular_submission_deadline` เป็น NOT NULL จึงไม่มีทางทดสอบกรณีไม่มี deadline จากข้อมูลที่ persist ได้โดยไม่แก้ model นอก scope ของ T-12; หากต้องรองรับกรณีนั้นจริง ต้องกำหนดการเปลี่ยน schema ใน task/spec แยก
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: การใช้ `regular_submission_deadline` สำหรับ FR-SBH-07; ทีมยืนยันแหล่งนี้ก่อนลงมือ
+
+## 2569-10-31 คำสั่ง: /implement T-13 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+
+- คำตอบทีมก่อนเริ่ม: อนุญาตให้แสดงข้อความทางเลือก UC-11 โดยไม่กำหนดปลายทาง URL เพื่อไม่สร้างลิงก์ที่นำทางผิด และสร้าง `frontend/src/__tests__/hours-submission.test.jsx` ตาม tasks.md
+- ไฟล์ที่แก้: `frontend/src/api/client.js`, `frontend/src/pages/HoursSubmission.jsx`, `frontend/src/__tests__/hours-submission.test.jsx`, `specs/002-ส่งข้อมูลชั่วโมง/tasks.md`
+- ผลการทำงาน: client map `deadline_exceeded` จาก API; หน้าเสนอข้อความไป UC-11 เฉพาะเมื่อ flag เป็น true โดยไม่เริ่ม workflow ขอผ่อนผันและไม่สร้างปลายทางลิงก์
+- ผล test: `hours-submission.test.jsx` ผ่าน 2 tests; frontend suite ผ่าน 19 files / 41 tests; `git diff --check` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี route เชื่อม UC-11 อยู่ใน scope ของ T-13 จึงถามทีมและใช้ข้อความทางเลือกตามที่ทีมยืนยัน ไม่กำหนด path เอง
