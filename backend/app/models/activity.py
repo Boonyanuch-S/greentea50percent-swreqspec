@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
 
 
 class Activity(Base):
-    """โมเดลกิจกรรมสำหรับ FR-LATE-01, FR-SBH-01, FR-SBH-02 และ ASM-05."""
+    """โมเดลกิจกรรมสำหรับ FR-LATE-01, FR-SBH-01, FR-SBH-02, FR-HRS-03, ASM-01 และ ASM-05."""
 
     __tablename__ = "activities"
 
@@ -23,3 +23,4 @@ class Activity(Base):
     status: Mapped[str | None] = mapped_column(String, nullable=True)
     project_number_status: Mapped[str | None] = mapped_column(String, nullable=True)
     category_template_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    academic_year: Mapped[str | None] = mapped_column(String, nullable=True)

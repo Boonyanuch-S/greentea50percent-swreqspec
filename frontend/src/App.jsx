@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from './hooks/useAuth.js'
 import AppLayout from './layouts/AppLayout.jsx'
+import ActivityHoursQueue from './pages/ActivityHoursQueue.jsx'
+import ActivityHoursReview from './pages/ActivityHoursReview.jsx'
 import ChecklistManagementPage from './pages/ChecklistManagementPage.jsx'
 import DocumentReviewPage from './pages/DocumentReviewPage.jsx'
 import HoursSubmission from './pages/HoursSubmission.jsx'
@@ -17,6 +19,8 @@ import { checklistApi, createProjectApprovalClient } from './api/client.js'
 import { projectDocumentMock } from './services/projectDocumentMock.js'
 import { reviewQueueMock } from './services/reviewQueue.js'
 import { hoursSubmissionMock } from './services/hoursSubmissionMock.js'
+import { activityHoursMock } from './services/activityHoursMock.js'
+import { projectOfficeReviewMock } from './services/projectOfficeReviewMock.js'
 import { AuthProvider } from './store/AuthContext.jsx'
 import { confirmAction, showToast, showWarning } from './utils/alerts.js'
 
@@ -57,11 +61,21 @@ function RoleHome({
   reviewClient,
   approvalClient,
   hoursSubmissionClient,
+  activityHoursClient,
 }) {
   const [facultyView, setFacultyView] = useState('queue')
   const [clubView, setClubView] = useState('projects')
+  const [studentAffairsView, setStudentAffairsView] = useState('projects')
+  const [selectedActivityHoursDocument, setSelectedActivityHoursDocument] = useState(null)
   const [selectedSubmissionId, setSelectedSubmissionId] = useState(null)
   const sessionApprovalClient = useMemo(() => createProjectApprovalClient(session), [session])
+  const isProjectQueueMockup =
+    new URLSearchParams(window.location.search).get('mockup') === 'project-queue'
+  // ใช้คิวจำลองชั่วคราวจน backend ตั้งค่าแหล่งข้อมูลจริงตาม FR-HRS-01; ยัง inject API client ได้
+  const sessionActivityHoursClient = useMemo(
+    () => activityHoursClient ?? activityHoursMock,
+    [activityHoursClient],
+  )
   // ใช้ข้อมูลจำลองชั่วคราวจนกว่าจะเชื่อมแหล่งข้อมูลกิจกรรมจริงตาม FR-SBH-01
   const sessionHoursSubmissionClient = hoursSubmissionClient ?? hoursSubmissionMock
 
@@ -121,13 +135,73 @@ function RoleHome({
   }
   if (role === 'student_affairs_officer') {
     return (
-      <ProjectApprovalHome
-        client={approvalClient ?? sessionApprovalClient}
-        DetailPage={ProjectOfficeReviewPanel}
-        eyebrow="Student Affairs Review / Project Documents"
-        heading="ตรวจเอกสารโครงการ"
-        description="เอกสารที่อาจารย์ส่งใบปะหน้าแล้วและรอการตรวจ"
-      />
+      <>
+        <div className="mx-auto mb-6 max-w-5xl">
+          <nav
+            className="inline-flex max-w-full rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+            aria-label="เมนูเจ้าหน้าที่กองกิจ"
+          >
+            <button
+              type="button"
+              aria-pressed={studentAffairsView === 'projects'}
+              onClick={() => setStudentAffairsView('projects')}
+              className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${
+                studentAffairsView === 'projects'
+                  ? 'bg-teal-700 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              ตรวจเอกสารโครงการ
+            </button>
+            <button
+              type="button"
+              aria-pressed={studentAffairsView === 'activity-hours'}
+              onClick={() => setStudentAffairsView('activity-hours')}
+              className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 ${
+                studentAffairsView === 'activity-hours'
+                  ? 'bg-teal-700 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              ตรวจสอบชั่วโมงกิจกรรม
+            </button>
+          </nav>
+        </div>
+        {studentAffairsView === 'activity-hours' ? (
+          selectedActivityHoursDocument === null ? (
+            <ActivityHoursQueue
+              client={sessionActivityHoursClient}
+              onSelectDocument={setSelectedActivityHoursDocument}
+            />
+          ) : (
+            <section className="mx-auto max-w-6xl">
+              <ActivityHoursReview
+                client={sessionActivityHoursClient}
+                documentId={selectedActivityHoursDocument.documentId}
+                documentDetails={selectedActivityHoursDocument}
+              />
+              <button
+                type="button"
+                onClick={() => setSelectedActivityHoursDocument(null)}
+                className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
+              >
+                กลับไปคิวเอกสาร
+              </button>
+            </section>
+          )
+        ) : (
+          <ProjectApprovalHome
+            client={
+              approvalClient ??
+              (isProjectQueueMockup ? projectOfficeReviewMock : sessionApprovalClient)
+            }
+            DetailPage={ProjectOfficeReviewPanel}
+            eyebrow="Student Affairs Review / Project Documents"
+            heading="ตรวจเอกสารโครงการ"
+            description="เอกสารที่อาจารย์ส่งใบปะหน้าแล้วและรอการตรวจ"
+          />
+        )}
+      </>
     )
   }
   if (role === 'faculty_officer') {
@@ -211,6 +285,7 @@ function AppRoutes({
   reviewClient,
   approvalClient,
   hoursSubmissionClient,
+  activityHoursClient,
 }) {
   const { session, tokenExpired, signIn, signOut, dismissExpiredNotice } = useAuth()
   const [view, setView] = useState('home') // 'home' | 'profile' (หน้าโปรไฟล์: นอก spec ทีมสั่งเพิ่ม)
@@ -261,6 +336,7 @@ function AppRoutes({
           reviewClient={reviewClient}
           approvalClient={approvalClient}
           hoursSubmissionClient={hoursSubmissionClient}
+          activityHoursClient={activityHoursClient}
         />
       )}
     </AppLayout>
@@ -273,6 +349,7 @@ export default function App({
   reviewClient = reviewQueueMock,
   approvalClient,
   hoursSubmissionClient,
+  activityHoursClient,
 }) {
   return (
     <AuthProvider>
@@ -282,6 +359,7 @@ export default function App({
         reviewClient={reviewClient}
         approvalClient={approvalClient}
         hoursSubmissionClient={hoursSubmissionClient}
+        activityHoursClient={activityHoursClient}
       />
     </AuthProvider>
   )

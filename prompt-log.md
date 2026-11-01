@@ -1123,3 +1123,470 @@
 - ผลการทำงาน: client map `deadline_exceeded` จาก API; หน้าเสนอข้อความไป UC-11 เฉพาะเมื่อ flag เป็น true โดยไม่เริ่ม workflow ขอผ่อนผันและไม่สร้างปลายทางลิงก์
 - ผล test: `hours-submission.test.jsx` ผ่าน 2 tests; frontend suite ผ่าน 19 files / 41 tests; `git diff --check` ผ่าน
 - สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี route เชื่อม UC-11 อยู่ใน scope ของ T-13 จึงถามทีมและใช้ข้อความทางเลือกตามที่ทีมยืนยัน ไม่กำหนด path เอง
+
+## 2569-11-01 คำสั่ง: /clarify — "เจ้าหน้าที่กองกิจ login แล้วให้ไปที่หน้าของ007ได้เลย"
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ต้นทาง: `specs/009-เข้าสู่ระบบ/spec.md` (Draft v2)
+- คำถามที่ AI ถาม:
+  1. ข้อกำหนดเดิมระบุเจ้าหน้าที่กองกิจไปหน้า UC-05 แต่คำสั่งใหม่ระบุ UC-07; ต้องการเปลี่ยนปลายทางหลัง login เป็น UC-07 หรือไม่?
+- คำตอบของทีม:
+  1. UC-07
+- สิ่งที่แก้ใน spec.md:
+  - อัปเดตคำตอบ Q-01 ให้หน้าหลักเจ้าหน้าที่กองกิจเป็น UC-07 และบันทึกใน CHANGELOG โดยคง ID เดิม
+  - คง Status เป็น Draft v2 และอัปเดตวันที่เป็น 2569-11-01
+
+## 2569-11-01 คำสั่ง: /implement T-01 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md
+
+- คำตอบทีมก่อนเริ่ม: ใช้ `backend/app/models/activity_hours.py` ตามโครงสร้างจริงของแอป; ไม่เพิ่มไฟล์ test; อนุญาตกำหนดชนิดข้อมูลและ nullability ตามความหมายของฟิลด์และรูปแบบ SQLAlchemy ในระบบ
+- ไฟล์ที่สร้าง: `backend/app/models/activity_hours.py`
+- ผลการทดสอบ: ตรวจ import, รายชื่อฟิลด์, foreign keys และการใช้ `Base.metadata` ร่วมกันด้วย Python assertion ผ่าน (`T-01 model metadata validation passed`)
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: path ของโมเดล, การเพิ่มไฟล์ test และการกำหนดชนิดข้อมูล/nullability; ทีมยืนยันแนวทางก่อนเริ่ม
+- สถานะ T-01: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 คำสั่ง: /implement T-02 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md
+
+- ไฟล์ที่สร้าง: `backend/auth/activity_hours_guard.py`, `backend/tests/test_AC_HRS_08_unauthenticated_user_is_denied.py`
+- ไฟล์ที่แก้: `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`
+- ผลการทดสอบ: `python -m pytest -q backend/tests/test_AC_HRS_08_unauthenticated_user_is_denied.py` ผ่าน `1 passed` (มี StarletteDeprecationWarning จาก TestClient/httpx)
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; ใช้ authentication context และ Token registry ที่ Login ใช้อยู่แล้วตาม CON-NFR-21 และ NFR-SEC-01
+- สถานะ T-02: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 คำสั่ง: /implement T-05 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md
+
+- คำตอบทีมก่อนเริ่ม: ใช้ `backend/app/api/activity_hours.py`; อนุญาตเพิ่ม import/include router ใน `backend/app/main.py`; ใช้ Authorization Token ตาม Login; ปรับ path ของไฟล์ API และเพิ่ม `backend/app/main.py` ในช่องไฟล์ที่แตะของ T-05
+- ไฟล์ที่สร้าง: `backend/app/api/activity_hours.py`, `backend/tests/test_AC_HRS_03_pending_documents_sorted_by_submitted_at.py`
+- ไฟล์ที่แก้: `backend/app/main.py`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`
+- ผลการทดสอบ: `python -m pytest -q backend/tests/test_AC_HRS_03_pending_documents_sorted_by_submitted_at.py` ผ่าน `1 passed`; `git diff --check` ผ่าน (มี StarletteDeprecationWarning จาก TestClient/httpx)
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: path ของ API ในโครงสร้างจริง, การลงทะเบียน router, และ contract การยืนยัน userSession; ทีมยืนยันก่อนเริ่ม
+- สถานะ T-05: เสร็จ รอทีมตรวจ
+
+## 2569-10-31 คำสั่ง: "ทำ Q-02 ให้หน่อย" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม:
+  1. NFR ข้อ 20 มีอยู่แล้วในเอกสาร NFR หลักหรือไม่ หรือให้รับรอง audit log เป็นข้อกำหนดใหม่/ข้อกำหนดร่วม?
+- คำตอบของทีม:
+  1. ยังไม่มีผู้ยืนยัน ไม่พบเอกสาร NFR หลักใน repository; รอทีมดูแล NFR ตอบ และให้ตัดสินร่วมกับ Q-04 ของ UC-11 ที่เป็นประเด็นเดียวกัน
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - บันทึกคำตอบทีมไว้ใต้ Q-02 โดยคงคำถามเปิดไว้ ไม่สรุปหรือเพิ่มข้อกำหนดแทนทีม
+  - อัปเดตวันที่เป็น 2569-10-31 และคงสถานะ Draft v2
+
+## 2569-10-31 คำสั่ง: "ตอบ Q-02 ให้เลย" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม:
+  1. ให้ถือ audit log เป็นข้อกำหนดเฉพาะ UC-07, ข้อกำหนดร่วม, NFR ที่มีอยู่แล้ว (พร้อมหลักฐาน) หรือคงคำถามเปิด?
+- คำตอบของทีม:
+  1. ยืนยันให้ audit log เป็นข้อกำหนดของ UC-07 แต่ยังไม่อ้างว่าเป็น NFR หลัก
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - ปิด Q-02 โดยระบุ DOM-PDPA-01 และ NFR-SEC-02 เป็นข้อกำหนด audit log เฉพาะ UC-07
+  - ลบการอ้างว่าเป็น NFR ข้อ 20 ที่ยังไม่ได้รับการยืนยัน และปรับ traceability ให้ตรง
+  - ระบุว่า Q-04 ของ UC-11 ยังเปิดอยู่และต้องได้รับคำตอบแยกต่างหาก
+  - คง Status เป็น Draft v2 และ Updated เป็น 2569-10-31
+- อัปเดต `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`: เปลี่ยน T-03 จาก "รอ Q-02" เป็น "พร้อมทำ"
+
+## 2569-10-31 คำสั่ง: /implement T-03 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md
+
+- คำถามที่ AI ถามและคำตอบของทีม: task ระบุ `backend/models` และ `backend/audit` แต่โครงสร้างจริงอยู่ใต้ `backend/app/`; ทีมยืนยันใช้ `backend/app/models/student_access_log.py` และ `backend/app/audit/student_access_log.py`
+- ไฟล์ที่สร้าง: `backend/app/models/student_access_log.py`, `backend/app/audit/student_access_log.py`, `backend/tests/test_AC_HRS_09_student_access_is_logged.py`
+- ไฟล์ที่แก้: `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md` (เปลี่ยนสถานะ T-03 เป็น "เสร็จ รอทีมตรวจ") และ `prompt-log.md`
+- ผลการทำงาน: เพิ่มโมเดล StudentAccessLog ที่เก็บ accessor_id, accessed_at และ access_item พร้อม helper สำหรับบันทึก log ตาม DOM-PDPA-01 และ NFR-SEC-02
+- ผล test: `python -m pytest -q backend/tests/test_AC_HRS_09_student_access_is_logged.py` — 1 passed; มี StarletteDeprecationWarning จาก TestClient dependency
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ตำแหน่งไฟล์ model/audit ให้สอดคล้องกับโครงสร้าง backend ที่มีอยู่; ไม่ได้ติดตั้ง helper เข้ากับ endpoint เพราะเป็นขอบเขตของ T-17
+
+## 2569-10-31 คำสั่ง: "ตอบ Q-06 ให้เลย" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม: ควรปรับ Goal ให้สอดคล้องกับ FR-HRS-06 ที่คืนเอกสารทั้งฉบับเมื่อพบรายการไม่ตรงเกณฑ์ หรือควรคง Goal และเปลี่ยนพฤติกรรม FR-HRS-06?
+- คำตอบของทีม: ปรับ Goal ให้ชัดว่าระบบตรวจและคืนเอกสารที่ผิดก่อนบันทึก เพื่อหลีกเลี่ยงการแก้ไขซ้ำหลังบันทึก โดยคง FR-HRS-06
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - ปรับ Goal ให้สื่อว่าเอกสารที่มีรายการไม่ตรงเกณฑ์จะถูกตรวจและคืนก่อนบันทึกชั่วโมง และการลดการแก้ไขซ้ำหมายถึงหลังบันทึกสำเร็จ
+  - ปิด Q-06 โดยบันทึกการตัดสินใจของทีม; คง FR-HRS-06 และ AC-HRS-02 เดิม
+  - คง Status เป็น Draft v2 และ Updated เป็น 2569-10-31
+
+## 2569-10-31 คำสั่ง: "ตอบ Q ให้เลย" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม:
+  1. Q-01: ข้อความ/เงื่อนไขที่ถูกต้องของ Exception Flow ขั้น 6b หรือยืนยันว่า flow นี้ไม่อยู่ในขอบเขต UC-07
+  2. Q-03: เกณฑ์เวลาการบันทึก REG รวมหน่วยและช่วงเริ่ม-สิ้นสุดการวัด
+  3. Q-05: use case/ระบบ/ทีมที่ดูแลแหล่งเกณฑ์ประเภทชั่วโมง
+- คำตอบของทีม:
+  1. Q-01: ยังไม่ทราบ
+  2. Q-03: ยังไม่ทราบ
+  3. Q-05: ยังไม่ทราบ
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - คง Q-01, Q-03 และ Q-05 เป็น Open Questions โดยบันทึกว่ายังไม่มีคำตอบ ณ 2569-10-31
+  - ระบุผู้ที่ควรถาม: ผู้เขียน UC-07 สำหรับ Q-01, ทีมเจ้าของ NFR-PERF/ผู้กำหนด SLA สำหรับ Q-03 และผู้ดูแลเกณฑ์หรือผู้เขียน UC ที่เกี่ยวข้องสำหรับ Q-05
+  - ไม่กำหนดพฤติกรรม Exception Flow, ค่าเวลา หรือเจ้าของเกณฑ์แทนทีม
+
+## 2569-10-31 คำสั่ง: /implement T-04 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md
+
+- คำถามที่ AI ถามและคำตอบของทีม:
+  1. Schema ของ Excel ยังไม่ยืนยัน; ทีมให้ reader รับชื่อคอลัมน์ผ่าน config และบันทึกสมมติฐานว่ารอเจ้าของไฟล์ยืนยัน
+  2. Library อ่าน Excel: ใช้ dependency ที่มีใน repository หากไม่มีตัวอ่าน `.xlsx` ให้เพิ่ม `openpyxl` และบันทึกใน tasks
+  3. ขออนุญาตเพิ่ม `backend/requirements.txt` และ `tasks.md` ในขอบเขต; ทีมอนุญาตหลังจากปฏิเสธในรอบก่อนหน้า
+- ไฟล์ที่สร้าง: `backend/importers/activity_hours_excel.py`, `backend/tests/test_activity_hours_excel_reader.py`
+- ไฟล์ที่แก้: `backend/requirements.txt` (เพิ่ม `openpyxl>=3.1`), `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md` (บันทึกขอบเขตไฟล์, สมมติฐานเรื่อง schema, dependency และสถานะ T-04), และ `prompt-log.md`
+- ผลการทำงาน: reader อ่านผู้เข้าร่วมและประเภทชั่วโมงเป็น `ActivityParticipantHour`; ชื่อ worksheet, แถวหัวตาราง และหัวคอลัมน์รับจาก config โดยไม่ hardcode schema และรายงานข้อผิดพลาดเมื่อหัวตาราง/ข้อมูลที่ต้องใช้ไม่ถูกต้อง
+- ผล test: `python -m pytest -q backend/tests/test_activity_hours_excel_reader.py` — 5 passed; มี StarletteDeprecationWarning จาก TestClient dependency
+- Dependency: ติดตั้ง `openpyxl` 3.1.5 หลังเพิ่มใน `backend/requirements.txt`
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: รูปแบบ workbook จริงยังไม่ยืนยัน; ไม่ได้กำหนดชื่อ sheet หรือหัวคอลัมน์ตายตัว และบันทึกให้ยืนยันกับเจ้าของไฟล์ก่อนเชื่อมต่อ T-07
+
+## 2569-10-31 คำสั่ง: /implement T-07 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md
+
+- คำถามที่ AI ถามและคำตอบของทีม:
+  1. ปรับ path จาก `backend/api` และ `backend/services` เป็น `backend/app/api` และ `backend/app/services`, อนุญาตแก้ `main.py` เฉพาะหากยังไม่ได้ลงทะเบียน router, และแก้ T-07 ใน tasks; ทีมอนุญาต โดยตรวจพบว่า `main.py` ลงทะเบียน router อยู่แล้ว จึงไม่แก้
+  2. ที่เก็บไฟล์: ตรวจของเดิมก่อน; ไม่พบ file storage สำหรับ Excel จึงใช้ `source_file_reference` เป็น relative reference ภายใน upload directory ที่ระบบตั้งค่า และฉีด resolver เป็น dependency พร้อมตรวจ path; บันทึกสมมติฐานรอยืนยันเจ้าของระบบไฟล์
+  3. Schema: ใช้ `ActivityHoursExcelConfig` ผ่าน dependency พร้อมค่า placeholder ชัดเจนจนกว่าเจ้าของไฟล์จะยืนยัน; ไม่เดาคอลัมน์เมื่อไม่ตรง config
+- ไฟล์ที่สร้าง: `backend/app/services/activity_hours_reader.py`, `backend/tests/test_AC_HRS_04_display_all_excel_participants_and_hour_types.py`
+- ไฟล์ที่แก้: `backend/app/api/activity_hours.py`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md` (เฉพาะ path, assumptions และสถานะ T-07), `prompt-log.md`
+- ผลการทำงาน: เพิ่ม endpoint แสดงผู้เข้าร่วมและประเภทชั่วโมงครบตาม FR-HRS-02/IF-XLS-01; route ใช้ Login guard, เปิดไฟล์ผ่าน resolver ที่จำกัดอยู่ใน upload directory และส่ง error 404/422/503 ตามปัญหาไฟล์, schema หรือการตั้งค่าระบบ
+- ผล test: `python -m pytest -q backend/tests/test_AC_HRS_03_pending_documents_sorted_by_submitted_at.py backend/tests/test_AC_HRS_04_display_all_excel_participants_and_hour_types.py backend/tests/test_activity_hours_excel_reader.py` — 8 passed; มี StarletteDeprecationWarning จาก TestClient dependency; `git diff --check` ผ่าน
+- สิ่งที่ทีมควรยืนยันก่อนใช้งานจริง: ชื่อ worksheet, แถว header, ชื่อหัวคอลัมน์, และการตั้ง upload directory/ความหมาย `source_file_reference` ให้ตรงระบบไฟล์จริง
+- หมายเหตุ: `backend/app/main.py` มีการเปลี่ยนแปลงจาก T-05 อยู่ก่อนแล้วและมี `activity_hours_router` ลงทะเบียนครบ จึงไม่แก้ไฟล์นี้ซ้ำใน T-07
+
+## 2569-10-31 คำสั่ง: "ตอบ Q-05 ให้หน่อย" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม: ใคร/ระบบหรือ UC ใดเป็นเจ้าของเกณฑ์ประเภทชั่วโมง และเกณฑ์ดึงจากแหล่งใด
+- คำตอบของทีม: ยังไม่ทราบ
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - คง Q-05 เป็น Open Question และบันทึกคำตอบว่า "ยังไม่ทราบ"
+  - ระบุให้สอบถามผู้ดูแลเกณฑ์ประเภทชั่วโมงหรือผู้เขียน UC ที่เกี่ยวข้อง เพื่อยืนยันเจ้าของและแหล่งข้อมูลก่อนเขียน integration
+  - คง Status เป็น Draft v2; ไม่ปิด Q-05 และไม่เปลี่ยน FR
+
+## 2569-10-31 คำสั่ง: /implement T-16 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถามและคำตอบของทีม:
+  1. path ใน tasks.md ไม่ตรงโครงสร้างจริง: ทีมอนุญาตอัปเดต T-16 เป็น `backend/app/integrations/uc04_summary_client.py` และ `backend/app/api/activity_hours.py` พร้อม test path เดิม
+  2. plan.md ไม่ระบุ protocol ของ UC-04: ทีมยืนยันให้ทำ client แบบจำลอง โดยไม่กำหนด endpoint/protocol จริง
+- ไฟล์ที่สร้าง: `backend/app/integrations/uc04_summary_client.py`, `backend/tests/test_AC_HRS_07_open_individual_summary_and_return.py`
+- ไฟล์ที่แก้: `backend/app/api/activity_hours.py`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md` (แก้ path ตามโครงสร้างจริง บันทึกขอบเขต client จำลอง และสถานะ T-16), `prompt-log.md`
+- ผลการทำงาน: เพิ่ม endpoint ที่ต้อง Login เพื่อส่ง document/participant ID ไปยัง provider จำลอง UC-04 และคืน payload โดยไม่กำหนด schema หรือ protocol จริง; หากไม่ได้ตั้ง provider ระบบตอบ 503; ผู้เรียกได้รับผลกลับเพื่อดำเนิน flow ตรวจสอบต่อ
+- ผล test: `python -m pytest -q backend/tests/test_AC_HRS_07_open_individual_summary_and_return.py backend/tests/test_AC_HRS_04_display_all_excel_participants_and_hour_types.py backend/tests/test_AC_HRS_03_pending_documents_sorted_by_submitted_at.py` — 4 passed; มี StarletteDeprecationWarning จาก TestClient dependency; `git diff --check` ผ่าน
+- สิ่งที่ทีมควรตรวจด้วยตาก่อน commit: path ที่แก้ใน T-16, การตั้ง `app.state.uc04_summary_provider` ในระบบที่จะเรียกจริง, และการกลับสู่หน้าตรวจสอบเมื่อผู้เรียก API รับผล
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: path จริงของไฟล์ backend และว่าจะทำ integration จริงหรือจำลอง; คง payload เป็น opaque object และไม่กำหนด contract ของ UC-04
+
+## 2569-10-31 คำสั่ง: "ตอบ Q" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม:
+  1. Q-01: ข้อความ/เงื่อนไข Exception Flow ขั้น 6b ที่ถูกต้อง หรือยืนยันว่าไม่รวมใน UC-07
+  2. Q-03: เกณฑ์เวลาการบันทึก REG และจุดเริ่ม-สิ้นสุดการวัด
+  3. Q-05: use case/ระบบ/ทีมเจ้าของและแหล่งข้อมูลเกณฑ์ประเภทชั่วโมง
+- คำตอบของทีม:
+  1. Q-01: ยังไม่ทราบ
+  2. Q-03: ยังไม่ทราบ
+  3. Q-05: ยังไม่ทราบ
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - ยืนยันสถานะคำตอบ "ยังไม่ทราบ" สำหรับ Q-01, Q-03 และ Q-05 และคงทั้งสามข้อเป็น Open Questions
+  - คงผู้ที่ต้องสอบถามและไม่กำหนด flow, ค่าเวลา, owner หรือแหล่งข้อมูลแทนทีม
+
+## 2569-10-31 คำสั่ง: "ตอบ Q-05" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม: ใคร/ระบบหรือ use case ใดดูแลเกณฑ์รายประเภทชั่วโมง และ UC-07 ต้องอ่านเกณฑ์จากแหล่งใด
+- คำตอบของทีม: ยังไม่ทราบ
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - ไม่มีการเปลี่ยนเนื้อหา เนื่องจาก Q-05 ระบุคำตอบ "ยังไม่ทราบ" และผู้ที่ควรถามไว้แล้ว; คง Q-05 เป็น Open Question
+
+## 2569-10-31 คำสั่ง: "ย้อน Q กลับไปก่อนแก้" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำตอบ/ขอบเขตที่ทีมยืนยัน: คืนสถานะ Q และ task statuses ตามรายการ Q-01, Q-02, Q-03, Q-05 และ Q-06 ที่ส่งมา รวม task ที่เคยระบุว่าเสร็จให้กลับเป็นรอ Q; ไม่ย้อนหรือลบโค้ดที่ทำแล้ว
+- สิ่งที่แก้:
+  - คืน Q-01, Q-02, Q-03, Q-05 และ Q-06 ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md` เป็น Open Questions ตามข้อความก่อนปิด Q-02/Q-06
+  - คืน Goal เดิมที่ยังขัดกับ FR-HRS-06 เพื่อให้ Q-06 กลับมาเปิดตามเดิม
+  - คืน task statuses ตามรายการรอ: T-03 รอ Q-02, T-04 และ T-07 รอ Q-06; task อื่นที่อยู่ในรายการยังคงสถานะรอ Q ตามเดิม
+  - ไม่ย้อน implementation หรือผล test ของ task ที่ทำไปแล้ว
+
+## 2569-10-31 คำสั่ง: ตรวจสอบภาพต้นฉบับ Exception Flow ของ UC-07
+
+- เครื่องมือ: Copilot ใน VS Code
+- คำถามที่ AI ถาม: ภาพยืนยันข้อความ 6b ว่าเมื่อยื่นเรื่องล่าช้ากว่ากำหนดให้เรียก UC-11 ขอบันทึกชั่วโมงย้อนหลัง แต่ไม่มี FR/AC รองรับและ UC-11 อยู่ใน Out of scope; ควรคง Q-01 เปิดไว้จนทีมกำหนดการตามรอยหรือไม่
+- คำตอบของทีม: คง Q-01 เปิดไว้
+- สิ่งที่แก้ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md`:
+  - ปรับ Q-01 ให้บันทึกข้อความที่อ่านได้จากภาพต้นฉบับ
+  - ระบุช่องว่างเรื่อง FR/AC และขอบเขตการเรียก UC-11; รอทีมเจ้าของกระบวนการ/ผู้เขียน spec โดยไม่สร้าง ID ใหม่
+
+## 2569-10-31 คำสั่ง: "คิดคำตอบ Q เองเลย" (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม)
+
+- เครื่องมือ: Copilot ใน VS Code
+- ข้อเสนอที่ AI ให้ทีมยืนยัน:
+  - Q-01: บันทึกข้อความจากภาพว่าเมื่อยื่นล่าช้าให้เรียก UC-11; คง UC-11 นอก scope ของ UC-07 และไม่เพิ่ม FR/AC
+  - Q-02: audit log เป็นข้อกำหนดเฉพาะ UC-07 ไม่อ้างเป็น NFR หลัก ตามคำยืนยันเดิมของทีม
+  - Q-03: คงเปิดเพราะไม่มีตัวเลข SLA
+  - Q-05: คงเปิดเพราะยังไม่ทราบ owner/แหล่งเกณฑ์
+  - Q-06: คง FR-HRS-06 และปรับ Goal ให้คืนเอกสารก่อนบันทึก โดยลดการแก้ซ้ำหลังบันทึกสำเร็จ ตามคำยืนยันเดิมของทีม
+- คำตอบของทีม: ยืนยันให้ใช้ข้อเสนอ — ปิด Q-01, Q-02, Q-06; คง Q-03 และ Q-05 เปิด
+- สิ่งที่แก้:
+  - ปรับ `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/spec.md` ให้ปิด Q-01/Q-02/Q-06 และคง Q-03/Q-05 เปิด โดยไม่สร้าง FR/AC ใหม่หรือกำหนดค่า SLA/owner เอง
+  - ปรับ task statuses ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md` ให้ตรงกับ Q ที่ปิด/เปิดและ dependencies ปัจจุบัน
+  - ปรับ `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/plan.md` ให้ตรงกับ Q ที่ปิด/เปิด
+
+## 2569-10-31 คำสั่ง: "ทำให้รับ /implement-all ได้" (UC-07)
+
+- เครื่องมือ: Copilot ใน VS Code
+- สิ่งที่แก้:
+  - จัด `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md` เป็นเฟสแนวตั้งตาม AC, เพิ่มจุดตรวจ Given/When/Then และคง Q-03/Q-05 ไว้ในเฟสรอคำตอบ
+  - แยก T-08 ให้รองรับเฉพาะ AC-HRS-04 ซึ่งไม่ต้องใช้เกณฑ์จาก Q-05; คงการแสดงผลตรวจ/รายการผิดไว้ใน T-11 ที่รอ Q-05
+  - เพิ่มคำสั่งเปิดระบบและ test ที่ตรวจสอบกับโครงสร้าง repository ลงใน `plan.md`
+  - แก้คำสั่ง pytest ใน `.claude/commands/implement-all.md` ให้ตรงกับ README, ให้ข้าม task ที่เสร็จแล้วในเฟส และห้าม stage งานทั้งหมดด้วย `git add -A`
+- สถานะ task เดิมและคำถามที่ยังเปิด: ไม่เปลี่ยน; T-16 ยังรอทีมตรวจ และ Q-03/Q-05 ยังเปิด
+- ผลตรวจเอกสาร: `git diff --check` ผ่าน; ยังไม่ได้รัน test suite เพราะรอบนี้แก้เฉพาะเอกสารและ workflow
+
+## 2569-10-31 คำสั่ง: /implement-all specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md เฟส 2
+
+- Task: T-08 สร้างหน้าจอแสดงรายชื่อและประเภทชั่วโมง
+- ไฟล์ที่สร้าง: `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/__tests__/activity-hours-review.test.jsx`
+- ไฟล์ที่แก้: `frontend/src/services/activityHoursMock.js`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`, `prompt-log.md`
+- ผลการทำงาน: สร้างหน้าจออ่านรายชื่อและประเภทชั่วโมงจาก mock client ตาม AC-HRS-04; แสดงข้อผิดพลาดเมื่อโหลดไม่สำเร็จ; ไม่ทำ validation หรือกำหนดเกณฑ์แทน Q-05
+- ผล test: `PYTHONPATH=. pytest -q backend/tests` — 103 passed, 7 warnings; `cd frontend && npm test` — 20 files, 43 tests passed; `git diff --check` ผ่าน
+- สิ่งที่เกือบต้องเดาแต่ไม่กำหนด: SLA/timeout ของ Q-03 และ owner/แหล่งเกณฑ์ของ Q-05 ยังคงเปิด เพราะไม่จำเป็นต่อ T-08
+- สถานะ: T-08 เสร็จ รอทีมตรวจ; บันทึก commit ตาม workflow ของ /implement-all
+
+## 2569-10-31 ข้อสังเกตจุดตรวจหลัง T-08
+
+- หน้าจอ `ActivityHoursReview` เป็น component ที่ทดสอบผ่าน React Testing Library แต่ยังไม่ได้ mount เข้ากับ App/เมนู เพราะไฟล์เชื่อมเส้นทางไม่ได้อยู่ในรายการไฟล์ที่ T-08 อนุญาตให้แก้
+- อัปเดตจุดตรวจเฟส 2 ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md` ให้ระบุข้อจำกัดนี้ตรง ๆ; การลองผ่าน browser ต้องมีการกำหนด task/ไฟล์เชื่อมหน้าเพิ่มเติมก่อน
+- Q-03 และ Q-05 ยังคงเปิด; ไม่มีการกำหนด SLA หรือ owner/แหล่งเกณฑ์แทนทีม
+
+## 2569-10-31 คำสั่ง: "เชื่อมให้ดูที" (T-08)
+
+- คำถามที่ AI ถาม: อนุญาตให้แก้ `frontend/src/App.jsx` และเพิ่ม integration test นอกเหนือจากไฟล์เดิมของ T-08 หรือไม่
+- คำตอบของทีม: อนุญาตให้เพิ่มทางเข้าในเมนูเจ้าหน้าที่กองกิจ โดยคงหน้าเดิมและไม่เพิ่ม validation/กฎเกณฑ์
+- ไฟล์ที่แก้เพิ่ม: `frontend/src/App.jsx`, `frontend/src/__tests__/activity-hours-review-navigation.test.jsx`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`, `prompt-log.md`
+- ผลการเชื่อม: หลัง login ในบทบาทเจ้าหน้าที่กองกิจ เลือก “ดูตัวอย่างชั่วโมงกิจกรรม (ข้อมูลจำลอง)” เพื่อเปิดหน้า T-08; เลือก “ตรวจเอกสารโครงการ” เพื่อกลับหน้าเดิม
+- ขอบเขต: ใช้ activity-hours mock ตาม T-08; ไม่เชื่อมข้อมูล Excel/REG จริง ไม่เปลี่ยนหน้าเริ่มต้น และไม่เปลี่ยนสถานะ Q-03/Q-05
+- ผลตรวจ: `cd frontend && npm test` — 21 files, 44 tests passed; `cd frontend && npm run build` ผ่าน; `git diff --check` ผ่าน
+- ทดลองผ่าน browser: login ด้วยบัญชีตัวอย่างเจ้าหน้าที่กองกิจแล้วเห็นรายชื่อ Participant One/Two และประเภท Volunteer/Education จาก mock; Vite ใช้พอร์ต 5174 เพราะ 5173 ถูกใช้งาน และ backend ที่พอร์ต 8000 ตอบ login สำเร็จ
+
+## 2569-10-31 คำสั่ง: "ทำให้ดูน่าใช้กว่านี้" (T-08)
+
+- ไฟล์ที่แก้: `frontend/src/pages/ActivityHoursReview.jsx`, `prompt-log.md`
+- ปรับการนำเสนอรายชื่อและประเภทชั่วโมงตาม FR-HRS-02/AC-HRS-04: เพิ่มหัวหน้าหน้าจอแบบ responsive, จำนวนผู้เข้าร่วมที่คำนวณจากข้อมูล, ป้ายระบุข้อมูลตัวอย่าง, แถวตาราง/ป้ายประเภทชั่วโมงให้อ่านง่าย และสถานะ loading/empty/error ที่มีรูปแบบสอดคล้องกัน
+- ไม่เพิ่มการตรวจเกณฑ์ อนุมัติ หรือการเชื่อมข้อมูลจริง; คงการแสดงข้อมูลจำลองและขอบเขตเดิม
+- ผลตรวจ: `cd frontend && npm test` — 21 files, 44 tests passed; `cd frontend && npm run build` ผ่าน; `git diff --check` ผ่าน
+- ระหว่างตรวจพบว่าตัวอักษรตกแต่งใน error state ถูกรวมใน `textContent` ที่ทดสอบอยู่ จึงแทนด้วย SVG ตกแต่งที่ไม่เปลี่ยนข้อความแจ้งข้อผิดพลาด; ทดสอบซ้ำผ่านทั้งหมด
+
+## 2569-10-31 คำสั่ง: "ทำ mockup ให้ดูดีมากกว่านี้"
+
+- ไฟล์ที่แก้: `frontend/src/pages/ActivityHoursReview.jsx`, `prompt-log.md`
+- ปรับหน้ารายชื่อให้กลมกลืนกับ AppLayout ด้วยหัวข้อพื้นขาว/แถบสี accent, ลำดับหัวข้อและตัวเลขผู้เข้าร่วม, การ์ดข้อมูลและตารางที่จัดระยะใหม่ พร้อม responsive layout
+- แก้ `<main>` ซ้อน `<main>` และ padding ซ้ำ โดยไม่เปลี่ยนข้อมูลจำลองหรือเพิ่ม interaction/กฎธุรกิจนอก FR-HRS-02/AC-HRS-04
+- ผลตรวจ: `cd frontend && npm test` — 21 files, 44 tests passed; `cd frontend && npm run build` ผ่าน; `git diff --check` ผ่าน
+
+## 2569-10-31 คำสั่ง: "ปรับให้ประเภทชั่วโมงเป็นภาษาไทย"
+
+- ไฟล์ที่แก้: `frontend/src/services/activityHoursMock.js`, `frontend/src/__tests__/activity-hours-review.test.jsx`, `prompt-log.md`
+- เปลี่ยนประเภทชั่วโมงในข้อมูลจำลองจาก `Volunteer`/`Education` เป็น `จิตอาสา`/`การศึกษา` และปรับ test ของ AC-HRS-04 ให้ตรวจข้อความภาษาไทย
+- เปลี่ยนเฉพาะข้อมูลจำลอง; ค่าที่มาจาก Excel/backend ยังคงแสดงตามข้อมูลต้นทาง ไม่แปลหรือเปลี่ยนกฎธุรกิจ
+
+## 2569-10-31 คำสั่ง: "เอาให้เหมือนเว็บจริง ไม่ต้องมีคำว่าตัวอย่าง"
+
+- ไฟล์ที่แก้: `frontend/src/App.jsx`, `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/__tests__/activity-hours-review-navigation.test.jsx`, `prompt-log.md`
+- เปลี่ยนชื่อเมนูเป็น "ตรวจสอบชั่วโมงกิจกรรม" และเอาป้าย "ข้อมูลตัวอย่าง" ออกจากหน้ารายชื่อ พร้อมเพิ่ม assertion ว่าหน้าจอไม่มีป้ายดังกล่าว
+- คงข้อมูลใน client จำลองไว้; ไม่เปลี่ยนเป็นข้อมูล backend จริงหรือสื่อว่ามีการเชื่อมระบบจริง
+
+## 2569-10-31 คำสั่ง: "ปุ่มเพื่อนใช้ไม่ได้"
+
+- คำตอบทีม: "เอาออกเลย"
+- ไฟล์ที่แก้: `frontend/src/pages/ActivityHoursReview.jsx`, `prompt-log.md`
+- นำไอคอนรูปคน+ ที่ดูเหมือนปุ่มแต่ไม่มี action ออก คงตัวเลขจำนวนผู้เข้าร่วมไว้ตามข้อมูลที่แสดงในหน้า
+
+## 2569-10-31 คำสั่ง: "ทำให้ตรงนี้คลิกดูรายละเอียดเพิ่มเติมได้"
+
+- คำตอบทีม: "ตอนนี้mockupขึ้นมาก่อน"
+- ไฟล์ที่แก้: `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/__tests__/activity-hours-review.test.jsx`, `prompt-log.md`
+- เพิ่มปุ่มที่ชื่อผู้เข้าร่วมเพื่อเปิด dialog รายละเอียด โดยแสดงเฉพาะรหัสอ้างอิง ประเภทชั่วโมง และจำนวนชั่วโมงที่มีอยู่แล้วในข้อมูลจำลอง; ปิดด้วยปุ่มกลับ, ปุ่มกากบาท หรือ Escape
+- ไม่เรียก UC-04/backend และไม่สร้างข้อมูลหรือ schema รายละเอียดใหม่; เป็น mockup ตามคำขอระหว่างรอการเชื่อม UC-04
+- ผลตรวจ: test component/navigation ที่เกี่ยวข้องผ่าน 4 tests; `git diff --check` ผ่าน
+
+## 2569-10-31 ยืนยันจุดตรวจ UC-07
+
+- คำตอบทีม: ยืนยันว่าตรวจรับ T-08 และ T-16 ผ่าน
+- ปรับสถานะ T-08 (เฟส 2) และ T-16 (เฟส 3) เป็น "เสร็จ" เพื่ออนุญาตให้เริ่มเฟส 4 ตาม workflow
+
+## 2569-10-31 คำสั่ง: /implement-all specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md (เฟส 4)
+
+- Task: T-17 บันทึกการตรวจสอบลง audit log
+- ไฟล์ที่แก้: `backend/app/audit/activity_hours_access.py`, `backend/app/api/activity_hours.py`, `backend/tests/test_AC_HRS_09_student_access_is_logged.py`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`, `prompt-log.md`
+- เพิ่มการส่ง access context จาก endpoint อ่านรายชื่อ Excel และ endpoint เรียก UC-04 ไปยัง `StudentAccessLog`; บันทึก `accessor_id`, เวลา และ route/document ที่เข้าถึงทุกครั้ง
+- ผล test: baseline `PYTHONPATH=. pytest -q backend/tests` — 103 passed; baseline `cd frontend && npm test` — 21 files/45 tests passed; หลัง T-17 `PYTHONPATH=. pytest -q backend/tests` — 105 passed, 7 warnings; `cd frontend && npm test` — 21 files/45 tests passed
+- ผลตรวจ: `git diff --check` ผ่าน; T-17 เสร็จ รอทีมตรวจ
+
+## 2569-10-31 ยืนยันคำตอบ Q-03/Q-05
+
+- คำตอบทีม: ยืนยันข้อเสนอ Q-03 และ Q-05
+- Q-03: REG ต้องตอบ success ภายใน 5 วินาที วัดตั้งแต่ส่ง request จนได้รับ success response; หากหมดเวลาแจ้ง "ส่งข้อมูลไม่สำเร็จ" ให้เจ้าหน้าที่ส่งซ้ำด้วยตนเองได้ 1 ครั้ง ไม่มี auto-retry และแจ้งเตือนหากส่งซ้ำไม่สำเร็จ
+- Q-05: ใช้ตารางเกณฑ์ที่มีอยู่แล้วในระบบ โดยกองการนักศึกษาเป็นเจ้าของธุรกิจและผู้ดูแลเกณฑ์รายปี; UC-07 อ่านอย่างเดียว ไม่เพิ่ม UC/API จัดการเกณฑ์ใหม่
+- ปิด Q-03/Q-05 ใน spec.md และปรับ plan.md/tasks.md ให้ตรงกับคำยืนยัน
+- คำตอบทีม: ผ่านจุดตรวจเฟส 4 (T-17)
+- ปรับสถานะ T-17 เป็น "เสร็จ" และเริ่มตรวจ baseline เพื่อดำเนินเฟส 5
+
+## 2569-10-31 /implement-all เฟส 5 — T-09 สร้างโมเดลเกณฑ์ประเภทชั่วโมง
+
+- ไฟล์ที่แตะ: `backend/app/models/hour_criteria.py`
+- สร้างโมเดล `HourCriteria` รองรับ `academic_year`, `hour_type`, `criteria_definition` และ `active_status` ตาม FR-HRS-03, ASM-01 และ ASM-02 โดยไม่กำหนดกติกาเกณฑ์ใหม่
+- ผลตรวจหลัง task: `PYTHONPATH=. pytest -q backend/tests` — 105 passed, 7 warnings; `cd frontend && npm test` — 21 files/45 tests passed
+
+## 2569-10-31 คำชี้แจง ASM-01 ก่อน T-10
+
+- คำถาม AI: ให้ใช้วันที่ส่งเอกสารหรือวันที่ตรวจสอบเป็นวันที่อ้างอิงปีการศึกษา
+- คำตอบทีม: `submitted_at`
+- คำถาม AI: `submitted_at` ต้องจับคู่กับ `academic_year` แบบปีปฏิทินหรือปีการศึกษา/ภาคการศึกษา
+- คำตอบทีม: `academic_term`
+- คำถาม AI: ขอวันเริ่มปีการศึกษา รูปแบบปี พ.ศ./ค.ศ. และยืนยันว่าต้องแยกภาคการศึกษาหรือไม่
+- คำตอบทีม: ไม่ได้ระบุรายละเอียด; ยังไม่เริ่ม T-10 เพื่อไม่เดากติกาแปลงวันที่เป็น `academic_year`
+
+## 2569-10-31 ปรับกติกา T-10
+
+- คำสั่งทีม: "แก้กติกาt 10 ใหม่"
+- คำตอบทีม: ใช้ปีการศึกษาที่ระบุไว้ชัดเจนกับ Activity แทนการคำนวณจากวันที่; ใช้ค่านั้น match กับ `HourCriteria.academic_year`
+- ปรับ ASM-01, plan.md และเงื่อนไข/ไฟล์ที่แตะของ T-10 ให้ใช้ `Activity.academic_year`
+- ยังไม่เริ่ม implement T-10: สถานะ prerequisite T-09 ยังเป็น "เสร็จ รอทีมตรวจ" และ T-10 ยังรอ T-09
+- คำตอบทีม: ผ่านการตรวจรับ T-09; เปลี่ยนสถานะ T-09 เป็น "เสร็จ" และ T-10 เป็น "พร้อมทำ"
+- คำตอบทีม: เมื่อไม่มี `Activity.academic_year` หรือไม่มีเกณฑ์ active ของปีนั้น ให้หยุดและแจ้ง error โดยคงเอกสาร/รายการเดิม ไม่ mark ผิดและไม่คืนเอกสาร
+- เพิ่มพฤติกรรมกรณีข้อมูลเกณฑ์ไม่พร้อมไว้ใน ASM-01
+
+## 2569-10-31 /implement T-10 ตรวจประเภทชั่วโมงเทียบเกณฑ์
+
+- ไฟล์ที่แก้: `backend/app/models/activity.py`, `backend/app/services/hour_validation.py`, `backend/app/api/activity_hours.py`, `backend/tests/test_AC_HRS_02_return_document_and_mark_invalid_items.py`
+- เพิ่ม `Activity.academic_year` และ endpoint ตรวจประเภทชั่วโมงโดยใช้ปีที่ระบุในกิจกรรมเทียบเกณฑ์ active; ทำเครื่องหมายเฉพาะรายการที่ไม่พบในเกณฑ์ และคืนเอกสารทั้งฉบับตาม FR-HRS-03, FR-HRS-06, ASM-01 และ ASM-03
+- กรณีไม่มีปีการศึกษาหรือเกณฑ์ active ระบบตอบ error และไม่แก้สถานะเอกสาร/รายการ ตามคำยืนยันทีม
+- ผล test: `PYTHONPATH=. pytest -q backend/tests/test_AC_HRS_02_return_document_and_mark_invalid_items.py` — 3 passed; `PYTHONPATH=. pytest -q backend/tests` — 108 passed, 7 warnings; `cd frontend && npm test` — 21 files/45 tests passed
+- สถานะ T-10: เสร็จ รอทีมตรวจ
+- คำตอบทีม: ผ่านการตรวจรับ T-10 ก่อนเริ่ม /implement-all เฟส 5
+- คำตอบทีม: อนุญาตขยายไฟล์ที่แตะของ T-11 เพื่อเพิ่มผลตรวจจำลองใน mock service และ test หน้า UI; ขยายรายการไฟล์ที่แตะใน tasks.md แล้ว
+
+## 2569-10-31 /implement-all เฟส 5 — T-11 แสดงผลการตรวจและรายการผิดบนหน้าจอ
+
+- ไฟล์ที่แก้: `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/services/activityHoursMock.js`, `frontend/src/__tests__/activity-hours-review.test.jsx`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`
+- เพิ่มการแสดงจำนวนรายการผิด ข้อความของรายการที่ผิด ผลตรวจรายแถว และสถานะคืนเอกสารจากผลจำลองตาม FR-HRS-03, FR-HRS-06 และ ASM-03
+- ผล test: `PYTHONPATH=. pytest -q backend/tests` — 108 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- สถานะ T-11: เสร็จ รอทีมตรวจ
+
+## 2569-10-31 ต่อ /implement-all เฟส 5 — รับ T-11 และทำ T-12
+
+- คำตอบทีม: ตรวจรับ T-11 ผ่านแล้ว; เปลี่ยนสถานะเป็น "เสร็จ"
+- คำถาม AI: REG ยังไม่กำหนด wire payload/response ใน spec และ plan; ควรสร้างสัญญาแบบใด
+- คำตอบทีม: ใช้ payload ระดับแอปจาก `document_id` และ `student_reference`, `reported_hour_type`, `reported_hours`; ไม่อ้างว่าเป็น wire format จริงของ REG
+- ไฟล์ที่แตะ T-12: `backend/app/integrations/reg_client.py`, `backend/app/models/reg_submission.py`, `backend/tests/test_reg_client_contract.py`
+- สร้าง transport contract ที่ฉีด provider ได้และเก็บ payload, response status/error, เวลาส่งล่าสุด และจำนวนครั้งแรกตาม IF-REG-01 และ FR-HRS-04
+- ผล baseline ก่อน T-12: `PYTHONPATH=. pytest -q backend/tests` — 108 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- ผล test หลัง T-12: `PYTHONPATH=. pytest -q backend/tests` — 110 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- สถานะ T-12: เสร็จ รอทีมตรวจ
+
+## 2569-10-31 /implement-all เฟส 5 — T-13 บันทึกชั่วโมงสำเร็จและเปลี่ยนสถานะ
+
+- ไฟล์ที่แตะ: `backend/app/services/activity_hours_approval.py`, `backend/app/api/activity_hours.py`, `backend/tests/test_AC_HRS_01_approve_matching_hours.py`
+- ตรวจ Activity year และ active criteria ก่อนส่งรายการชั่วโมงผ่าน RegClient; เปลี่ยนสถานะเอกสารเป็น "บันทึกชั่วโมงสำเร็จ" เมื่อ REG ตอบ success ตาม FR-HRS-04 และ IF-REG-01
+- บันทึกการอ่านข้อมูลผู้เข้าร่วมในขั้นอนุมัติตาม DOM-PDPA-01
+- test: `test_AC_HRS_01_approve_matching_hours` ผ่าน
+- ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 111 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- สถานะ T-13: เสร็จ รอทีมตรวจ
+
+## 2569-10-31 /implement-all เฟส 5 — T-14 จัดการ REG ไม่ตอบสนองและการส่งซ้ำ
+
+- คำตอบทีม: อนุมัติขยายไฟล์ที่แตะ T-14 เพื่อรวม `reg_client.py` และให้ transport รับ timeout จาก config แล้วบังคับ timeout ที่ชั้นเชื่อมต่อจริง
+- ไฟล์ที่แตะ: `backend/app/services/reg_retry.py`, `backend/app/api/activity_hours.py`, `backend/app/integrations/reg_client.py`, `backend/app/config.py`, `backend/tests/test_AC_HRS_06_reg_timeout_retry_and_failure_alert.py`
+- เพิ่ม timeout 5 วินาที, เก็บผล timeout, จำกัดจำนวนส่งรวม 2 ครั้ง (ครั้งแรกและ retry ด้วยตนเองหนึ่งครั้ง), ไม่มี auto-retry และแจ้ง "ส่งข้อมูลไม่สำเร็จ" หาก retry ไม่สำเร็จ ตาม FR-HRS-07, IF-REG-01 และ Q-03
+- test: `test_AC_HRS_06_reg_timeout_retry_and_failure_alert` ผ่าน; ยืนยัน timeout 5 วินาทีและปฏิเสธ retry ครั้งที่สอง
+- ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 112 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- สถานะ T-14: เสร็จ รอทีมตรวจ
+
+## 2569-10-31 /implement-all เฟส 5 — T-15 เรียก UC-10 หลังบันทึก REG สำเร็จ
+
+- ไฟล์ที่แตะ: `backend/app/integrations/uc10_notification_client.py`, `backend/app/api/activity_hours.py`, `backend/tests/test_AC_HRS_05_notify_club_after_reg_success.py`
+- หลัง REG ตอบ success และเอกสารเปลี่ยนเป็น "บันทึกชั่วโมงสำเร็จ" ระบบบันทึกคำขอเรียก UC-10; กรณี retry ที่สำเร็จก็เรียก UC-10 ตาม FR-HRS-05 โดยไม่กำหนดเนื้อหาหรือช่องทางแจ้งเตือนที่เป็น Out of scope
+- test: `test_AC_HRS_05_notify_club_after_reg_success` ผ่านและยืนยันลำดับ REG success ก่อน UC-10
+- ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 113 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- สถานะ T-15: เสร็จ รอทีมตรวจ
+
+## 2569-10-31 /implement-all เฟส 5 — T-18 เชื่อมคิวและหน้าตรวจสอบกับ API จำลอง
+
+- คำตอบทีม: อนุญาตเพิ่ม `frontend/src/App.jsx` ในไฟล์ที่แตะของ T-18 เพื่อเชื่อม workflow เข้าหน้าหลัก
+- ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/services/activityHoursMock.js`, `frontend/src/App.jsx`; คง `ActivityHoursReview.jsx` ที่มีอยู่และเชื่อมผ่าน client/documentId
+- เพิ่มการเปิดเอกสารจากคิวไปหน้าตรวจและกลับคิว; mock รองรับเอกสารในคิว และคิวแสดงข้อผิดพลาดเมื่อโหลดไม่สำเร็จ ตาม FR-HRS-01 ถึง FR-HRS-03 และ FR-HRS-06
+- ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 113 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- สถานะ T-18: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 /implement-all เฟส 5 — T-19 กำหนดเกณฑ์ performance การส่ง REG
+
+- คำตอบทีม: ยืนยันผ่านการตรวจรับ T-12, T-13, T-14, T-15 และ T-18; เปลี่ยนสถานะเป็น "เสร็จ"
+- ไฟล์ที่แตะ: `backend/tests/test_reg_performance.py`; ค่า `REG_TIMEOUT_SECONDS = 5` ใน `backend/app/config.py` มีอยู่แล้วจาก T-14 และยังคงอ้างอิง NFR-PERF-01, IF-REG-01 และ Q-03
+- test วัดเวลาตั้งแต่เรียก RegClient จนได้ success response จาก transport จำลอง ยืนยันว่า elapsed ไม่เกิน config timeout 5 วินาที และ timeout เดียวกันถูกส่งให้ transport
+- ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 114 passed, 7 warnings; `cd frontend && npm test` — 21 files/46 tests passed
+- สถานะ T-19: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 /implement-all เฟส 5 — T-20 เชื่อมหน้าจอกับ API จริง
+
+- คำตอบทีม: อนุญาตเพิ่ม `frontend/src/App.jsx` และ `frontend/src/__tests__/activity-hours-review-navigation.test.jsx` ในขอบเขต T-20
+- ไฟล์ที่แตะ: `frontend/src/services/activityHoursClient.js`, `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/App.jsx`, `frontend/src/__tests__/activity-hours-review-navigation.test.jsx`
+- client เรียก pending, participants, validate, approve, manual REG retry และ individual-summary พร้อม Authorization token; หน้าตรวจแสดงผลตรวจ/ข้อผิดพลาด, ป้องกัน approve ซ้ำหลังเริ่มส่ง, จำกัด retry ผ่าน UI หนึ่งครั้ง และแสดง response จาก UC-04 โดยไม่กำหนด schema
+- test ครอบคลุมการเรียก API พร้อม token, ลำดับตรวจสอบ/UC-04/อนุมัติ และ retry ด้วยตนเองหนึ่งครั้งเมื่อ REG timeout
+- ผล test: backend `114 passed, 7 warnings`; frontend `21 files/48 tests passed`; `npm run build` ผ่าน
+- สถานะ T-20: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 /implement-all เฟส 5 — T-21 ทดสอบคิวและการอ่านไฟล์
+
+- ตรวจ test เดิม `test_AC_HRS_03_pending_documents_sorted_by_submitted_at` และ `test_AC_HRS_04_display_all_excel_participants_and_hour_types`; ครอบคลุมการเรียงคิว, การแสดงรายชื่อและประเภทชั่วโมงครบถ้วน และผลกรณี schema Excel ไม่ตรง โดยไม่ต้องแก้ test เพิ่ม
+- test เฉพาะ: 3 passed; ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 114 passed, 7 warnings; `cd frontend && npm test` — 21 files/48 tests passed
+- ไฟล์ที่แก้: `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`, `prompt-log.md`; ไฟล์ test ข้างต้นตรวจและรันผ่านโดยไม่มีการแก้ไข
+- สถานะ T-21: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 /implement-all เฟส 5 — T-22 ทดสอบ approval, validation และ REG
+
+- ตรวจ test `test_AC_HRS_01_approve_matching_hours`, `test_AC_HRS_02_return_document_and_mark_invalid_items` และ `test_AC_HRS_06_reg_timeout_retry_and_failure_alert`; ยืนยันการบันทึก REG, คืนเอกสารและระบุรายการผิด, timeout และการส่งซ้ำด้วยตนเองหนึ่งครั้ง
+- test เฉพาะ: 5 passed; ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 114 passed, 7 warnings; `cd frontend && npm test` — 21 files/48 tests passed
+- ไฟล์ที่แก้: `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`, `prompt-log.md`; ไฟล์ test ข้างต้นตรวจและรันผ่านโดยไม่มีการแก้ไข
+- สถานะ T-22: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 /implement-all เฟส 5 — T-23 ทดสอบการแจ้งเตือนและ UC-04
+
+- ตรวจ test `test_AC_HRS_05_notify_club_after_reg_success` ยืนยัน REG success มาก่อนการเรียก UC-10 และ `test_AC_HRS_07_open_individual_summary_and_return` ยืนยันการเรียก UC-04 พร้อม participant ที่เลือก; frontend integration ยืนยันกลับมาทำ approval ต่อได้หลังแสดง response UC-04
+- test เฉพาะ: 2 passed; ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 114 passed, 7 warnings; `cd frontend && npm test` — 21 files/48 tests passed
+- ไฟล์ที่แก้: `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`, `prompt-log.md`; ไฟล์ test ข้างต้นตรวจและรันผ่านโดยไม่มีการแก้ไข
+- สถานะ T-23: เสร็จ รอทีมตรวจ
+
+## 2569-11-01 ผลตรวจรับงานเฟส 5
+
+- คำตอบทีม: ยืนยันตรวจรับ T-19, T-20, T-21, T-22 และ T-23 ผ่านทั้งหมด
+- ปรับสถานะทั้งห้า task เป็น "เสร็จ"; dependency ของ T-24 ครบ จึงพร้อมทำต่อ
+
+## 2569-11-01 /implement-all เฟส 5 — T-24 ทดสอบสิทธิ์และ audit log
+
+- ตรวจ `test_AC_HRS_08_unauthenticated_user_is_denied` และ `test_AC_HRS_09_student_access_is_logged`; ยืนยันการปฏิเสธผู้ไม่ยืนยันตัวตน และการบันทึกผู้เข้าถึง เวลา และรายการข้อมูลเมื่อเรียกดูรายชื่อหรือ UC-04
+- test เฉพาะ: 4 passed; ผล test ทั้งหมด: `PYTHONPATH=. pytest -q backend/tests` — 114 passed, 7 warnings; `cd frontend && npm test` — 21 files/48 tests passed
+- ไฟล์ test ที่กำหนดมีอยู่แล้วและผ่านโดยไม่ต้องแก้ไข; เปลี่ยนสถานะ T-24 เป็น "เสร็จ รอทีมตรวจ"
+
+## 2569-11-01 คำสั่ง: แก้หน้า Queue ที่โหลดรายการไม่ได้
+
+- สาเหตุจาก backend log: `GET /activity-hours/documents/pending` ตอบ 503 เพราะยังไม่ได้ตั้งค่า `app.state.activity_session`
+- คำถามที่ AI ถามและคำตอบของทีม: เลือกใช้ `activityHoursMock` ชั่วคราว เนื่องจากยังไม่มีแหล่งข้อมูลกิจกรรมจริงที่เชื่อมต่อ
+- ไฟล์ที่แก้: `frontend/src/App.jsx`, `frontend/src/services/activityHoursMock.js`, `frontend/src/__tests__/activity-hours-review-navigation.test.jsx`
+- ตั้งค่า mock เป็น client เริ่มต้นของหน้าเจ้าหน้าที่ แต่ยังสามารถ inject `createActivityHoursClient` เพื่อเชื่อม API จริงได้; แก้วันที่ mock ให้ใช้ ค.ศ. เพื่อแสดงปี พ.ศ. 2569 ถูกต้องใน locale ไทย
+- ตรวจหน้าเว็บจริงหลัง Login พบรายการคิวแสดงได้; test เฉพาะ 7 passed, frontend ทั้งหมด 21 files/48 tests passed และ `npm run build` ผ่าน
+
+## 2569-11-01 คำสั่ง: แสดงข้อมูลเอกสารและแยกแท็บรายชื่อ
+
+- ปรับการเลือกเอกสารให้ส่งข้อมูลจากคิวไปหน้า review; เมื่อเปิดจาก API ใช้รหัสเอกสาร รหัสกิจกรรม ไฟล์ วันที่ส่ง และสถานะที่ API คืน ส่วน mock ใช้ชื่อกิจกรรมที่มีอยู่
+- เพิ่มแท็บ "ข้อมูลเอกสาร" เป็นแท็บเริ่มต้น และแท็บ "รายชื่อผู้เข้าร่วม" สำหรับตาราง, รายละเอียดผู้เข้าร่วม และ UC-04; คงผลตรวจและ action อนุมัติไว้ในแท็บข้อมูลเอกสาร
+- ไฟล์ที่แก้: `frontend/src/App.jsx`, `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/pages/ActivityHoursReview.jsx`, `frontend/src/services/activityHoursClient.js`, `frontend/src/__tests__/activity-hours-review-navigation.test.jsx`, `frontend/src/__tests__/activity-hours-review.test.jsx`
+- ผลตรวจ: frontend `21 files/48 tests passed`; `npm run build` ผ่าน; `git diff --check` ผ่าน
+
+## 2569-11-01 คำสั่ง: ย้ายปุ่มกลับไปคิวเอกสาร
+
+- ย้ายปุ่ม "กลับไปคิวเอกสาร" จากด้านบนของรายละเอียดไปไว้ต่อท้ายหน้ารีวิว ชิดซ้าย โดยคงการทำงานกลับไปยังคิวเดิม
+- ไฟล์ที่แก้: `frontend/src/App.jsx`
+- ผลตรวจ: `cd frontend && npm test` ผ่าน (`21 files/48 tests`)
+
+## 2569-11-01 คำสั่ง: ทำ mockup หน้าตรวจเอกสารโครงการ
+
+- เพิ่มโหมดคิว mockup ที่ URL `?mockup=project-queue` โดยแยกจากคิว API จริง; ต้อง Login ตาม flow เดิม
+- เพิ่มรายการจำลองที่เปิดหน้ารายละเอียดกองกิจได้ และปรับ layout รายการ/สถานะ/empty state ให้ดูเป็นหน้าใช้งานจริงขึ้น
+- ไฟล์ที่แก้: `frontend/src/App.jsx`, `frontend/src/pages/ProjectApprovalListPage.jsx`, `frontend/src/services/projectOfficeReviewMock.js`, `frontend/src/__tests__/project-office-queue-mockup.test.jsx`
+- ผลตรวจ: focused tests `4 files/7 tests passed`; `npm run build` ผ่าน
