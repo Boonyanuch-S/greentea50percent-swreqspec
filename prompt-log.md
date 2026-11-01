@@ -1584,6 +1584,13 @@
 - ไฟล์ที่แก้: `frontend/src/App.jsx`
 - ผลตรวจ: `cd frontend && npm test` ผ่าน (`21 files/48 tests`)
 
+## 2569-11-01 คำสั่ง: ตรวจความครบถ้วนเอกสาร UC-07
+
+- ตรวจสถานะ tasks.md พบว่า T-01 ถึง T-24 ระบุว่าเสร็จแล้ว แต่ข้อความส่วนท้ายยังระบุว่าเฟส 5 เริ่มไม่ได้; ปรับข้อความใน tasks.md และ plan.md ให้ตรงกับสถานะปัจจุบัน
+- เพิ่มข้อจำกัดการใช้งานจริงที่ตรวจจากโค้ด: frontend ใช้ mock เป็นค่าเริ่มต้น และ backend ต้องตั้ง `app.state.activity_session` กับ `app.state.reg_timeout_transport`; automated tests ใช้ REG transport จำลอง
+- ไม่แก้ spec.md เพราะข้อกำหนดไม่เปลี่ยน; AC checkboxes ยังคงให้ทีมตรวจรับเอง
+- ไฟล์ที่แก้: `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/tasks.md`, `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/plan.md`, `prompt-log.md`
+
 ## 2569-11-01 คำสั่ง: ทำ mockup หน้าตรวจเอกสารโครงการ
 
 - เพิ่มโหมดคิว mockup ที่ URL `?mockup=project-queue` โดยแยกจากคิว API จริง; ต้อง Login ตาม flow เดิม
