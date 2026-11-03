@@ -9,6 +9,10 @@ class ReviewQueueService:
     def __init__(self, submissions: Iterable[ProjectSubmission] = ()) -> None:
         self._submissions = list(submissions)
 
+    def add_submission(self, submission: ProjectSubmission) -> None:
+        """รับเอกสารที่กรรมการส่งเข้าคิวตรวจ ตาม FR-PRJ-05 และ FR-VDC-01."""
+        self._submissions.append(submission)
+
     def list_pending(self) -> list[ProjectSubmission]:
         """เรียงคิวรอตรวจตามเวลาส่งและ submission_id ตาม FR-VDC-01 และ Q-06."""
         return sorted(

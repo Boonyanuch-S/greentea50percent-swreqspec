@@ -7,8 +7,18 @@ from ..models.review_decision import ReviewDecision
 from .review_queue_service import ReviewQueueService
 
 FORWARDED_STATUS = "ส่งต่ออาจารย์"
+PENDING_REVIEW_STATUS = "รอตรวจสอบ"
 # Serialize decisions across both review services in this in-process prototype.
 review_decision_lock = RLock()
+
+
+class DecisionAlreadyMade(Exception):
+    """เอกสารออกจากคิวรอตรวจแล้ว จึงเปลี่ยนคำตัดสินผ่านหน้าใช้งานไม่ได้."""
+
+
+def require_pending(submission: ProjectSubmission) -> None:
+    if submission.status != PENDING_REVIEW_STATUS:
+        raise DecisionAlreadyMade(f"เอกสารนี้ตรวจแล้ว สถานะปัจจุบัน: {submission.status}")
 
 
 class ApprovalService:
@@ -21,17 +31,22 @@ class ApprovalService:
         self._club_notifications: dict[int, NotificationMessage] = {}
         self._next_decision_id = 1
         self._next_notification_id = 1
+        self.on_approved = None
 
     def approve(
         self,
         submission_id: int,
         reviewer_user_id: str,
+        *,
+        pending_only: bool = False,
     ) -> ReviewDecision | None:
         """บันทึกคำตัดสินและส่งต่อเอกสารเข้า mock queue ของ UC-05 ตาม FR-VDC-05 และ IF-UC05-01."""
         with review_decision_lock:
             submission = self._review_queue.get_submission(submission_id)
             if submission is None:
                 return None
+            if pending_only:
+                require_pending(submission)
 
             decision = ReviewDecision(
                 decision_id=self._next_decision_id,
@@ -64,6 +79,8 @@ class ApprovalService:
             self._next_notification_id += 1
             self._decisions.append(decision)
             self._advisor_handoffs.append(submission)
+            if self.on_approved is not None:
+                self.on_approved(submission_id)
             return decision
 
     def list_decisions(self) -> list[ReviewDecision]:

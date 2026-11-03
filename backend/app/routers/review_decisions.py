@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
-from ..middleware.auth import require_authenticated_user
+from ..middleware.auth import require_roles
+from ..models.auth_token import UserRole
+from ..models.authenticated_user_context import AuthenticatedUserContext
 from ..services.approval_service import (
     FORWARDED_STATUS,
     ApprovalService,
+    DecisionAlreadyMade,
 )
 from ..services.rejection_service import (
     RETURNED_STATUS,
@@ -12,26 +15,18 @@ from ..services.rejection_service import (
 )
 from .review_queue import review_queue_service
 
-review_decision_router = APIRouter(
-    dependencies=[Depends(require_authenticated_user)],
-)
+require_faculty = require_roles(UserRole.FACULTY_OFFICER)
+review_decision_router = APIRouter(dependencies=[Depends(require_faculty)])
 approval_service = ApprovalService(review_queue_service)
 rejection_service = RejectionService(review_queue_service)
 
 
-class ApprovalRequest(BaseModel):
-    """ข้อมูลเจ้าหน้าที่ผู้อนุมัติ ตาม FR-VDC-05."""
-
-    reviewer_user_id: str = Field(min_length=1)
-
-
 class RejectionRequest(BaseModel):
-    """ข้อมูลเจ้าหน้าที่และเหตุผลการตีกลับ ตาม FR-VDC-06 และ IF-UC01-01."""
+    """เหตุผลการตีกลับ ตาม FR-VDC-06 และ IF-UC01-01."""
 
-    reviewer_user_id: str = Field(min_length=1)
     reason_text: str = Field(min_length=1)
 
-    @field_validator("reviewer_user_id", "reason_text")
+    @field_validator("reason_text")
     @classmethod
     def reject_blank_values(cls, value: str) -> str:
         if not value.strip():
@@ -42,13 +37,14 @@ class RejectionRequest(BaseModel):
 @review_decision_router.post("/submissions/{submission_id}/review/approve")
 def approve_submission(
     submission_id: int,
-    request: ApprovalRequest,
+    user: AuthenticatedUserContext = Depends(require_faculty),
 ) -> dict[str, int | str | dict[str, str]]:
     """บันทึกคำตัดสิน เปลี่ยนสถานะ และส่งต่อให้ UC-05 ตาม FR-VDC-05 และ IF-UC05-01."""
-    decision = approval_service.approve(
-        submission_id,
-        request.reviewer_user_id,
-    )
+    # ใช้ผู้ตรวจจาก Token ไม่รับจากคำขอ เพื่อให้ประวัติการตรวจเชื่อถือได้
+    try:
+        decision = approval_service.approve(submission_id, user.user_id, pending_only=True)
+    except DecisionAlreadyMade as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
     if decision is None:
         raise HTTPException(status_code=404, detail="ไม่พบเอกสารโครงการ")
 
@@ -70,13 +66,18 @@ def approve_submission(
 def reject_submission(
     submission_id: int,
     request: RejectionRequest,
+    user: AuthenticatedUserContext = Depends(require_faculty),
 ) -> dict[str, int | str | dict[str, int | str]]:
     """บันทึกการตีกลับและส่งเหตุผลเข้าคิวจำลอง UC-01 ตาม FR-VDC-06 และ IF-UC01-01."""
-    result = rejection_service.reject(
-        submission_id,
-        request.reviewer_user_id,
-        request.reason_text,
-    )
+    try:
+        result = rejection_service.reject(
+            submission_id,
+            user.user_id,
+            request.reason_text,
+            pending_only=True,
+        )
+    except DecisionAlreadyMade as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
     if result is None:
         raise HTTPException(status_code=404, detail="ไม่พบเอกสารโครงการ")
     decision, message = result

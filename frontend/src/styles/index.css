@@ -5,7 +5,54 @@
   --font-sans: "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* ให้กล่อง SweetAlert ใช้ฟอนต์เดียวกับหน้าเว็บ */
+@layer base {
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+  }
+
+  /* ภาษาไทยมีสระและวรรณยุกต์ซ้อนบนล่าง จึงต้องเว้นบรรทัดหัวข้อมากกว่าค่าเริ่มต้น */
+  h1,
+  h2,
+  h3 {
+    @apply leading-snug;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .form-input {
+    @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm leading-6 font-normal text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500;
+  }
+
+  .form-checkbox {
+    @apply h-4 w-4 shrink-0 cursor-pointer accent-teal-700;
+  }
+}
+
+/* ให้กล่อง SweetAlert ใช้ฟอนต์และทรงเดียวกับหน้าเว็บ */
 .swal2-popup {
   font-family: inherit;
+  border-radius: 1rem;
+}
+
+.swal2-title {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: var(--color-slate-950);
+}
+
+.swal2-html-container {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-slate-600);
+}
+
+.swal2-actions .swal2-styled {
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
 }

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { approvalApi } from '../api/client.js'
+import Button from './Button.jsx'
+import { Notice } from './Feedback.jsx'
 
 // อนุมัติจากหน้ารายละเอียดและแสดงผล API ตาม FR-VDC-04 และ FR-VDC-05
 export default function ApprovalAction({
@@ -41,30 +43,30 @@ export default function ApprovalAction({
 
   return (
     <section
-      className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="card p-6"
       aria-label="การอนุมัติเอกสาร"
     >
-      <h2 className="text-xl font-bold text-slate-950">การอนุมัติเอกสาร</h2>
+      <h2 className="text-lg font-bold text-slate-950">การอนุมัติเอกสาร</h2>
       {!reviewerUserId && (
-        <p role="alert" className="mt-3 text-sm text-red-700">
+        <Notice tone="danger" role="alert" className="mt-3">
           ไม่พบข้อมูลผู้อนุมัติใน session
-        </p>
+        </Notice>
       )}
-      {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
+      {error && <Notice tone="danger" role="alert" className="mt-3">{error}</Notice>}
       {approvalResult && (
-        <div role="status" aria-live="polite" className="mt-4 rounded-lg bg-teal-50 p-4 text-teal-900">
+        <Notice tone="success" role="status" aria-live="polite" className="mt-4">
           <p>สถานะการอนุมัติ: {approvalResult.status}</p>
-          <p>ส่งต่อไปยัง: {approvalResult.handoff.target_use_case}</p>
-        </div>
+          <p>ส่งต่อไปยัง: อาจารย์ที่ปรึกษา</p>
+        </Notice>
       )}
-      <button
+      <Button
         type="button"
-        className="mt-5 rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-4 w-full"
         disabled={approving || !reviewerUserId || approvalResult !== null}
         onClick={approve}
       >
         {approving ? 'กำลังส่งต่อ...' : 'อนุมัติและส่งต่อให้อาจารย์'}
-      </button>
+      </Button>
     </section>
   )
 }

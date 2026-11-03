@@ -19,3 +19,24 @@ test('test_AC_APR_03_list_approvals_for_selection เลือกโครงก
   // Then ระบบเปิดเอกสารชุดที่เลือก
   expect(onOpen).toHaveBeenCalledWith('a-2')
 })
+
+test('test_AC_APR_03_list_separates_pending_from_handled นับเฉพาะงานที่รอดำเนินการและบอกขั้นถัดไป', async () => {
+  // Given อาจารย์มีเอกสารที่ต้องทำและเอกสารที่ส่งต่อกองกิจแล้ว
+  const client = {
+    listApprovals: async () => [
+      { id: 'a-1', projectName: 'โครงการรออนุมัติเนื้อหา', status: 'ส่งต่ออาจารย์', contentApprovedAt: null },
+      { id: 'a-2', projectName: 'โครงการรอใบปะหน้า', status: 'ส่งต่ออาจารย์', contentApprovedAt: '2026-11-01T09:00:00' },
+      { id: 'a-3', projectName: 'โครงการส่งกองกิจแล้ว', status: 'รออนุมัติ', contentApprovedAt: '2026-11-01T09:00:00' },
+    ],
+  }
+
+  // When อาจารย์เปิดรายการ
+  render(<ProjectApprovalListPage client={client} heading="อนุมัติเอกสารโครงการ" actionableStatus="ส่งต่ออาจารย์" onOpen={vi.fn()} />)
+
+  // Then ตัวเลขนับเฉพาะงานของอาจารย์ และแต่ละรายการบอกขั้นถัดไป
+  expect(await screen.findByText('2')).toBeTruthy()
+  expect(screen.getByText('รออนุมัติเนื้อหา')).toBeTruthy()
+  expect(screen.getByText('อนุมัติเนื้อหาแล้ว เหลืออัปโหลดใบปะหน้า')).toBeTruthy()
+  expect(screen.getByRole('heading', { name: 'ดำเนินการแล้ว (1)' })).toBeTruthy()
+  expect(screen.getByText('รอกองกิจตรวจสอบ')).toBeTruthy()
+})

@@ -25,7 +25,7 @@ test('test_AC_APR_04_return_full_document_with_comment กองกิจตี�
   fireEvent.click(submit)
 
   // Then ระบบส่งคอมเมนต์ครบถ้วนและแสดงสถานะหลังตีกลับ
-  expect((await screen.findByRole('status')).textContent).toContain('UC-01')
+  expect((await screen.findByRole('status')).textContent).toContain('กรรมการสโมสร')
   expect(screen.getByText('สถานะ: ตีกลับให้แก้ไข')).toBeTruthy()
   expect(client.returnDocuments).toHaveBeenCalledWith('แก้ตัวชี้วัด')
 })

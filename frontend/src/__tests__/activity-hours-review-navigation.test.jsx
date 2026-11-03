@@ -4,6 +4,11 @@ import App from '../App.jsx'
 import { createActivityHoursClient } from '../services/activityHoursClient.js'
 import { projectApprovalMock } from '../services/projectApprovalMock.js'
 
+vi.mock('../utils/alerts.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  confirmAction: vi.fn(async () => true),
+}))
+
 function createAuthClient() {
   return {
     login: async () => ({
@@ -140,10 +145,11 @@ test('เจ้าหน้าที่ใช้ API ชั่วโมงจร
       name: 'รายชื่อผู้เข้าร่วมและประเภทชั่วโมง',
     })
     fireEvent.click(within(table).getByRole('button', {
-      name: 'ดูสรุป UC-04 ของ Participant One',
+      name: 'ดูรายละเอียดของ Participant One',
     }))
-    const summary = await screen.findByRole('region', { name: 'สรุปข้อมูลจาก UC-04' })
-    expect(within(summary).getByText(/UC-04 response/)).toBeTruthy()
+    const summary = await screen.findByRole('region', { name: 'สรุปข้อมูลรายบุคคล' })
+    expect(await within(summary).findByText(/UC-04 response/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'กลับไปยังรายชื่อ' }))
     fireEvent.click(screen.getByRole('tab', { name: 'ข้อมูลเอกสาร' }))
     fireEvent.click(screen.getByRole('button', { name: 'ยืนยันอนุมัติ' }))
 

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from urllib.parse import quote
+
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field, field_validator
 
 from ..config import COVER_SHEET_ALLOWED_EXTENSIONS
@@ -6,6 +8,7 @@ from ..middleware.auth import require_authenticated_context, require_roles
 from ..models.auth_token import UserRole
 from ..models.authenticated_user_context import AuthenticatedUserContext
 from ..models.project_approval import PENDING_STATUS, ProjectApproval, ProjectDocumentItem
+from ..storage.project_document import StoredDocumentFile
 from ..services.project_approval_service import (
     PRINT_COVER_SHEET_MESSAGE,
     ProjectApprovalConflict,
@@ -19,7 +22,7 @@ project_approval_router = APIRouter(
     dependencies=[Depends(require_authenticated_context)],
 )
 
-project_approval_service = create_sample_project_approval_service()
+project_approval_service = create_sample_project_approval_service(include_office_samples=True)
 APPROVAL_NOT_FOUND = "ไม่พบเอกสารที่รออนุมัติ"
 require_advisor = require_roles(UserRole.ADVISOR)
 require_office = require_roles(UserRole.STUDENT_AFFAIRS_OFFICER)
@@ -41,6 +44,12 @@ class ReturnRequest(BaseModel):
         if not value.strip():
             raise ValueError("ต้องระบุข้อมูล")
         return value
+
+
+class DocumentReviewRequest(BaseModel):
+    """ผลการตรวจเอกสารรายฉบับของอาจารย์ตาม FR-APR-02."""
+
+    reviewed: bool
 
 
 def _document_summary(document: ProjectDocumentItem) -> dict[str, str | int]:
@@ -70,6 +79,7 @@ def _approval_summary(approval: ProjectApproval) -> dict:
         "status": approval.status,
         "content_approved_at": approval.content_approved_at,
         "completed_at": approval.completed_at,
+        "activity_date": approval.activity_date,
     }
 
 
@@ -81,7 +91,19 @@ def _approval_response(approval: ProjectApproval, service: ProjectApprovalServic
         and {"file_name": cover_sheet.file_name, "uploaded_at": cover_sheet.uploaded_at},
         "cover_sheet_accept": ",".join(COVER_SHEET_ALLOWED_EXTENSIONS),
         "documents": [_document_summary(item) for item in service.list_documents(approval.id)],
+        "reviewed_document_ids": service.list_reviewed_document_ids(approval.id),
     }
+
+
+def _file_response(file: StoredDocumentFile) -> Response:
+    return Response(
+        content=file.content,
+        media_type=file.media_type,
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(file.file_name)}",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 def _conflict(error: ProjectApprovalConflict) -> HTTPException:
@@ -124,6 +146,64 @@ def get_project_document(
     if document is None:
         raise HTTPException(status_code=404, detail="ไม่พบเอกสารรายการนี้")
     return _document_detail(document)
+
+
+@project_approval_router.get(
+    "/{approval_id}/documents/{document_id}/file",
+    dependencies=[Depends(require_approval_reader)],
+)
+def get_project_document_file(
+    approval_id: str,
+    document_id: str,
+    service: ProjectApprovalService = Depends(get_project_approval_service),
+) -> Response:
+    """คืนไฟล์เอกสารรายการที่เลือกเพื่อเปิดตรวจ ตาม FR-APR-01 และ AC-APR-03."""
+    file = service.get_document_file(approval_id, document_id)
+    if file is None:
+        raise HTTPException(status_code=404, detail="ยังไม่มีไฟล์ของเอกสารนี้")
+    return _file_response(file)
+
+
+@project_approval_router.get(
+    "/{approval_id}/cover-sheet/file",
+    dependencies=[Depends(require_approval_reader)],
+)
+def get_cover_sheet_file(
+    approval_id: str,
+    service: ProjectApprovalService = Depends(get_project_approval_service),
+) -> Response:
+    """คืนไฟล์ใบปะหน้าที่เซ็นแล้วให้กองกิจตรวจ ตาม FR-APR-05 และ IF-UPLOAD-01."""
+    file = service.get_cover_sheet_file(approval_id)
+    if file is None:
+        raise HTTPException(status_code=404, detail="ยังไม่มีไฟล์ใบปะหน้า")
+    return _file_response(file)
+
+
+@project_approval_router.put("/{approval_id}/documents/{document_id}/review")
+def set_document_review(
+    approval_id: str,
+    document_id: str,
+    request: DocumentReviewRequest,
+    user: AuthenticatedUserContext = Depends(require_advisor),
+    service: ProjectApprovalService = Depends(get_project_approval_service),
+) -> dict:
+    """บันทึกการตรวจเอกสารรายฉบับก่อนอนุมัติเนื้อหา ตาม FR-APR-02."""
+    try:
+        document = service.set_document_reviewed(
+            approval_id,
+            document_id,
+            request.reviewed,
+            user.user_id,
+        )
+    except ProjectApprovalConflict as error:
+        raise _conflict(error) from error
+    if document is None:
+        raise HTTPException(status_code=404, detail="ไม่พบเอกสารรายการนี้")
+    return {
+        "document_id": document.id,
+        "reviewed": request.reviewed,
+        "reviewed_document_ids": service.list_reviewed_document_ids(approval_id),
+    }
 
 
 @project_approval_router.post("/{approval_id}/content-approval")

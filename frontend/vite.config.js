@@ -10,7 +10,9 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    // อนุญาตโดเมนของ Codespace เพื่อเปิดผ่านลิงก์ใน GitHub Codespaces ได้ (Vite บล็อกโดเมนอื่นเป็นค่าเริ่มต้น)
+    allowedHosts: ['.app.github.dev'],
     proxy: { '/api': { target: 'http://localhost:8000', rewrite: (p) => p.replace(/^\/api/, '') } },
   },
-  test: { environment: 'jsdom', globals: true },
+  test: { environment: 'jsdom', globals: true, setupFiles: ['./src/__tests__/setup.js'], include: ['src/__tests__/*.test.jsx'] },
 })

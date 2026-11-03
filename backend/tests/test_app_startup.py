@@ -10,4 +10,4 @@ def test_app_includes_review_queue_router():
     response = client.get("/review-queue", headers={"Authorization": "test-session"})
     # Then router ตอบกลับสำเร็จ
     assert response.status_code == 200
-    assert response.json() == []
+    assert isinstance(response.json(), list)

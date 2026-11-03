@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button.jsx'
-import { confirmAction } from '../utils/alerts.js'
+import { LoadError, LoadingCard, Notice } from '../components/Feedback.jsx'
+import PageHeader from '../components/PageHeader.jsx'
+import ReturnDocumentPicker, { composeReturnReason } from '../components/ReturnDocumentPicker.jsx'
+import { OtherChecklistResults, ResultBadge, ReviewHistory, resultForDocument } from '../components/ReviewContext.jsx'
+import StatusBadge from '../components/StatusBadge.jsx'
+import { confirmAction, showDocument } from '../utils/alerts.js'
 
 const PENDING_STATUS = 'รออนุมัติ'
 
@@ -11,6 +16,8 @@ export default function ProjectOfficeReviewPanel({ client, onBack }) {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [comment, setComment] = useState('')
+  const [returnDocuments, setReturnDocuments] = useState([])
+  const [reviewContext, setReviewContext] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -25,6 +32,11 @@ export default function ProjectOfficeReviewPanel({ client, onBack }) {
       .finally(() => {
         if (active) setLoading(false)
       })
+    client.getReviewContext?.()
+      .then((context) => {
+        if (active) setReviewContext(context)
+      })
+      .catch(() => {})
     return () => {
       active = false
     }
@@ -41,6 +53,19 @@ export default function ProjectOfficeReviewPanel({ client, onBack }) {
       setError(requestError.message)
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  // เปิดไฟล์เอกสารและใบปะหน้าที่อัปโหลดเข้ามาเพื่อตรวจทั้งชุดตาม FR-APR-05
+  async function openFile(loadFile, title, name) {
+    setError('')
+    try {
+      const file = await loadFile()
+      const url = URL.createObjectURL(file)
+      await showDocument({ title, name, url, type: file.type })
+      URL.revokeObjectURL(url)
+    } catch (requestError) {
+      setError(requestError.message)
     }
   }
 
@@ -69,103 +94,125 @@ export default function ProjectOfficeReviewPanel({ client, onBack }) {
     })
     if (!confirmed) return
     submitDecision(
-      () => client.returnDocuments(comment),
-      (result) => `ส่งเอกสารทั้งชุดกลับ ${result.target_use_case} แล้ว สถานะเอกสาร: ${result.status}`,
+      () => client.returnDocuments(composeReturnReason(returnDocuments, comment)),
+      (result) => `ส่งเอกสารทั้งชุดกลับให้กรรมการสโมสรแก้ไขแล้ว สถานะเอกสาร: ${result.status}`,
     )
   }
 
   if (loading) {
-    return (
-      <div className="mx-auto max-w-5xl rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-600">
-        กำลังโหลดเอกสาร...
-      </div>
-    )
+    return <LoadingCard>กำลังโหลดเอกสาร...</LoadingCard>
   }
 
   if (!approval) {
-    return <p role="alert" className="p-6 text-red-700">{error}</p>
+    return <LoadError message={error} backLabel="← กลับรายการเอกสาร" onBack={onBack} />
   }
 
   const canDecide = approval.status === PENDING_STATUS && Boolean(approval.coverSheet) && !submitting
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       {onBack && (
-        <button
-          type="button"
-          className="mb-5 rounded-lg px-2 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-200"
-          onClick={onBack}
-        >
+        <Button type="button" variant="ghost" size="sm" className="mb-3 -ml-3" onClick={onBack}>
           ← กลับรายการเอกสาร
-        </button>
+        </Button>
       )}
-      <header className="mb-8 border-b border-slate-200 pb-6">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
-          Student Affairs Review / Project Documents
-        </p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950">ตรวจเอกสารโครงการ</h1>
-            {approval.projectName && <p className="mt-2 font-semibold text-slate-800">{approval.projectName}</p>}
-            <p className="mt-2 text-slate-600">ตรวจเอกสารทั้งชุดและใบปะหน้าที่เซ็นแล้ว ก่อนให้ผ่านหรือตีกลับ</p>
-          </div>
-          <span className="rounded-full bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800">
-            สถานะ: {approval.status}
-          </span>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="กองกิจการนักศึกษา · เอกสารโครงการ"
+        title={approval.projectName ?? 'ตรวจเอกสารโครงการ'}
+        description="ตรวจเอกสารทั้งชุดและใบปะหน้าที่เซ็นแล้ว ก่อนให้ผ่านหรือตีกลับ"
+      >
+        <StatusBadge status={approval.status} label="สถานะ" />
+      </PageHeader>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[1fr_0.9fr]">
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-label="เอกสารทั้งชุด">
-          <h2 className="text-xl font-bold text-slate-950">เอกสารทั้งชุด</h2>
-          <ul className="mt-4 divide-y divide-slate-100">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
+        <section className="card p-6" aria-label="เอกสารทั้งชุด">
+          <h2 className="text-lg font-bold text-slate-950">เอกสารทั้งชุด</h2>
+          <ul className="mt-2 divide-y divide-slate-100">
             {approval.documents.map((document) => (
-              <li key={document.id} className="py-3">
-                <p className="text-sm font-semibold text-teal-700">{document.type}</p>
-                <p className="mt-1 font-semibold text-slate-950">{document.title}</p>
-                <p className="mt-1 text-sm text-slate-500">ไฟล์อ้างอิง: {document.reference}</p>
+              <li key={document.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-2 text-xs font-semibold text-teal-700">
+                    {document.type}
+                    {reviewContext && <ResultBadge result={resultForDocument(reviewContext.facultyChecklist, document.type)} />}
+                  </p>
+                  <p className="mt-0.5 font-semibold text-slate-950">{document.title}</p>
+                  <p className="mt-0.5 break-all text-sm text-slate-500">ไฟล์อ้างอิง: {document.reference}</p>
+                </div>
+                {client.getDocumentFile && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="shrink-0"
+                    aria-label={`เปิดไฟล์ ${document.title}`}
+                    onClick={() => openFile(() => client.getDocumentFile(document.id), document.title, document.reference)}
+                  >
+                    เปิดไฟล์
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
-          <p className="mt-4 border-t border-slate-100 pt-4 text-sm text-slate-600">
-            ใบปะหน้าที่เซ็นแล้ว: {approval.coverSheet?.fileName ?? 'ยังไม่มีไฟล์'}
-          </p>
+          <OtherChecklistResults
+            results={reviewContext?.facultyChecklist}
+            documentTypes={approval.documents.map((document) => document.type)}
+          />
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
+            <p className="min-w-0 break-all text-sm text-slate-700">
+              ใบปะหน้าที่เซ็นแล้ว: {approval.coverSheet?.fileName ?? 'ยังไม่มีไฟล์'}
+            </p>
+            {approval.coverSheet && client.getCoverSheetFile && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="shrink-0"
+                aria-label="เปิดไฟล์ใบปะหน้าที่เซ็นแล้ว"
+                onClick={() => openFile(() => client.getCoverSheetFile(), 'ใบปะหน้าที่เซ็นแล้ว', approval.coverSheet.fileName)}
+              >
+                เปิดไฟล์
+              </Button>
+            )}
+          </div>
         </section>
 
         <div className="space-y-6">
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-label="ผลการตรวจ">
-            <h2 className="text-xl font-bold text-slate-950">ผลการตรวจ</h2>
-            <Button type="button" className="mt-5 sm:w-auto" disabled={!canDecide} onClick={handlePass}>
+          <ReviewHistory history={reviewContext?.history} />
+          {message && <Notice tone="success" role="status">{message}</Notice>}
+          {error && <Notice tone="danger" role="alert">{error}</Notice>}
+
+          <section className="card p-6" aria-label="ผลการตรวจ">
+            <h2 className="text-lg font-bold text-slate-950">ผลการตรวจ</h2>
+            <Button type="button" className="mt-4 w-full" disabled={!canDecide} onClick={handlePass}>
               ตรวจผ่าน
             </Button>
           </section>
 
-          <form
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-            aria-label="การตีกลับเอกสาร"
-            onSubmit={handleReturn}
-          >
-            <h2 className="text-xl font-bold text-slate-950">ตีกลับเอกสาร</h2>
-            <label className="mt-4 flex flex-col gap-2 text-sm font-semibold text-slate-700">
+          <form className="card p-6" aria-label="การตีกลับเอกสาร" onSubmit={handleReturn}>
+            <h2 className="text-lg font-bold text-slate-950">ตีกลับเอกสาร</h2>
+            <ReturnDocumentPicker
+              documents={approval.documents.map((item) => ({ id: item.id, label: item.type }))}
+              selected={returnDocuments}
+              onChange={setReturnDocuments}
+            />
+            <label className="mt-3 block text-sm font-semibold text-slate-700">
               คอมเมนต์รายละเอียดที่ต้องแก้ไข
               <textarea
-                className="min-h-28 rounded-lg border border-slate-300 p-3 font-normal"
+                className="form-input mt-2 min-h-28"
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
                 aria-required="true"
               />
             </label>
-            <button
+            <Button
               type="submit"
-              className="mt-4 rounded-lg border border-rose-300 px-4 py-2 font-semibold text-rose-800 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+              variant="dangerOutline"
+              className="mt-3 w-full"
               disabled={!canDecide || !comment.trim()}
             >
               ตีกลับเอกสารทั้งชุด
-            </button>
+            </Button>
           </form>
-
-          {message && <p role="status" className="rounded-lg bg-teal-50 p-4 text-sm text-teal-900">{message}</p>}
-          {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</p>}
         </div>
       </div>
     </div>

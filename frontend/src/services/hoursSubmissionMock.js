@@ -1,3 +1,5 @@
+import { activityHoursMock } from './activityHoursMock.js'
+
 const activities = [
   {
     id: 'activity-finished-01',
@@ -28,6 +30,15 @@ const activities = [
 
 // Mock API สำหรับหน้าส่งชั่วโมง รองรับ FR-SBH-01, FR-SBH-03, FR-SBH-04 และ FR-SBH-06
 export const hoursSubmissionMock = {
+  // จำลองการส่งเข้าคิวของกองกิจตาม FR-SBH-05 และ IF-UC07-01 เงื่อนไขจริงรอ Q-02 และ Q-03 ของ specs/002
+  async submitHours(activityId) {
+    const activity = activities.find((item) => item.id === activityId)
+    if (!activity) {
+      throw new Error('ไม่พบกิจกรรมที่เลือก')
+    }
+    activityHoursMock.addSubmittedDocument(activity)
+  },
+
   async getFinishedActivities() {
     return activities.filter((activity) => activity.status === 'จบแล้ว')
   },

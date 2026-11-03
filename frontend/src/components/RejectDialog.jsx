@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { rejectionApi } from '../api/client.js'
+import Button from './Button.jsx'
+import { Notice } from './Feedback.jsx'
+import ReturnDocumentPicker, { composeReturnReason } from './ReturnDocumentPicker.jsx'
 
 // รับเหตุผล ยืนยันการตีกลับ และแสดงผลตาม FR-VDC-06 และ IF-UC01-01
 export default function RejectDialog({
@@ -7,10 +10,13 @@ export default function RejectDialog({
   reviewerUserId,
   session,
   disabled = false,
+  suggestedReason = '',
+  documents = [],
   onRejected,
 }) {
   const [open, setOpen] = useState(false)
   const [reasonText, setReasonText] = useState('')
+  const [selectedDocuments, setSelectedDocuments] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [rejectionResult, setRejectionResult] = useState(null)
   const [error, setError] = useState('')
@@ -33,7 +39,7 @@ export default function RejectDialog({
       const result = await rejectionApi.rejectSubmission(
         submissionId,
         reviewerUserId,
-        reason,
+        composeReturnReason(selectedDocuments, reason),
         session,
       )
       setRejectionResult(result)
@@ -52,71 +58,71 @@ export default function RejectDialog({
 
   return (
     <section
-      className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="card p-6"
       aria-label="การตีกลับเอกสาร"
     >
-      <h2 className="text-xl font-bold text-slate-950">การตีกลับเอกสาร</h2>
-      {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
+      <h2 className="text-lg font-bold text-slate-950">การตีกลับเอกสาร</h2>
+      {error && !open && <Notice tone="danger" role="alert" className="mt-3">{error}</Notice>}
       {rejectionResult && (
-        <div role="status" aria-live="polite" className="mt-4 rounded-lg bg-rose-50 p-4 text-rose-900">
+        <Notice tone="danger" role="status" aria-live="polite" className="mt-4">
           <p>สถานะการตีกลับ: {rejectionResult.status}</p>
           <p className="mt-1">เหตุผล: {rejectionResult.reason_text}</p>
-          <p className="mt-1 text-sm">
-            ส่งเหตุผลเข้าคิวจำลอง {rejectionResult.notification.target_use_case} แล้ว
+          <p className="mt-1">
+            ส่งเหตุผลให้กรรมการสโมสรแก้ไขแล้ว (คิวจำลอง)
           </p>
-        </div>
+        </Notice>
       )}
       {!rejectionResult && (
-        <button
+        <Button
           type="button"
-          className="mt-5 rounded-lg border border-rose-300 px-4 py-2 font-semibold text-rose-800 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+          variant="dangerOutline"
+          className="mt-4 w-full"
           disabled={disabled || submitting || !reviewerUserId}
           onClick={() => {
             setError('')
+            // ร่างเหตุผลจากรายการที่ผู้ตรวจระบุว่าไม่ครบ ผู้ตรวจแก้ไขได้ก่อนยืนยันตาม FR-VDC-06
+            setReasonText((current) => current || suggestedReason)
             setOpen(true)
           }}
         >
           ตีกลับเอกสาร
-        </button>
+        </Button>
       )}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]"
           role="dialog"
           aria-modal="true"
           aria-labelledby="reject-dialog-title"
         >
-          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
             <h3 id="reject-dialog-title" className="text-lg font-bold text-slate-950">
               ยืนยันการตีกลับ
             </h3>
-            <label className="mt-4 flex flex-col gap-2 text-sm font-semibold text-slate-700">
+            {error && <Notice tone="danger" role="alert" className="mt-3">{error}</Notice>}
+            <ReturnDocumentPicker documents={documents} selected={selectedDocuments} onChange={setSelectedDocuments} />
+            <label className="mt-4 block text-sm font-semibold text-slate-700">
               เหตุผลในการตีกลับ
               <textarea
                 autoFocus
-                className="min-h-28 rounded-lg border border-slate-300 p-3 font-normal"
+                className="form-input mt-2 min-h-28"
                 value={reasonText}
                 onChange={(event) => setReasonText(event.target.value)}
                 aria-required="true"
               />
             </label>
             <div className="mt-5 flex justify-end gap-3">
-              <button
-                type="button"
-                className="rounded-lg px-4 py-2 font-semibold text-slate-700 hover:bg-slate-100"
-                disabled={submitting}
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="ghost" disabled={submitting} onClick={() => setOpen(false)}>
                 ยกเลิก
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="rounded-lg bg-rose-700 px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                variant="danger"
                 disabled={submitting || !reasonText.trim()}
                 onClick={reject}
               >
                 {submitting ? 'กำลังส่งเหตุผล...' : 'ยืนยันตีกลับ'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

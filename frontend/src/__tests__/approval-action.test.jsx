@@ -52,7 +52,7 @@ test('test_approval_action_displays_result เจ้าหน้าที่เ�
 
   // Then หน้าจอแสดงสถานะจาก API และสถานะเอกสารที่อัปเดตแล้ว
   expect(await screen.findByText('สถานะการอนุมัติ: ส่งต่ออาจารย์')).toBeTruthy()
-  expect(screen.getByText('ส่งต่อไปยัง: UC-05')).toBeTruthy()
+  expect(screen.getByText('ส่งต่อไปยัง: อาจารย์ที่ปรึกษา')).toBeTruthy()
   expect(approveSubmission).toHaveBeenCalledWith(
     501,
     'faculty@example.test',

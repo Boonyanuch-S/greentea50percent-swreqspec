@@ -6,9 +6,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from ..middleware.auth import require_authenticated_user
+from ..middleware.auth import require_roles
+from ..models.auth_token import UserRole
 from ..models.checklist_item import ChecklistBase
-from ..services.checklist_service import ChecklistService
+from ..services.checklist_service import STARTER_CHECKLIST_ITEMS, ChecklistService
 from ..services.project_review_service import ChecklistEvaluation
 
 
@@ -25,9 +26,14 @@ ChecklistSession = sessionmaker(
     expire_on_commit=False,
 )
 
+# ฐานข้อมูลจำลองว่างทุกครั้งที่เริ่มระบบ จึงใส่รายการเริ่มต้นให้ผู้ตรวจติ๊กได้ทันทีตาม FR-VDC-03
+with ChecklistSession() as seed_session:
+    ChecklistService.seed_if_empty(seed_session, STARTER_CHECKLIST_ITEMS)
+    seed_session.commit()
+
 # บังคับ Login ก่อนเข้าถึง Checklist ตาม CON-NFR-21 และ NFR-SEC-01
 checklist_router = APIRouter(
-    dependencies=[Depends(require_authenticated_user)],
+    dependencies=[Depends(require_roles(UserRole.FACULTY_OFFICER))],
 )
 
 

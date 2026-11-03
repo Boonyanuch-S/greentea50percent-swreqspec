@@ -7,6 +7,24 @@
 เพิ่ม AC-PRJ-07 ถึง AC-PRJ-12 ในแผนทดสอบ, ปิด Q-01 บางส่วนด้วยแหล่งข้อมูลจริงจากกองกิจการนักศึกษา
 (ดูหัวข้อ 9) และแก้รหัสเอกสาร "กส 002" เป็น "กศ.002" ให้ตรงกับเอกสารจริง
 
+## 0.1 สถานะตามงานจริง (อัปเดต 2569-11-03)
+
+ข้อสังเกตสำคัญ: plan นี้อ้าง spec Draft v2 (FR-PRJ-08 ถึง 11, AC-PRJ-07 ถึง 12, IF-CHK-02 ของ 001, IF-FILE-01, DOM-AUTHZ-01, DOM-CONC-01)
+แต่ `spec.md` ยังเป็น Draft v1 ID เหล่านี้จึงยังไม่มีจริง โค้ดทำตาม v1 เท่านั้น ทีมต้องตัดสินว่าจะอัปเดต spec เป็น v2 หรือย้อน plan กลับเป็น v1
+
+API ที่ทำจริงต่างจากหัวข้อ 4 ดังนี้ (F-007 ใน rtm.md):
+
+| ใน plan | ที่ทำจริง | หมายเหตุ |
+|---|---|---|
+| `GET /project-documents/new` | ไม่มี ฟอร์มเปล่าสร้างใน `frontend/src/api/client.js: getNewProjectForm` | รอ Q-02 |
+| `GET /project-documents/{project_id}/checklist` | `GET /project-documents/checklist` คืนค่าคงที่ `PROJECT_CHECKLIST` 3 รายการ | รอ Q-01 |
+| `POST /project-documents/{project_id}/attachments` และ `/submit` | รวมเป็น `POST /project-documents` (multipart: fields + ไฟล์แนบ) | PDF/JPG/PNG ไม่เกิน 10 MB ทีมเลือกเอง |
+| `GET /project-documents/{project_id}/edit` | `GET /project-documents/{project_id}` (เฉพาะเจ้าของ) และ `GET /project-documents` | รอ Q-05 |
+| `POST /project-documents/{project_id}/lock-heartbeat` | ไม่มี | ขึ้นกับ FR-PRJ-10 ที่ยังไม่อยู่ใน spec |
+| ไม่มีใน plan | `GET /project-documents/central-checklist`, `GET /project-documents/{id}/attachments/{item}/file` | นอก spec (F-009) |
+
+ฐานข้อมูล: ตอนนี้เก็บแบบ in-memory ตาม CHANGELOG 2569-11-01 ของ spec (ทีมเลือกเอง ไม่ได้มาจาก spec)
+
 ## 1. สรุปแนวทาง
 
 1. ฟีเจอร์นี้ให้กรรมการสโมสรนักศึกษาสร้างและแก้ไขเอกสารโครงการกิจกรรมตาม FR-PRJ-01 และ FR-PRJ-06

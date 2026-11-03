@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Button from '../components/Button.jsx'
+import { Notice } from '../components/Feedback.jsx'
 import TextField from '../components/TextField.jsx'
 import AuthLayout from '../layouts/AuthLayout.jsx'
 
@@ -38,9 +39,9 @@ export default function LoginPage({ client, onLoginSuccess }) {
   return (
     <AuthLayout labelledBy="login-heading">
       <header className="mb-6">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">Science SU · Activity &amp; Hours System</p>
-        <h1 id="login-heading" className="text-3xl font-bold tracking-tight text-slate-950">เข้าสู่ระบบ</h1>
-        <p className="mt-2 text-slate-600">ระบบจัดการเอกสารกิจกรรมและส่งชั่วโมงอัตโนมัติ</p>
+        <p className="mb-1 text-sm font-semibold text-teal-700">Science SU · Activity &amp; Hours System</p>
+        <h1 id="login-heading" className="text-3xl font-bold text-slate-950">เข้าสู่ระบบ</h1>
+        <p className="mt-1.5 text-slate-600 lg:hidden">ระบบจัดการเอกสารกิจกรรมและส่งชั่วโมงอัตโนมัติ</p>
       </header>
 
       <form className="space-y-5" onSubmit={handleSubmit}>
@@ -60,12 +61,12 @@ export default function LoginPage({ client, onLoginSuccess }) {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ'}
         </Button>
       </form>
 
-      {message && <p className="mt-5 rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">{message}</p>}
+      {message && <Notice tone="danger" role="alert" className="mt-5">{message}</Notice>}
     </AuthLayout>
   )
 }

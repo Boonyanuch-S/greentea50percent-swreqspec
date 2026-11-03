@@ -17,6 +17,7 @@ class ProjectApproval:
     updated_at: datetime
     content_approved_at: datetime | None = None
     completed_at: datetime | None = None
+    activity_date: str | None = None
 
 
 @dataclass(frozen=True)

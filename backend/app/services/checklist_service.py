@@ -4,6 +4,26 @@ from sqlalchemy.orm import Session
 from ..models.checklist_item import ChecklistItem, ChecklistItemVersion
 from ..models.checklist_rule import ChecklistRule
 
+# รายการเริ่มต้นตามคำสั่งทีม อ้างอิงเอกสารช่วงเสนอและเตรียมโครงการจาก https://dsa.su.ac.th/ksu/?page_id=306
+# เป็นตัวเลือกให้ผู้ตรวจติ๊กตามแต่ละโครงการ ไม่ใช่ชุดบังคับ และแก้ชื่อหรือเพิ่มได้ตาม FR-VDC-03 และ FR-VDC-07
+# 3 รายการแรกเป็นเอกสารที่กรรมการแนบ ใช้ชื่อตรงกับ PROJECT_CHECKLIST เพื่อจับคู่ผลตรวจกับไฟล์
+STARTER_CHECKLIST_ITEMS = (
+    "เล่มโครงการ",
+    "กส 002",
+    "ใบแนบกิจกรรม",
+    "กศ.001 บันทึกข้อความ",
+    "กศ.002 แบบเสนอขออนุมัติโครงการตามแผนงบประมาณ (กองทุนพัฒนากิจการนักศึกษา มศก.)",
+    "กศ.002.1 แบบเสนอขออนุมัติโครงการตามแผนดำเนินงาน (องค์กรกิจกรรมนักศึกษา)",
+    "กศ.002.2 แบบเสนอขออนุมัติโครงการนอกแผนดำเนินงาน (องค์กรกิจกรรมนักศึกษา)",
+    "กศ.003 แบบเสนอขออนุมัติโครงการ (ประกันคุณภาพการศึกษา)",
+    "กศ.004 แบบขอยืมเงินทดรองจ่าย (กองทุนพัฒนากิจการนักศึกษา มศก.)",
+    "กศ.006 แบบขอความอนุเคราะห์ออกหนังสือราชการ",
+    "กศ.008 แบบขอยืมสิ่งของกองกิจการนักศึกษา",
+    "กศ.009 แบบขอใช้สถานที่กองกิจการนักศึกษา",
+    "แบบเสนอรายนามและรายละเอียดผู้ให้การสนับสนุนโครงการ",
+    "เสนอแผนการดำเนินโครงการพัฒนาศักยภาพนักศึกษา (แบบกำหนดรหัสโครงการ)",
+)
+
 
 class ChecklistService:
     """จัดการ Checklist กลางฉบับล่าสุดโดยคง identity ของรายการ ตาม FR-VDC-07 และ IF-CHK-02."""
@@ -25,11 +45,32 @@ class ChecklistService:
             return []
         return list(
             session.scalars(
-                select(ChecklistItemVersion).where(
-                    ChecklistItemVersion.checklist_rule_id == rule.checklist_rule_id
-                )
+                select(ChecklistItemVersion)
+                .where(ChecklistItemVersion.checklist_rule_id == rule.checklist_rule_id)
+                .order_by(ChecklistItemVersion.checklist_item_id)
             )
         )
+
+    @staticmethod
+    def seed_if_empty(session: Session, item_names: tuple[str, ...]) -> None:
+        """ใส่รายการเริ่มต้นเป็นฉบับแรกเมื่อยังไม่มี Checklist กลาง ตาม FR-VDC-07 และ IF-CHK-02."""
+        if ChecklistService.latest_rule(session) is not None:
+            return
+        rule = ChecklistRule(version=1, is_current=True)
+        session.add(rule)
+        session.flush()
+        for item_name in item_names:
+            item = ChecklistItem()
+            session.add(item)
+            session.flush()
+            session.add(
+                ChecklistItemVersion(
+                    checklist_item_id=item.checklist_item_id,
+                    checklist_rule_id=rule.checklist_rule_id,
+                    item_name=item_name,
+                )
+            )
+        session.flush()
 
     @staticmethod
     def add_item(session: Session, item_name: str) -> ChecklistItemVersion:

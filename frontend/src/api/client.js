@@ -1,3 +1,5 @@
+import { SESSION_REJECTED } from '../utils/token.js'
+
 const BASE = import.meta.env.VITE_API_BASE ?? '/api'
 
 function requireAuthentication(session, resource = 'Checklist') {
@@ -19,6 +21,7 @@ async function authenticatedJsonFetch(path, session, options = {}, resource = 'C
     },
   })
 
+  if (response.status === 401) window.dispatchEvent(new Event(SESSION_REJECTED))
   const responseText = await response.text()
   let body = null
   if (responseText) {
@@ -73,7 +76,7 @@ export function createHoursSubmissionClient(session) {
   }
 }
 
-// อ่าน Checklist กลางฉบับล่าสุดตาม FR-VDC-07, IF-CHK-02 และ CON-NFR-21
+// อ่าน รายการตรวจเอกสารตาม FR-VDC-07, IF-CHK-02 และ CON-NFR-21
 export async function getLatestChecklist(session) {
   return authenticatedJsonFetch('/checklists/latest', session)
 }
@@ -144,6 +147,7 @@ function toApprovalSummary(body) {
     status: body.status,
     contentApprovedAt: body.content_approved_at,
     completedAt: body.completed_at,
+    activityDate: body.activity_date,
   }
 }
 
@@ -152,6 +156,7 @@ function toApprovalView(body) {
     ...toApprovalSummary(body),
     coverSheet: body.cover_sheet ? { fileName: body.cover_sheet.file_name } : null,
     coverSheetAccept: body.cover_sheet_accept,
+    reviewedDocumentIds: body.reviewed_document_ids,
     documents: body.documents.map((document) => ({
       id: document.id,
       type: document.document_type,
@@ -173,6 +178,92 @@ function toDocumentView(body) {
   }
 }
 
+// โหลดไฟล์ด้วย Token เพราะ iframe หรือลิงก์ส่ง header ยืนยันตัวตนเองไม่ได้ ตาม CON-NFR-21
+async function authenticatedBlobFetch(path, session, resource) {
+  const token = requireAuthentication(session, resource)
+  const response = await fetch(`${BASE}${path}`, { headers: { Authorization: token } })
+  if (response.status === 401) window.dispatchEvent(new Event(SESSION_REJECTED))
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    throw new Error(body?.detail ?? `ไม่สามารถเปิดไฟล์ได้ (HTTP ${response.status})`)
+  }
+  return response.blob()
+}
+
+// เรียก API เอกสารโครงการของกรรมการตาม FR-PRJ-01 ถึง FR-PRJ-07 และ CON-NFR-21
+export function createProjectDocumentClient(session) {
+  const resource = 'เอกสารโครงการ'
+  const request = (path) => authenticatedJsonFetch(path, session, {}, resource)
+  const getProject = (projectId) => request(`/project-documents/${projectId}`)
+
+  return {
+    listMyProjects: () => request('/project-documents'),
+    getNewProjectForm: async () => ({ projectName: '', objectives: '', activityDate: '', location: '', indicators: '' }),
+    getProject,
+    getProjectForEdit: getProject,
+    getChecklist: () => request('/project-documents/checklist'),
+    getCentralChecklist: () => request('/project-documents/central-checklist'),
+    getAttachmentFile: (projectId, itemId) => authenticatedBlobFetch(
+      `/project-documents/${projectId}/attachments/${itemId}/file`,
+      session,
+      resource,
+    ),
+    async submitProject({ id, attachments, ...fields }) {
+      const body = new FormData()
+      body.append('fields', JSON.stringify(fields))
+      if (id) body.append('project_id', id)
+      Object.entries(attachments).forEach(([itemId, attachment]) => {
+        if (attachment?.file) body.append(itemId, attachment.file)
+      })
+      const token = requireAuthentication(session, resource)
+      const response = await fetch(`${BASE}/project-documents`, {
+        method: 'POST',
+        headers: { Authorization: token },
+        body,
+      })
+      if (response.status === 401) window.dispatchEvent(new Event(SESSION_REJECTED))
+      const result = await response.json().catch(() => null)
+      if (response.ok) return { ok: true, project: result }
+      if (result?.missing) return { ok: false, missing: result.missing }
+      throw new Error(result?.detail ?? `ส่งโครงการไม่สำเร็จ (HTTP ${response.status})`)
+    },
+  }
+}
+
+// เรียกคิวและรายละเอียดเอกสารของเจ้าหน้าที่คณะตาม FR-VDC-01 ถึง FR-VDC-04 และ CON-NFR-21
+export function createReviewClient(session) {
+  const resource = 'คิวเอกสาร'
+  const request = (path, options) => authenticatedJsonFetch(path, session, options, resource)
+
+  return {
+    getReviewQueue: () => request('/review-queue'),
+    async getSubmission(submissionId) {
+      const [submission, documents] = await Promise.all([
+        request(`/submissions/${submissionId}`),
+        request(`/submissions/${submissionId}/documents`),
+      ])
+      return { ...submission, documents, history: await request(`/submissions/${submissionId}/history`) }
+    },
+    getDocumentFile: (submissionId, documentId) => authenticatedBlobFetch(
+      `/submissions/${submissionId}/documents/${documentId}/file`,
+      session,
+      resource,
+    ),
+    getSubmissionChecklist: (submissionId) => request(`/submissions/${submissionId}/checklist`),
+    updateSubmissionChecklist: (submissionId, items) => request(`/submissions/${submissionId}/checklist`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        items: items.map(({ checklist_item_id: checklistItemId, selected, result }) => ({
+          checklist_item_id: checklistItemId,
+          selected,
+          result: selected ? result : null,
+        })),
+      }),
+    }),
+    addChecklistItem: (itemName) => addChecklistItem(itemName, session),
+  }
+}
+
 // เรียก API อนุมัติเอกสารด้วย Token ของผู้ใช้ตาม FR-APR-01 ถึง FR-APR-06 และ CON-NFR-21
 export function createProjectApprovalClient(session) {
   const resource = 'การอนุมัติเอกสาร'
@@ -190,6 +281,23 @@ export function createProjectApprovalClient(session) {
         },
         async getDocument(documentId) {
           return toDocumentView(await request(`${basePath}/documents/${documentId}`))
+        },
+        async getDocumentFile(documentId) {
+          return authenticatedBlobFetch(`${basePath}/documents/${documentId}/file`, session, resource)
+        },
+        async getReviewContext() {
+          const context = await request(`/project-approvals/${approvalId}/review-context`)
+          return { facultyChecklist: context.faculty_checklist, history: context.history }
+        },
+        async getCoverSheetFile() {
+          return authenticatedBlobFetch(`${basePath}/cover-sheet/file`, session, resource)
+        },
+        async setDocumentReviewed(documentId, reviewed) {
+          const result = await request(`${basePath}/documents/${documentId}/review`, {
+            method: 'PUT',
+            body: JSON.stringify({ reviewed }),
+          })
+          return result.reviewed_document_ids
         },
         async approveContent() {
           const result = await request(`${basePath}/content-approval`, { method: 'POST' })

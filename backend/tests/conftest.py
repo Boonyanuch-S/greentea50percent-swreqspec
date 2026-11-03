@@ -25,9 +25,26 @@ def _client_for(user_id, role):
     return TestClient(app, headers={"Authorization": token})
 
 
+@pytest.fixture(autouse=True)
+def faculty_tokens():
+    # test เดิมของ UC-03 ส่ง Token คงที่ จึงลงทะเบียนเป็นเจ้าหน้าที่คณะตามสิทธิ์จริงของ API
+    now = datetime.now(timezone.utc)
+    for token in ("reviewer-session", "reviewer-one", "reviewer-two", "test-session"):
+        token_registry.register(
+            token,
+            AuthenticatedUserContext(f"{token}@example.test", UserRole.FACULTY_OFFICER, now),
+            now.replace(tzinfo=None) + timedelta(minutes=30),
+        )
+
+
 @pytest.fixture
 def service():
     sample_service = create_sample_project_approval_service()
+    # test ของขั้นถัดไปเริ่มจากจุดที่อาจารย์ตรวจรายฉบับครบแล้ว ส่วนการบังคับตรวจอยู่ใน
+    # test_AC_APR_01_documents_reviewed_before_content_approval.py
+    for approval in sample_service.list_approvals():
+        for document in sample_service.list_documents(approval.id):
+            sample_service.set_document_reviewed(approval.id, document.id, True, ADVISOR_ID)
     app.dependency_overrides[get_project_approval_service] = lambda: sample_service
     yield sample_service
     app.dependency_overrides.pop(get_project_approval_service)

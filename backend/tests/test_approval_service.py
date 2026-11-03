@@ -39,7 +39,7 @@ def test_approval_status_and_advisor_handoff(monkeypatch):
     # Then ระบบบันทึกคำตัดสิน เปลี่ยนสถานะ และส่งเอกสารเข้า mock queue ของ UC-05
     assert response.status_code == 200
     assert response.json()["decision_type"] == "approve"
-    assert response.json()["reviewer_user_id"] == "reviewer-1"
+    assert response.json()["reviewer_user_id"] == "reviewer-session@example.test"
     assert response.json()["status"] == "ส่งต่ออาจารย์"
     assert response.json()["handoff"] == {
         "target_use_case": "UC-05",

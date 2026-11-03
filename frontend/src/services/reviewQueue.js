@@ -84,6 +84,11 @@ export const reviewQueueMock = {
     return structuredClone(submission)
   },
 
+  // เพิ่มชื่อเอกสารเข้า Checklist กลางจากหน้าตรวจตาม FR-VDC-07
+  async addChecklistItem(itemName, session) {
+    return checklistApi.addChecklistItem(itemName, session)
+  },
+
   async getSubmissionChecklist(submissionId, session) {
     const checklist = await checklistApi.getLatestChecklist(session)
     const evaluationKey = getEvaluationKey(submissionId, session)

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import Button from './Button.jsx'
+import { EmptyState, Notice } from './Feedback.jsx'
 
 // ให้เจ้าหน้าที่อ่าน เพิ่ม และแก้รายการ Checklist กลาง ตาม FR-VDC-07 และ IF-CHK-02
 export default function ChecklistManagementPanel({ client, session }) {
@@ -68,66 +70,48 @@ export default function ChecklistManagementPanel({ client, session }) {
   }
 
   if (loading) {
-    return <p role="status">กำลังโหลด Checklist กลาง...</p>
+    return <p role="status" className="text-sm text-slate-600">กำลังโหลดรายการเอกสาร...</p>
   }
 
   return (
     <section aria-labelledby="checklist-management-heading">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 id="checklist-management-heading" className="text-xl font-bold text-slate-950">
-            Checklist กลาง
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            เพิ่มรายการเอกสารที่ต้องการใช้ร่วมกัน
-          </p>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="checklist-management-heading" className="text-lg font-bold text-slate-950">
+          รายการเอกสารที่ใช้ร่วมกัน
+        </h2>
         {version && (
-          <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600">
-            v{version} <span className="mx-1 text-slate-300">·</span> {items.length} รายการ
+          <span className="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800">
+            ฉบับที่ {version} <span className="mx-1 text-teal-300">·</span> {items.length} รายการ
           </span>
         )}
       </div>
-      {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
 
-      <form
-        className="mt-6 flex flex-col gap-3 rounded-xl bg-slate-50 p-4 sm:flex-row sm:items-end"
-        onSubmit={handleAddItem}
-      >
-        <div className="min-w-0 flex-1">
-          <label className="mb-1.5 block text-sm font-semibold text-slate-700" htmlFor="new-checklist-item">
-            ชื่อรายการ Checklist ใหม่
-          </label>
-          <input
-            id="new-checklist-item"
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-            placeholder="พิมพ์ชื่อรายการเอกสาร"
-            value={newItemName}
-            onChange={(event) => setNewItemName(event.target.value)}
-            required
-          />
-        </div>
-        <button
-          className="rounded-lg bg-teal-700 px-5 py-2.5 font-semibold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:shrink-0"
-          type="submit"
-          disabled={saving}
-        >
-          เพิ่มรายการ
-        </button>
-      </form>
+      <Notice className="mt-4">
+        <p>
+          รายการนี้เป็นตัวเลือก ไม่ใช่ชุดบังคับ ผู้ตรวจติ๊กเฉพาะเอกสารที่เกี่ยวข้องได้ในหน้าตรวจของแต่ละโครงการ
+          และแก้ชื่อหรือเพิ่มรายการให้ตรงกับที่ใช้เรียกจริงได้
+        </p>
+        <p className="mt-1">การแก้ชื่อมีผลทันทีกับทุกโครงการที่กำลังตรวจ โดยผลที่ติ๊กไว้ยังอยู่</p>
+        <p className="mt-1">
+          รายการเริ่มต้นอ้างอิงจาก{' '}
+          <a
+            href="https://dsa.su.ac.th/ksu/?page_id=306"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold underline underline-offset-2"
+          >
+            เอกสารกิจกรรมนักศึกษา กองกิจการนักศึกษา
+          </a>
+        </p>
+      </Notice>
+      {error && <Notice tone="danger" role="alert" className="mt-3">{error}</Notice>}
 
       {items.length === 0 ? (
-        <div className="mt-5 rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center">
-          <p className="font-medium text-slate-700">ยังไม่มีรายการใน Checklist กลาง</p>
-          <p className="mt-1 text-sm text-slate-500">เพิ่มรายการแรกด้วยช่องด้านบน</p>
-        </div>
+        <EmptyState title="ยังไม่มีรายการเอกสาร" description="เพิ่มรายการแรกด้วยช่องด้านล่าง" />
       ) : (
-        <ul className="mt-5 space-y-3">
+        <ul className="mt-3 divide-y divide-slate-100">
           {items.map((item) => (
-            <li
-              className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
-              key={item.checklist_item_id}
-            >
+            <li className="flex flex-wrap items-center gap-3 py-2.5" key={item.checklist_item_id}>
               {editingItemId === item.checklist_item_id ? (
                 <form className="flex flex-1 flex-wrap gap-3" onSubmit={handleRenameItem}>
                   <label className="sr-only" htmlFor={`checklist-item-${item.checklist_item_id}`}>
@@ -135,32 +119,29 @@ export default function ChecklistManagementPanel({ client, session }) {
                   </label>
                   <input
                     id={`checklist-item-${item.checklist_item_id}`}
-                    className="min-w-60 flex-1 rounded-lg border border-slate-300 px-3 py-2"
+                    className="form-input min-w-60 flex-1"
                     value={editingItemName}
                     onChange={(event) => setEditingItemName(event.target.value)}
                     required
                   />
-                  <button
-                    className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white disabled:opacity-60"
-                    type="submit"
-                    disabled={saving}
-                  >
+                  <Button type="submit" disabled={saving}>
                     บันทึก
-                  </button>
-                  <button
-                    className="rounded-lg border border-slate-300 px-4 py-2"
+                  </Button>
+                  <Button
+                    variant="secondary"
                     type="button"
                     disabled={saving}
                     onClick={() => setEditingItemId(null)}
                   >
                     ยกเลิก
-                  </button>
+                  </Button>
                 </form>
               ) : (
                 <>
-                  <span className="flex-1">{item.item_name}</span>
-                  <button
-                    className="rounded-lg border border-slate-300 px-4 py-2"
+                  <span className="min-w-0 flex-1 text-sm leading-6 text-slate-800">{item.item_name}</span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     type="button"
                     onClick={() => {
                       setEditingItemId(item.checklist_item_id)
@@ -168,13 +149,35 @@ export default function ChecklistManagementPanel({ client, session }) {
                     }}
                   >
                     แก้ไข
-                  </button>
+                  </Button>
                 </>
               )}
             </li>
           ))}
         </ul>
       )}
+
+      <form
+        className="mt-4 flex flex-col gap-3 rounded-xl bg-slate-50 p-4 sm:flex-row sm:items-end"
+        onSubmit={handleAddItem}
+      >
+        <div className="min-w-0 flex-1">
+          <label className="mb-1.5 block text-sm font-semibold text-slate-700" htmlFor="new-checklist-item">
+            ชื่อเอกสารใหม่
+          </label>
+          <input
+            id="new-checklist-item"
+            className="form-input"
+            placeholder="พิมพ์ชื่อรายการเอกสาร"
+            value={newItemName}
+            onChange={(event) => setNewItemName(event.target.value)}
+            required
+          />
+        </div>
+        <Button className="sm:shrink-0" type="submit" disabled={saving}>
+          เพิ่มรายการ
+        </Button>
+      </form>
     </section>
   )
 }

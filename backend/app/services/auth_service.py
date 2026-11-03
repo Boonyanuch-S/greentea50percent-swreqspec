@@ -70,12 +70,13 @@ def authenticate(
     )
 
 
-# บัญชีตัวอย่างของ prototype ตามคำสั่งทีม ยังไม่ใช่แหล่งบัญชีจริง
+# บัญชีตัวอย่างของ prototype ตามคำสั่งทีม ยังไม่ใช่แหล่งบัญชีจริง ใช้รหัสผ่านเดียวกัน ต่างกันที่อีเมล
+SAMPLE_PASSWORD = "advisor1234"
 SAMPLE_ACCOUNTS = (
-    ("boonliang_t@silpakorn.edu", "club1234", UserRole.CLUB_COMMITTEE, "นางสาวธิติมาพร บุญเลี้ยง", "สโมสรนักศึกษาคณะวิทยาศาสตร์"),
-    ("faculty@silpakorn.edu", "faculty1234", UserRole.FACULTY_OFFICER, "เจ้าหน้าที่คณะวิทยาศาสตร์ (บัญชีตัวอย่าง)", "คณะวิทยาศาสตร์"),
-    ("intuwet_p@silpakorn.edu", "advisor1234", UserRole.ADVISOR, "ผู้ช่วยศาสตราจารย์ ดร.พชรพล อินทุเวศ", "คณะวิทยาศาสตร์"),
-    ("preechawai_p@silpakorn.edu", "affairs1234", UserRole.STUDENT_AFFAIRS_OFFICER, "นางสาวปัทมรัตน์ ปรีชาไว", "กองกิจการนักศึกษา"),
+    ("boonliang_t@silpakorn.edu", SAMPLE_PASSWORD, UserRole.CLUB_COMMITTEE, "นางสาวธิติมาพร บุญเลี้ยง", "สโมสรนักศึกษาคณะวิทยาศาสตร์"),
+    ("faculty@silpakorn.edu", SAMPLE_PASSWORD, UserRole.FACULTY_OFFICER, "เจ้าหน้าที่คณะวิทยาศาสตร์ (บัญชีตัวอย่าง)", "คณะวิทยาศาสตร์"),
+    ("intuwet_p@silpakorn.edu", SAMPLE_PASSWORD, UserRole.ADVISOR, "ผู้ช่วยศาสตราจารย์ ดร.พชรพล อินทุเวศ", "คณะวิทยาศาสตร์"),
+    ("preechawai_p@silpakorn.edu", SAMPLE_PASSWORD, UserRole.STUDENT_AFFAIRS_OFFICER, "นางสาวปัทมรัตน์ ปรีชาไว", "กองกิจการนักศึกษา"),
 )
 
 

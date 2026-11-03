@@ -1,3 +1,5 @@
+export const SESSION_REJECTED = 'app:session-rejected'
+
 // ตรวจวันหมดอายุของ Token ตาม IF-TOKEN-01
 export function msUntilExpiry(expiresAt, now = Date.now()) {
   return new Date(expiresAt).getTime() - now

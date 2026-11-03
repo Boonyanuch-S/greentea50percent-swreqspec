@@ -3,6 +3,7 @@ const approval = {
   projectName: 'โครงการค่ายวิทยาศาสตร์ 2569',
   status: 'ส่งต่ออาจารย์',
   contentApprovedAt: null,
+  reviewedDocumentIds: [],
   documents: [
     {
       id: 'project-book',
@@ -55,6 +56,13 @@ export const projectApprovalMock = {
   async getDocument(documentId) {
     const document = approval.documents.find((item) => item.id === documentId)
     return document ? structuredClone(document) : null
+  },
+
+  // จำลองการตรวจเอกสารรายฉบับก่อนอนุมัติเนื้อหา รองรับ FR-APR-02
+  async setDocumentReviewed(documentId, reviewed) {
+    const others = approval.reviewedDocumentIds.filter((id) => id !== documentId)
+    approval.reviewedDocumentIds = reviewed ? [...others, documentId] : others
+    return [...approval.reviewedDocumentIds]
   },
 
   // จำลองการอนุมัติเนื้อหาและการรับไฟล์ใบปะหน้า รองรับ FR-APR-03 และ FR-APR-04

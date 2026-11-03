@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from datetime import datetime, timezone
+from pathlib import PurePath
 from threading import RLock
 
 from ..config import (
@@ -21,6 +22,11 @@ from ..models.project_approval import (
 )
 from ..models.review_comment import ReviewComment
 from ..storage.cover_sheet import CoverSheetStorage
+from ..storage.project_document import (
+    ProjectDocumentStorage,
+    StoredDocumentFile,
+    load_sample_file,
+)
 from .approval_service import FORWARDED_STATUS
 from .rejection_service import RETURNED_STATUS
 
@@ -30,6 +36,20 @@ INCOMPLETE_SAMPLE_APPROVAL_ID = "approval-005-003"
 REQUIRED_DOCUMENT_TYPES = ("เล่มโครงการ", "กส 002", "ใบแนบกิจกรรม")
 PRINT_COVER_SHEET_MESSAGE = "กรุณาพิมพ์เฉพาะใบปะหน้าเพื่อขอลายเซ็นจริง"
 RECEIVED_VALIDATION_STATUS = "received"
+SAMPLE_ADVISOR_ID = "intuwet_p@silpakorn.edu"
+SAMPLE_ACTIVITY_DATE = ("2027-01-15", "15 มกราคม 2570")
+URGENT_SAMPLE_ACTIVITY_DATE = ("2026-11-20", "20 พฤศจิกายน 2569")
+URGENT_SAMPLE_ID = "approval-005-004"
+OFFICE_REVIEW_SAMPLES = (
+    ("approval-005-004", 5004, "โครงการแข่งขันตอบปัญหาวิทยาศาสตร์", True),
+    ("approval-005-005", 5005, "โครงการอบรมจริยธรรมการวิจัยสำหรับนักศึกษา", True),
+)
+COVER_SHEET_MEDIA_TYPES = {
+    ".pdf": "application/pdf",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+}
 
 
 class ProjectApprovalConflict(Exception):
@@ -52,11 +72,19 @@ class ProjectApprovalService:
         self._documents = list(documents)
         self._actions: list[ApprovalAction] = []
         self._cover_sheets: dict[str, CoverSheetUpload] = {}
+        self._reviewed_documents: dict[str, set[str]] = {}
         self._comments: list[ReviewComment] = []
         self._storage = CoverSheetStorage()
+        self._document_files = ProjectDocumentStorage()
         self.uc10 = UC10Integration()
         self.uc01 = UC01ReturnQueue()
         self._lock = RLock()
+
+    def add_approval(self, approval: ProjectApproval, documents: Iterable[ProjectDocumentItem]) -> None:
+        """รับเอกสารที่เจ้าหน้าที่คณะส่งต่อเข้าคิวอาจารย์ ตาม FR-APR-01 และ IF-UC05-01."""
+        with self._lock:
+            self._approvals[approval.id] = approval
+            self._documents.extend(documents)
 
     def list_approvals(self, status: str | None = None) -> list[ProjectApproval]:
         """คืนรายการเอกสารให้เลือกเปิด ตาม FR-APR-01 และ FR-APR-05."""
@@ -83,6 +111,29 @@ class ProjectApprovalService:
             None,
         )
 
+    def save_document_file(self, approval_id: str, document_id: str, file: StoredDocumentFile) -> None:
+        """เก็บไฟล์ของเอกสารในชุด เป็นจุดรับไฟล์ที่กรรมการแนบจาก UC-01 ตาม FR-APR-01."""
+        self._document_files.save(approval_id, document_id, file)
+
+    def get_document_file(self, approval_id: str, document_id: str) -> StoredDocumentFile | None:
+        """คืนไฟล์ของเอกสารรายการที่เลือกเพื่อเปิดตรวจ ตาม FR-APR-01 และ AC-APR-03."""
+        if self.get_document(approval_id, document_id) is None:
+            return None
+        return self._document_files.read(approval_id, document_id)
+
+    def get_cover_sheet_file(self, approval_id: str) -> StoredDocumentFile | None:
+        """คืนไฟล์ใบปะหน้าล่าสุดให้เปิดตรวจ ตาม FR-APR-05 และ IF-UPLOAD-01."""
+        upload = self._cover_sheets.get(approval_id)
+        content = self._storage.read(upload.file_reference) if upload else None
+        if upload is None or content is None:
+            return None
+        extension = PurePath(upload.file_name).suffix.lower()
+        return StoredDocumentFile(
+            file_name=upload.file_name,
+            media_type=COVER_SHEET_MEDIA_TYPES.get(extension, "application/octet-stream"),
+            content=content,
+        )
+
     def get_cover_sheet(self, approval_id: str) -> CoverSheetUpload | None:
         return self._cover_sheets.get(approval_id)
 
@@ -91,6 +142,36 @@ class ProjectApprovalService:
 
     def list_comments(self, approval_id: str) -> list[ReviewComment]:
         return [item for item in self._comments if item.approval_id == approval_id]
+
+    def list_reviewed_document_ids(self, approval_id: str) -> list[str]:
+        """คืนเอกสารที่อาจารย์ยืนยันว่าตรวจแล้ว เรียงตามลำดับแสดงผล ตาม FR-APR-02."""
+        reviewed = self._reviewed_documents.get(approval_id, set())
+        return [item.id for item in self.list_documents(approval_id) if item.id in reviewed]
+
+    def set_document_reviewed(
+        self,
+        approval_id: str,
+        document_id: str,
+        reviewed: bool,
+        actor_id: str,
+    ) -> ProjectDocumentItem | None:
+        """บันทึกการตรวจรายฉบับก่อนอนุมัติเนื้อหา ตาม FR-APR-02 และคำสั่งทีม 2569-11-01."""
+        with self._lock:
+            approval = self._approvals.get(approval_id)
+            document = self.get_document(approval_id, document_id)
+            if approval is None or document is None:
+                return None
+            self._require_status(approval, FORWARDED_STATUS)
+            if approval.content_approved_at is not None:
+                raise ProjectApprovalConflict("อนุมัติเนื้อหาแล้ว ไม่สามารถเปลี่ยนผลการตรวจรายฉบับได้")
+            reviewed_ids = self._reviewed_documents.setdefault(approval_id, set())
+            if reviewed:
+                reviewed_ids.add(document_id)
+            else:
+                reviewed_ids.discard(document_id)
+            action = "document_reviewed" if reviewed else "document_review_cancelled"
+            self._record_action(approval_id, actor_id, action, datetime.now(timezone.utc))
+            return document
 
     def approve_content(self, approval_id: str, actor_id: str) -> ProjectApproval | None:
         """บันทึกเวลาอนุมัติเนื้อหาครั้งแรกเมื่อเอกสารครบชุด ตาม FR-APR-03, ASM-01 และ ASM-03."""
@@ -101,6 +182,7 @@ class ProjectApprovalService:
             self._require_status(approval, FORWARDED_STATUS)
             self._require_complete_documents(approval_id)
             if approval.content_approved_at is None:
+                self._require_all_documents_reviewed(approval_id)
                 now = datetime.now(timezone.utc)
                 approval.content_approved_at = now
                 approval.updated_at = now
@@ -223,6 +305,11 @@ class ProjectApprovalService:
             allowed = ", ".join(COVER_SHEET_ALLOWED_EXTENSIONS)
             raise InvalidCoverSheet(f"รับเฉพาะไฟล์ชนิด {allowed}")
 
+    def _require_all_documents_reviewed(self, approval_id: str) -> None:
+        remaining = len(self.list_documents(approval_id)) - len(self.list_reviewed_document_ids(approval_id))
+        if remaining > 0:
+            raise ProjectApprovalConflict(f"ต้องตรวจเอกสารให้ครบก่อนอนุมัติเนื้อหา เหลืออีก {remaining} ฉบับ")
+
     def _require_complete_documents(self, approval_id: str) -> None:
         """เอกสารต้องครบชุดก่อนอนุมัติ ตาม AC-APR-01 และ ASM-03."""
         document_types = {item.document_type for item in self.list_documents(approval_id)}
@@ -310,14 +397,35 @@ def _sample_documents(
     return documents
 
 
-def create_sample_project_approval_service() -> ProjectApprovalService:
-    """สร้างข้อมูลตัวอย่างที่ถือว่า UC-03 ส่งต่อแล้ว ตาม FR-APR-01 และ FR-APR-02."""
+def _advance_to_office_review(service: ProjectApprovalService, approval_id: str) -> None:
+    """พาโครงการตัวอย่างผ่านขั้นของอาจารย์ด้วยกฎเดียวกับการใช้งานจริง ตาม FR-APR-03 และ FR-APR-04."""
+    for document in service.list_documents(approval_id):
+        service.set_document_reviewed(approval_id, document.id, True, SAMPLE_ADVISOR_ID)
+    service.approve_content(approval_id, SAMPLE_ADVISOR_ID)
+    service.upload_cover_sheet(
+        approval_id,
+        "ใบปะหน้า-ลงนามแล้ว.pdf",
+        load_sample_file(approval_id, "cover-sheet", "ใบปะหน้า-ลงนามแล้ว.pdf").content,
+        SAMPLE_ADVISOR_ID,
+    )
+
+
+def create_sample_project_approval_service(
+    *,
+    include_office_samples: bool = False,
+) -> ProjectApprovalService:
+    """สร้างข้อมูลตัวอย่างที่ถือว่า UC-03 ส่งต่อแล้ว ตาม FR-APR-01 และ FR-APR-02.
+
+    include_office_samples เพิ่มโครงการที่ผ่านขั้นอาจารย์แล้ว เพื่อให้กองกิจมีเอกสารให้ตรวจตาม FR-APR-05
+    """
     now = datetime.now(timezone.utc)
     samples = (
         (SAMPLE_APPROVAL_ID, 5001, "โครงการค่ายวิทยาศาสตร์ 2569", True),
         ("approval-005-002", 5002, "โครงการอบรมทักษะห้องปฏิบัติการ", True),
         (INCOMPLETE_SAMPLE_APPROVAL_ID, 5003, "โครงการวันวิทยาศาสตร์", False),
     )
+    if include_office_samples:
+        samples += OFFICE_REVIEW_SAMPLES
     approvals = [
         ProjectApproval(
             id=approval_id,
@@ -326,6 +434,7 @@ def create_sample_project_approval_service() -> ProjectApprovalService:
             status=FORWARDED_STATUS,
             created_at=now,
             updated_at=now,
+            activity_date=(URGENT_SAMPLE_ACTIVITY_DATE if approval_id == URGENT_SAMPLE_ID else SAMPLE_ACTIVITY_DATE)[0],
         )
         for approval_id, project_id, project_name, _ in samples
     ]
@@ -338,4 +447,14 @@ def create_sample_project_approval_service() -> ProjectApprovalService:
             include_attachment=include_attachment,
         )
     ]
-    return ProjectApprovalService(approvals, documents)
+    service = ProjectApprovalService(approvals, documents)
+    for document in documents:
+        service.save_document_file(
+            document.approval_id,
+            document.id,
+            load_sample_file(document.approval_id, document.id, document.document_reference),
+        )
+    if include_office_samples:
+        for approval_id, *_ in OFFICE_REVIEW_SAMPLES:
+            _advance_to_office_review(service, approval_id)
+    return service

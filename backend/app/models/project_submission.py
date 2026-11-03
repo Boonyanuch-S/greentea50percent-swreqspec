@@ -25,3 +25,4 @@ class ProjectSubmission(Base):
     document_url: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     current_status: Mapped[str] = mapped_column(String, nullable=False)
+    activity_date: Mapped[str | None] = mapped_column(String, nullable=True)

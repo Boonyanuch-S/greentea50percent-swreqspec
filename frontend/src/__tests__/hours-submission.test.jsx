@@ -42,7 +42,7 @@ test('test_AC_SBH_05_show_exception_link_when_deadline_exceeded เสนอ UC-
     await screen.findByText('กำหนดส่งของกองกิจผ่านแล้ว'),
   ).toBeTruthy()
   expect(
-    screen.getByText('สามารถไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า'),
+    screen.getByText('สามารถยื่นคำขอผ่อนผันเวลาส่งช้าได้'),
   ).toBeTruthy()
 })
 

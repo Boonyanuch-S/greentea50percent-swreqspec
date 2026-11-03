@@ -1,4 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import Button from '../components/Button.jsx'
+import { EmptyState, Notice } from '../components/Feedback.jsx'
+import Icon from '../components/Icon.jsx'
+import PageHeader from '../components/PageHeader.jsx'
+import StatusBadge, { statusText } from '../components/StatusBadge.jsx'
+import { confirmAction } from '../utils/alerts.js'
 
 // แสดงข้อมูลเอกสารและรายชื่อ ผลตรวจตาม FR-HRS-01, FR-HRS-02, FR-HRS-03, FR-HRS-06 และ ASM-03
 export default function ActivityHoursReview({ client, documentId, documentDetails }) {
@@ -15,10 +21,22 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
   const [actionLoading, setActionLoading] = useState(false)
   const [retryAvailable, setRetryAvailable] = useState(false)
   const [approvalAttempted, setApprovalAttempted] = useState(false)
-  const [summaryParticipantName, setSummaryParticipantName] = useState('')
   const [summary, setSummary] = useState(null)
   const [summaryError, setSummaryError] = useState('')
   const [summaryLoading, setSummaryLoading] = useState(false)
+  const latestSummaryRequest = useRef(null)
+  const invalidItems = validationResult?.invalid_items ?? []
+  const invalidReferences = new Set(invalidItems.map((item) => item.student_reference))
+  const totalReportedHours = participants.reduce((total, participant) => {
+    const hours = Number(participant.reported_hours)
+    return Number.isFinite(hours) ? total + hours : total
+  }, 0)
+  const resultStats = [
+    { label: 'ผู้เข้าร่วม', value: participants.length, valueClass: 'text-slate-950' },
+    { label: 'ตรงเกณฑ์', value: participants.filter((item) => !invalidReferences.has(item.student_reference)).length, valueClass: 'text-emerald-700' },
+    { label: 'ไม่ตรงเกณฑ์', value: invalidItems.length, valueClass: invalidItems.length > 0 ? 'text-rose-700' : 'text-slate-950' },
+    { label: 'ชั่วโมงที่แจ้งรวม', value: totalReportedHours, valueClass: 'text-slate-950' },
+  ]
   const documentInfo = [
     { label: 'รหัสเอกสาร', value: documentDetails?.documentId ?? documentId },
     { label: 'กิจกรรม', value: documentDetails?.activityName },
@@ -35,7 +53,7 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
     },
     {
       label: 'สถานะเอกสาร',
-      value: validationResult?.document_status ?? documentDetails?.status,
+      value: validationResult ? null : statusText(documentDetails?.status),
     },
   ].filter(({ value }) => value !== undefined && value !== null && value !== '')
 
@@ -99,6 +117,16 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [selectedParticipant])
 
+  // การบันทึกเข้า REG ย้อนกลับเองไม่ได้ จึงถามยืนยันก่อนส่งตาม FR-HRS-04
+  async function handleApprove() {
+    const confirmed = await confirmAction({
+      title: 'ยืนยันบันทึกชั่วโมงเข้าระบบ REG?',
+      text: `ระบบจะส่งข้อมูลผู้เข้าร่วม ${participants.length} รายการไปบันทึก`,
+      confirmText: 'ยืนยันอนุมัติ',
+    })
+    if (confirmed) submitHours()
+  }
+
   async function submitHours(retry = false) {
     setActionLoading(true)
     setActionError('')
@@ -128,55 +156,38 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
     }
   }
 
-  async function loadIndividualSummary(participant) {
-    setSummaryLoading(true)
-    setSummaryError('')
+  // เปิดรายละเอียดพร้อมสรุปข้อมูลรายบุคคล แล้วกลับมาตรวจเกณฑ์ต่อได้ตาม FR-HRS-08 และ AC-HRS-07
+  async function openParticipant(participant) {
+    setSelectedParticipant(participant)
     setSummary(null)
-    setSummaryParticipantName(participant.participant_name)
+    setSummaryError('')
+    latestSummaryRequest.current = participant.student_reference
+    setSummaryLoading(true)
     try {
-      const result = await client.getIndividualSummary(
-        documentId,
-        participant.student_reference,
-      )
-      setSummary(result)
+      const result = await client.getIndividualSummary(documentId, participant.student_reference)
+      if (latestSummaryRequest.current === participant.student_reference) setSummary(result)
     } catch (requestError) {
-      setSummaryError(requestError instanceof Error ? requestError.message : String(requestError))
+      if (latestSummaryRequest.current === participant.student_reference) {
+        setSummaryError(requestError instanceof Error ? requestError.message : String(requestError))
+      }
     } finally {
-      setSummaryLoading(false)
+      if (latestSummaryRequest.current === participant.student_reference) setSummaryLoading(false)
     }
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-8 text-slate-900">
-      <header className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
-        <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-teal-500 to-emerald-400" />
-        <div aria-hidden="true" className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-teal-50" />
-        <div aria-hidden="true" className="absolute right-24 top-16 h-28 w-28 rounded-full border-[18px] border-emerald-50" />
-        <div className="relative flex flex-col gap-6 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-8">
-          <div className="min-w-0">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-800">
-                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-teal-500 ring-4 ring-teal-100" />
-                Activity Hours
-              </span>
-              <span className="text-slate-300" aria-hidden="true">/</span>
-              <span className="text-xs font-medium text-slate-500">Student Affairs</span>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-              ข้อมูลเอกสาร
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-              ตรวจสอบรายละเอียดเอกสารและข้อมูลผู้เข้าร่วมกิจกรรม
-            </p>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6 pb-2">
+      <PageHeader
+        eyebrow="กองกิจการนักศึกษา · ชั่วโมงกิจกรรม"
+        title="ตรวจสอบใบสรุปชั่วโมงกิจกรรม"
+        description="ตรวจสอบรายละเอียดเอกสารและข้อมูลผู้เข้าร่วมกิจกรรม"
+      />
 
       <div
         role="tablist"
         aria-label="ข้อมูลเอกสารและรายชื่อผู้เข้าร่วม"
         onKeyDown={handleTabKeyDown}
-        className="flex w-fit max-w-full gap-1 rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+        className="flex gap-1 overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--color-slate-200)]"
       >
         <button
           ref={documentTabRef}
@@ -187,10 +198,10 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
           aria-controls="activity-hours-document-panel"
           tabIndex={activeTab === 'document' ? 0 : -1}
           onClick={() => setActiveTab('document')}
-          className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
+          className={`whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600 ${
             activeTab === 'document'
-              ? 'bg-teal-700 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              ? 'border-teal-700 text-teal-800'
+              : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800'
           }`}
         >
           ข้อมูลเอกสาร
@@ -204,10 +215,10 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
           aria-controls="activity-hours-participants-panel"
           tabIndex={activeTab === 'participants' ? 0 : -1}
           onClick={() => setActiveTab('participants')}
-          className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 ${
+          className={`whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600 ${
             activeTab === 'participants'
-              ? 'bg-teal-700 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              ? 'border-teal-700 text-teal-800'
+              : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800'
           }`}
         >
           รายชื่อผู้เข้าร่วม
@@ -222,57 +233,72 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
           tabIndex={0}
           className="space-y-6 outline-none"
         >
-          <section aria-label="รายละเอียดเอกสาร" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="font-bold text-slate-900">รายละเอียดเอกสาร</h2>
-            <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-              {documentInfo.map(({ label, value }) => (
-                <div key={label} className="rounded-xl bg-slate-50 p-4">
-                  <dt className="text-sm text-slate-500">{label}</dt>
-                  <dd className="mt-1 break-words font-semibold text-slate-900">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-
       {validationResult && (
         <section
           aria-label="ผลการตรวจสอบ"
           className={`rounded-2xl border p-5 ${
-            validationResult.invalid_items.length > 0
-              ? 'border-amber-200 bg-amber-50'
-              : 'border-emerald-200 bg-emerald-50'
+            invalidItems.length > 0 ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50'
           }`}
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="font-bold text-slate-900">ผลการตรวจสอบประเภทชั่วโมง</h2>
-              <p
-                role={validationResult.invalid_items.length > 0 ? 'alert' : 'status'}
-                className="mt-1 text-sm text-slate-700"
-              >
-                {validationResult.invalid_items.length > 0
-                  ? `พบรายการไม่ตรงเกณฑ์ ${validationResult.invalid_items.length} รายการ`
+              <h2 className="text-lg font-bold text-slate-950">ผลการตรวจสอบประเภทชั่วโมง</h2>
+              <p role={invalidItems.length > 0 ? 'alert' : 'status'} className="mt-1 text-sm text-slate-700">
+                {invalidItems.length > 0
+                  ? `พบรายการไม่ตรงเกณฑ์ ${invalidItems.length} รายการ`
                   : 'ประเภทชั่วโมงตรงตามเกณฑ์ทุกรายการ'}
               </p>
             </div>
-            <span className="inline-flex w-fit items-center rounded-full border border-amber-200 bg-white px-3 py-1 text-sm font-semibold text-amber-800">
-              สถานะเอกสาร: {validationResult.document_status}
-            </span>
+            <StatusBadge status={validationResult.document_status} label="สถานะเอกสาร" />
           </div>
-          {validationResult.invalid_items.length > 0 && (
-            <ul className="mt-4 space-y-2 border-t border-amber-200 pt-4">
-              {validationResult.invalid_items.map((item) => (
-                <li
-                  key={item.student_reference}
-                  className="rounded-xl border border-amber-200 bg-white p-3 text-sm"
-                >
-                  <p className="font-semibold text-slate-900">
-                    {item.student_reference} · {item.reported_hour_type}
-                  </p>
-                  <p className="mt-1 text-amber-800">{item.validation_message}</p>
-                </li>
-              ))}
-            </ul>
+
+          <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {resultStats.map(({ label, value, valueClass }) => (
+              <div key={label} className="rounded-xl bg-white/70 px-3 py-2">
+                <dt className="text-xs text-slate-500">{label}</dt>
+                <dd className={`mt-0.5 text-xl font-bold ${valueClass}`}>{value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          {invalidItems.length > 0 && (
+            <>
+              <ul className="mt-4 space-y-2">
+                {invalidItems.map((item) => {
+                  const participant = participants.find(({ student_reference: reference }) => reference === item.student_reference)
+                  return (
+                    <li
+                      key={item.student_reference}
+                      className="flex flex-col gap-2 rounded-xl border border-rose-200 bg-white p-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        {participant && <p className="font-semibold text-slate-950">{participant.participant_name}</p>}
+                        <p className={participant ? 'text-slate-600' : 'font-semibold text-slate-950'}>
+                          {item.student_reference} · {item.reported_hour_type}
+                        </p>
+                        <p className="mt-1 text-rose-700">{item.validation_message}</p>
+                      </div>
+                      {participant && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="w-fit shrink-0"
+                          aria-label={`ดูรายละเอียดของ ${participant.participant_name}`}
+                          onClick={() => openParticipant(participant)}
+                        >
+                          ดูรายละเอียด
+                        </Button>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+              {/* ระบุผลของการคืนเอกสารให้ชัดตาม FR-HRS-06 และ ASM-03 */}
+              <p className="mt-3 text-sm font-medium text-rose-800">
+                ส่งเอกสารทั้งฉบับคืนให้กรรมการสโมสรแก้ไขแล้ว และยังไม่บันทึกชั่วโมงรายการใดเข้าระบบ REG
+              </p>
+            </>
           )}
         </section>
       )}
@@ -280,41 +306,42 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
       {validationResult?.document_status === 'รอตรวจสอบ'
         && validationResult.invalid_items.length === 0
         && !approvalAttempted && (
-          <section className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+          <section className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="font-semibold text-slate-900">ตรวจสอบครบแล้ว</p>
-              <p className="mt-1 text-sm text-slate-600">ยืนยันอนุมัติเพื่อส่งข้อมูลไปบันทึกที่ระบบ REG</p>
+              <p className="font-semibold text-slate-950">ตรวจสอบครบแล้ว</p>
+              <p className="mt-1 text-sm text-slate-600">ยืนยันอนุมัติเพื่อส่งข้อมูล {participants.length} รายการไปบันทึกที่ระบบ REG</p>
             </div>
-            <button
-              type="button"
-              onClick={() => submitHours()}
-              disabled={actionLoading}
-              className="rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
-            >
+            <Button type="button" onClick={handleApprove} disabled={actionLoading}>
               {actionLoading ? 'กำลังส่งข้อมูล...' : 'ยืนยันอนุมัติ'}
-            </button>
+            </Button>
           </section>
         )}
       {actionError && (
-        <section role="alert" className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 sm:flex-row sm:items-center sm:justify-between">
-          <span>{actionError}</span>
-          {retryAvailable && (
-            <button
-              type="button"
-              onClick={() => submitHours(true)}
-              disabled={actionLoading}
-              className="w-fit rounded-lg border border-red-300 bg-white px-3 py-2 font-semibold text-red-800 hover:bg-red-100 disabled:cursor-wait disabled:opacity-60"
-            >
-              {actionLoading ? 'กำลังส่งซ้ำ...' : 'ลองส่งซ้ำ'}
-            </button>
-          )}
-        </section>
+        <Notice tone="danger" role="alert">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>{actionError}</span>
+            {retryAvailable && (
+              <Button type="button" variant="dangerOutline" size="sm" className="w-fit" onClick={() => submitHours(true)} disabled={actionLoading}>
+                {actionLoading ? 'กำลังส่งซ้ำ...' : 'ลองส่งซ้ำ'}
+              </Button>
+            )}
+          </div>
+        </Notice>
       )}
       {actionMessage && (
-        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
-          {actionMessage}
-        </p>
+        <Notice tone="success" role="status">{actionMessage}</Notice>
       )}
+          <section aria-label="รายละเอียดเอกสาร" className="card p-6">
+            <h2 className="text-lg font-bold text-slate-950">รายละเอียดเอกสาร</h2>
+            <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+              {documentInfo.map(({ label, value }) => (
+                <div key={label}>
+                  <dt className="text-sm text-slate-500">{label}</dt>
+                  <dd className="mt-0.5 break-words font-medium text-slate-900">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         </section>
       )}
 
@@ -326,17 +353,15 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
           tabIndex={0}
           className="space-y-6 outline-none"
         >
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.03]">
-        <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+      <section className="card overflow-hidden">
+        <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-3">
-            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                <path d="M8 7h8m-8 5h8m-8 5h5m5 4H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8l5 5v11a2 2 0 0 1-2 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
+              <Icon name="users" />
             </span>
             <div>
-              <h2 className="font-bold text-slate-900">ข้อมูลผู้เข้าร่วม</h2>
-              <p className="mt-1 text-sm text-slate-500">ประเภทชั่วโมงตามที่ระบุในเอกสาร</p>
+              <h2 className="text-lg font-bold text-slate-950">ข้อมูลผู้เข้าร่วม</h2>
+              <p className="text-sm text-slate-500">ประเภทชั่วโมงตามที่ระบุในเอกสาร</p>
             </div>
           </div>
           <span className="text-sm font-semibold text-slate-600">
@@ -355,39 +380,23 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
             ))}
           </div>
         ) : error ? (
-          <div role="alert" className="m-5 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 sm:m-7">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="mt-0.5 h-5 w-5 shrink-0">
-              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" />
-              <path d="M12 8v5m0 3h.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-            </svg>
-            <span>
-              <span className="block font-semibold">
-                โหลดรายชื่อผู้เข้าร่วมไม่สำเร็จ: <span className="font-normal text-red-700">{error}</span>
-              </span>
-            </span>
-          </div>
+          <Notice tone="danger" role="alert" className="m-5 sm:m-6">
+            โหลดรายชื่อผู้เข้าร่วมไม่สำเร็จ: {error}
+          </Notice>
         ) : participants.length === 0 ? (
-          <div className="px-6 py-14 text-center">
-            <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
-              <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-                <path d="M8 7h8m-8 5h8m-8 5h5m5 4H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8l5 5v11a2 2 0 0 1-2 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <p className="mt-4 font-semibold text-slate-800">ยังไม่มีรายชื่อผู้เข้าร่วม</p>
-            <p className="mt-1 text-sm text-slate-500">เมื่อมีข้อมูล ระบบจะแสดงรายการในส่วนนี้</p>
-          </div>
+          <EmptyState icon="users" title="ยังไม่มีรายชื่อผู้เข้าร่วม" description="เมื่อมีข้อมูล ระบบจะแสดงรายการในส่วนนี้" />
         ) : (
           <div className="overflow-x-auto">
             <table aria-label="รายชื่อผู้เข้าร่วมและประเภทชั่วโมง" className="w-full min-w-[32rem] text-left">
-              <thead className="bg-slate-50 text-xs font-semibold tracking-wide text-slate-500">
+              <thead className="bg-slate-50 text-xs font-semibold text-slate-500">
                 <tr>
-                  <th scope="col" className="w-20 px-5 py-3.5 text-center sm:px-7">ลำดับ</th>
-                  <th scope="col" className="px-5 py-3.5 sm:px-7">ผู้เข้าร่วม</th>
-                  <th scope="col" className="px-5 py-3.5 sm:px-7">ประเภทชั่วโมง</th>
+                  <th scope="col" className="w-20 px-5 py-3 text-center sm:px-6">ลำดับ</th>
+                  <th scope="col" className="px-5 py-3 sm:px-6">ผู้เข้าร่วม</th>
+                  <th scope="col" className="px-5 py-3 sm:px-6">ประเภทชั่วโมง</th>
                   {validationResult && (
-                    <th scope="col" className="px-5 py-3.5 sm:px-7">ผลตรวจ</th>
+                    <th scope="col" className="px-5 py-3 sm:px-6">ผลตรวจ</th>
                   )}
-                  <th scope="col" className="px-5 py-3.5 sm:px-7">สรุป UC-04</th>
+                  <th scope="col" className="px-5 py-3 sm:px-6">รายละเอียด</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -398,62 +407,49 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
                       validationResult?.invalid_items.some(
                         (item) => item.student_reference === participant.student_reference,
                       )
-                        ? 'bg-amber-50/70 hover:bg-amber-50'
+                        ? 'bg-rose-50/70 hover:bg-rose-50'
                         : 'hover:bg-teal-50/40'
                     }`}
                   >
-                    <td className="px-5 py-4 text-center text-sm tabular-nums text-slate-400 sm:px-7">
+                    <td className="px-5 py-3 text-center text-sm tabular-nums text-slate-500 sm:px-6">
                       {String(index + 1).padStart(2, '0')}
                     </td>
-                    <td className="px-5 py-4 sm:px-7">
+                    <td className="px-5 py-3 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-100 to-emerald-50 text-sm font-bold text-teal-800 ring-1 ring-inset ring-teal-200/70">
+                        <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-800">
                           {participant.participant_name.trim().charAt(0) || '?'}
                         </span>
-                        <button
-                          type="button"
-                          aria-label={`ดูรายละเอียดของ ${participant.participant_name}`}
-                          onClick={() => setSelectedParticipant(participant)}
-                          className="inline-flex items-center gap-1 font-semibold text-teal-800 decoration-teal-700 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
-                        >
-                          {participant.participant_name}
-                          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-4 w-4 text-teal-600">
-                            <path d="m7.5 4.5 5.5 5.5-5.5 5.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </button>
+                        <span className="font-semibold text-slate-900">{participant.participant_name}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 sm:px-7">
-                      <span className="inline-flex items-center gap-2 rounded-lg border border-teal-100 bg-teal-50 px-3 py-1.5 text-sm font-semibold text-teal-800">
-                        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-teal-500" />
-                        {participant.reported_hour_type}
-                      </span>
+                    <td className="px-5 py-3 sm:px-6">
+                      <span className="text-sm text-slate-700">{participant.reported_hour_type}</span>
                     </td>
                     {validationResult && (
-                      <td className="px-5 py-4 sm:px-7">
+                      <td className="px-5 py-3 sm:px-6">
                         {validationResult.invalid_items.some(
                           (item) => item.student_reference === participant.student_reference,
                         ) ? (
-                          <span className="inline-flex rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-900">
+                          <span className="inline-flex rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-800">
                             ไม่ตรงเกณฑ์
                           </span>
                         ) : (
-                          <span className="inline-flex rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-semibold text-emerald-900">
+                          <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-900">
                             ตรงเกณฑ์
                           </span>
                         )}
                       </td>
                     )}
-                    <td className="px-5 py-4 sm:px-7">
-                      <button
+                    <td className="px-5 py-3 sm:px-6">
+                      <Button
                         type="button"
-                        aria-label={`ดูสรุป UC-04 ของ ${participant.participant_name}`}
-                        onClick={() => loadIndividualSummary(participant)}
-                        disabled={summaryLoading}
-                        className="rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-teal-800 hover:bg-teal-50 disabled:cursor-wait disabled:opacity-60"
+                        variant="secondary"
+                        size="sm"
+                        aria-label={`ดูรายละเอียดของ ${participant.participant_name}`}
+                        onClick={() => openParticipant(participant)}
                       >
-                        ดูสรุป UC-04
-                      </button>
+                        ดูรายละเอียด
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -462,27 +458,9 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
           </div>
         )}
       </section>
-      {summaryLoading && (
-        <p role="status" className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
-          กำลังเรียก UC-04...
-        </p>
-      )}
-      {summaryError && (
-        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          เรียก UC-04 ไม่สำเร็จ: {summaryError}
-        </p>
-      )}
-      {summary !== null && (
-        <section aria-label="สรุปข้อมูลจาก UC-04" className="rounded-2xl border border-teal-200 bg-white p-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-bold text-slate-900">สรุปข้อมูลจาก UC-04</h2>
-            <p className="text-sm text-slate-600">ผู้เข้าร่วม: {summaryParticipantName}</p>
-          </div>
-          <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-words rounded-xl bg-slate-50 p-4 text-xs text-slate-700">
-            {JSON.stringify(summary, null, 2)}
-          </pre>
         </section>
       )}
+
       {selectedParticipant && (
         <div
           className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]"
@@ -496,14 +474,12 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
             role="dialog"
             aria-modal="true"
             aria-labelledby="participant-detail-title"
-            className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl shadow-slate-950/20"
+            className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
           >
             <header className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
-                  Activity Hours
-                </p>
-                <h2 id="participant-detail-title" className="mt-1 text-xl font-bold text-slate-950">
+                <p className="text-sm font-semibold text-teal-700">ชั่วโมงกิจกรรม</p>
+                <h2 id="participant-detail-title" className="text-xl font-bold text-slate-950">
                   รายละเอียดผู้เข้าร่วม
                 </h2>
               </div>
@@ -518,9 +494,9 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
                 </svg>
               </button>
             </header>
-            <div className="space-y-5 px-6 py-6">
+            <div className="max-h-[60vh] space-y-5 overflow-y-auto px-6 py-6">
               <div className="flex items-center gap-4">
-                <span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-lg font-bold text-teal-800 ring-1 ring-inset ring-teal-100">
+                <span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal-100 text-lg font-bold text-teal-800">
                   {selectedParticipant.participant_name.trim().charAt(0) || '?'}
                 </span>
                 <div>
@@ -532,7 +508,7 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
                   </p>
                 </div>
               </div>
-              <dl className="grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
+              <dl className="grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
                 <div>
                   <dt className="text-xs font-medium text-slate-500">ประเภทชั่วโมง</dt>
                   <dd className="mt-1 font-semibold text-slate-900">
@@ -546,20 +522,33 @@ export default function ActivityHoursReview({ client, documentId, documentDetail
                   </dd>
                 </div>
               </dl>
+              <section aria-label="สรุปข้อมูลรายบุคคล">
+                <h3 className="font-bold text-slate-950">สรุปข้อมูลรายบุคคล</h3>
+                {summaryLoading && <p role="status" className="mt-2 text-sm text-slate-600">กำลังโหลดสรุปข้อมูล...</p>}
+                {summaryError && (
+                  <Notice tone="danger" role="alert" className="mt-2">โหลดสรุปข้อมูลไม่สำเร็จ: {summaryError}</Notice>
+                )}
+                {summary !== null && (
+                  <dl className="mt-2 divide-y divide-slate-100 text-sm">
+                    {Object.entries(summary).map(([label, value]) => (
+                      <div key={label} className="flex justify-between gap-4 py-2">
+                        <dt className="text-slate-500">{label}</dt>
+                        <dd className="break-words text-right font-medium text-slate-900">
+                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </section>
             </div>
             <footer className="flex justify-end border-t border-slate-100 px-6 py-4">
-              <button
-                type="button"
-                onClick={() => setSelectedParticipant(null)}
-                className="rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
-              >
+              <Button type="button" onClick={() => setSelectedParticipant(null)}>
                 กลับไปยังรายชื่อ
-              </button>
+              </Button>
             </footer>
           </section>
         </div>
-      )}
-        </section>
       )}
     </div>
   )

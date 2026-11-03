@@ -28,7 +28,7 @@ test('test_checklist_management_adds_and_edits_items_AC_VDC_05 เพิ่ม�
   render(<ChecklistManagementPage client={client} session={session} />)
 
   // When เพิ่มรายการและแก้ไขชื่อรายการนั้น
-  const nameInput = await screen.findByLabelText('ชื่อรายการ Checklist ใหม่')
+  const nameInput = await screen.findByLabelText('ชื่อเอกสารใหม่')
   fireEvent.change(nameInput, { target: { value: 'เอกสารประกอบ' } })
   fireEvent.click(screen.getByRole('button', { name: 'เพิ่มรายการ' }))
   const itemName = await screen.findByText('เอกสารประกอบ')
@@ -68,7 +68,7 @@ test('test_AC_VDC_05_all_reviewers_see_same_latest_rule ผู้ตรวจอ
     <ChecklistManagementPage client={client} session={reviewerOneSession} />,
   )
 
-  const nameInput = await screen.findByLabelText('ชื่อรายการ Checklist ใหม่')
+  const nameInput = await screen.findByLabelText('ชื่อเอกสารใหม่')
   fireEvent.change(nameInput, { target: { value: 'เอกสารประกอบ' } })
   fireEvent.click(screen.getByRole('button', { name: 'เพิ่มรายการ' }))
   expect(await screen.findByText('เอกสารประกอบ')).toBeTruthy()
@@ -110,9 +110,9 @@ test('หน้า Checklist กลางใช้แท็บเมนูแท
     target: { value: 'password' },
   })
   fireEvent.click(screen.getByRole('button', { name: 'เข้าสู่ระบบ' }))
-  fireEvent.click(await screen.findByRole('button', { name: 'Checklist กลาง' }))
-  expect(await screen.findByRole('heading', { name: 'จัดการ Checklist กลาง' })).toBeTruthy()
-  expect(screen.getByRole('button', { name: 'Checklist กลาง' }).getAttribute('aria-pressed')).toBe('true')
+  fireEvent.click(await screen.findByRole('button', { name: 'รายการเอกสาร' }))
+  expect(await screen.findByRole('heading', { name: 'จัดการรายการเอกสาร' })).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'รายการเอกสาร' }).getAttribute('aria-pressed')).toBe('true')
   expect(screen.queryByRole('button', { name: '← กลับคิวเอกสาร' })).toBeNull()
   fireEvent.click(screen.getByRole('button', { name: 'คิวเอกสาร' }))
 
@@ -171,9 +171,9 @@ test('เปิด Checklist กลางได้จากหน้าราย
   fireEvent.click(await screen.findByRole('button', { name: /โครงการทดสอบ/ }))
   expect(await screen.findByRole('heading', { name: 'โครงการทดสอบ' })).toBeTruthy()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Checklist กลาง' }))
+  fireEvent.click(screen.getByRole('button', { name: 'รายการเอกสาร' }))
 
-  expect(await screen.findByRole('heading', { name: 'จัดการ Checklist กลาง' })).toBeTruthy()
+  expect(await screen.findByRole('heading', { name: 'จัดการรายการเอกสาร' })).toBeTruthy()
   expect(screen.queryByRole('heading', { name: 'โครงการทดสอบ' })).toBeNull()
 })
 

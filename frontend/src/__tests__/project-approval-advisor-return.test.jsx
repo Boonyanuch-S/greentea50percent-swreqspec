@@ -34,7 +34,7 @@ test('test_IF_UC01_02_advisor_returns_documents_with_comment อาจารย�
   fireEvent.click(screen.getByRole('button', { name: 'ส่งเอกสารกลับ' }))
 
   // Then ระบบส่งความเห็นครบถ้วนและแสดงผลการส่งกลับ UC-01
-  expect((await screen.findByRole('status')).textContent).toContain('UC-01')
+  expect((await screen.findByRole('status')).textContent).toContain('กรรมการสโมสร')
   expect(client.returnDocuments).toHaveBeenCalledWith('แก้วัตถุประสงค์')
   expect(screen.getByText('สถานะ: ตีกลับให้แก้ไข')).toBeTruthy()
 })

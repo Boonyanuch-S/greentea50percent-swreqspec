@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..middleware.auth import require_authenticated_user
+from ..middleware.auth import require_roles
+from ..models.auth_token import UserRole
 from ..services.review_queue_service import ReviewQueueService
 
 
 # บังคับ Login ก่อนเข้าคิวและรายละเอียดเอกสารตาม CON-NFR-21 และ NFR-SEC-01
 review_queue_router = APIRouter(
-    dependencies=[Depends(require_authenticated_user)],
+    dependencies=[Depends(require_roles(UserRole.FACULTY_OFFICER))],
 )
 
 review_queue_service = ReviewQueueService()
@@ -26,6 +27,7 @@ def _submission_response(submission):
         "document_url": submission.document_url,
         "created_at": submission.created_at,
         "current_status": submission.current_status,
+        "activity_date": submission.activity_date,
     }
 
 

@@ -56,6 +56,7 @@ test('AC-SBH-03 only finished activities are loaded from authenticated API', asy
       <App
         authClient={createAuthClient()}
         hoursSubmissionClient={createHoursSubmissionClient({ token: 'test-token' })}
+        projectDocumentClient={{ listMyProjects: async () => [] }}
       />,
     )
     login()

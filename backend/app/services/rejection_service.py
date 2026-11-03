@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from ..models.project_submission import ProjectSubmission
 from ..models.review_decision import ReviewDecision
-from .approval_service import review_decision_lock
+from .approval_service import require_pending, review_decision_lock
 from .review_queue_service import ReviewQueueService
 
 RETURNED_STATUS = "ตีกลับให้แก้ไข"
@@ -33,12 +33,16 @@ class RejectionService:
         submission_id: int,
         reviewer_user_id: str,
         reason_text: str,
+        *,
+        pending_only: bool = False,
     ) -> tuple[ReviewDecision, UC01ReturnMessage] | None:
         """บันทึกคำตัดสิน เปลี่ยนสถานะ และส่งเหตุผลเข้าคิวจำลอง UC-01 ตาม FR-VDC-06 และ IF-UC01-01."""
         with review_decision_lock:
             submission = self._review_queue.get_submission(submission_id)
             if submission is None:
                 return None
+            if pending_only:
+                require_pending(submission)
 
             decision = ReviewDecision(
                 decision_id=self._next_decision_id,

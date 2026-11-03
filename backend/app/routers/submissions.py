@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, model_validator
 from sqlalchemy.orm import Session
 
-from ..middleware.auth import require_authenticated_user
+from ..middleware.auth import require_roles
+from ..models.auth_token import UserRole
 from ..models.project_submission import ProjectSubmission
 from ..services.project_review_service import ProjectReviewService
 from . import review_queue
@@ -13,7 +14,7 @@ from .checklists import get_checklist_session
 
 # ปกป้อง Checklist รายโครงการด้วย Login ตาม CON-NFR-21 และ NFR-SEC-01
 submissions_router = APIRouter(
-    dependencies=[Depends(require_authenticated_user)],
+    dependencies=[Depends(require_roles(UserRole.FACULTY_OFFICER))],
 )
 
 

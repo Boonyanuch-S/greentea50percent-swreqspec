@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button.jsx'
+import { EmptyState, LoadingCard, Notice } from '../components/Feedback.jsx'
+import Icon from '../components/Icon.jsx'
+import PageHeader from '../components/PageHeader.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import { useUrlParams } from '../hooks/useUrlParams.js'
 import { RETURNED } from '../services/projectDocumentMock.js'
 import { formatThaiDate } from '../utils/formatDate.js'
 import ProjectDetailPage from './ProjectDetailPage.jsx'
@@ -8,24 +12,30 @@ import ProjectDocumentForm from './ProjectDocumentForm.jsx'
 
 // หน้าหลักของกรรมการสโมสร (UC-01): เลือกสร้างโครงการใหม่ (FR-PRJ-01) หรือแก้ไขโครงการที่ถูกตีกลับ (FR-PRJ-06)
 export default function ProjectDocumentsPage({ client }) {
-  const [projects, setProjects] = useState([])
-  const [editing, setEditing] = useState(null) // null = รายการ, 'new' = สร้างใหม่, id = แก้ไข
-  const [viewing, setViewing] = useState(null) // id ของโครงการที่เปิดดูรายละเอียด (นอก spec ทีมสั่งเพิ่ม)
+  const [projects, setProjects] = useState(null) // null = กำลังโหลด
+  const [params, updateParams] = useUrlParams()
+  const editing = params.get('edit') // null = รายการ, 'new' = สร้างใหม่, id = แก้ไข
+  const viewing = params.get('project') // id ของโครงการที่เปิดดูรายละเอียด (นอก spec ทีมสั่งเพิ่ม)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (editing === null && viewing === null) {
-      client.listMyProjects().then(setProjects)
+      setError('')
+      client.listMyProjects()
+        .then(setProjects)
+        .catch((requestError) => {
+          setError(requestError.message)
+          setProjects([])
+        })
     }
   }, [client, editing, viewing])
 
   function handleSubmitted() {
-    setEditing(null)
-    setViewing(null)
+    updateParams({ edit: null, project: null }, { replace: true })
   }
 
   function openEdit(projectId) {
-    setViewing(null)
-    setEditing(projectId)
+    updateParams({ edit: projectId, project: null })
   }
 
   if (editing !== null) {
@@ -34,33 +44,33 @@ export default function ProjectDocumentsPage({ client }) {
         client={client}
         projectId={editing === 'new' ? null : editing}
         onSubmitted={handleSubmitted}
-        onCancel={() => setEditing(null)}
+        onCancel={() => updateParams({ edit: null })}
       />
     )
   }
 
   if (viewing !== null) {
-    return <ProjectDetailPage client={client} projectId={viewing} onBack={() => setViewing(null)} onEdit={() => openEdit(viewing)} />
+    return <ProjectDetailPage client={client} projectId={viewing} onBack={() => updateParams({ project: null })} onEdit={() => openEdit(viewing)} />
   }
 
   return (
     <div>
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950">เอกสารโครงการ</h1>
-          <p className="mt-2 text-slate-600">สร้างเอกสารโครงการใหม่ ดูรายละเอียด หรือแก้ไขโครงการที่ถูกตีกลับ</p>
-        </div>
-        <Button type="button" className="sm:w-auto" onClick={() => setEditing('new')} data-req="FR-PRJ-01">
+      <PageHeader title="เอกสารโครงการ" description="สร้างเอกสารโครงการใหม่ ดูรายละเอียด หรือแก้ไขโครงการที่ถูกตีกลับ">
+        <Button type="button" className="w-full sm:w-auto" onClick={() => updateParams({ edit: 'new' })} data-req="FR-PRJ-01">
           + สร้างโครงการใหม่
         </Button>
-      </header>
+      </PageHeader>
 
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-label="รายการโครงการ">
+      {error && <Notice tone="danger" role="alert" className="mb-4">{error}</Notice>}
+      {projects === null ? (
+        <LoadingCard>กำลังโหลดรายการโครงการ...</LoadingCard>
+      ) : (
+      <section className="card overflow-hidden" aria-label="รายการโครงการ">
         {projects.length === 0 ? (
-          <p className="p-6 text-sm text-slate-500">ยังไม่มีโครงการ</p>
+          <EmptyState title="ยังไม่มีโครงการ" description="เริ่มจากปุ่ม “สร้างโครงการใหม่” ด้านบน" />
         ) : (
           <table className="w-full table-fixed text-left text-sm">
-            <thead className="hidden bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 md:table-header-group">
+            <thead className="hidden bg-slate-50 text-xs font-semibold text-slate-500 md:table-header-group">
               <tr>
                 <th className="px-6 py-3">ชื่อโครงการ</th>
                 <th className="w-44 whitespace-nowrap px-6 py-3">วันที่จัดกิจกรรม</th>
@@ -72,14 +82,15 @@ export default function ProjectDocumentsPage({ client }) {
               {projects.map((project) => (
                 <tr
                   key={project.id}
-                  onClick={() => setViewing(project.id)}
-                  className="group grid cursor-pointer grid-cols-[1fr_auto] gap-x-3 gap-y-2 p-4 hover:bg-slate-50 md:table-row md:p-0"
+                  onClick={() => updateParams({ project: project.id })}
+                  className="group grid cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 p-4 transition-colors hover:bg-slate-50 md:table-row md:p-0"
                 >
                   <td className="col-span-2 md:px-6 md:py-4">
                     <button
                       type="button"
-                      className="text-left font-semibold text-slate-900 group-hover:text-teal-700"
+                      className="flex items-center gap-3 rounded text-left font-semibold text-slate-900 group-hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
                     >
+                      <Icon name="document" className="h-5 w-5 shrink-0 text-slate-400 group-hover:text-teal-600" />
                       {project.projectName || 'ไม่มีชื่อโครงการ'}
                     </button>
                   </td>
@@ -90,19 +101,20 @@ export default function ProjectDocumentsPage({ client }) {
                   <td className="md:px-6 md:py-4">
                     <StatusBadge status={project.status} />
                   </td>
-                  <td className="flex justify-end gap-2 md:table-cell md:space-x-2 md:px-6 md:py-4 md:text-right">
+                  <td className="flex justify-end gap-2 md:table-cell md:px-6 md:py-4 md:text-right">
                     {project.status === RETURNED && (
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         onClick={(event) => {
                           event.stopPropagation()
                           openEdit(project.id)
                         }}
-                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-white"
                         data-req="FR-PRJ-06"
                       >
                         แก้ไข
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>
@@ -111,6 +123,7 @@ export default function ProjectDocumentsPage({ client }) {
           </table>
         )}
       </section>
+      )}
     </div>
   )
 }

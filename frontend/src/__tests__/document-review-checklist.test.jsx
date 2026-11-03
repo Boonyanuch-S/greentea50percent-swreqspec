@@ -1,8 +1,18 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { vi } from 'vitest'
 import App from '../App.jsx'
 import ReviewerChecklistPanel from '../components/ReviewerChecklistPanel.jsx'
+import DocumentReviewPage from '../pages/DocumentReviewPage.jsx'
 import { reviewQueueMock } from '../services/reviewQueue.js'
+
+function resultRadio(itemName, result) {
+  const group = screen.getByRole('radiogroup', { name: `สถานะเอกสาร ${itemName}` })
+  return within(group).getByRole('radio', { name: result })
+}
+
+function chooseResult(itemName, result) {
+  fireEvent.click(resultRadio(itemName, result))
+}
 
 test('test_AC_VDC_04_document_review_displays_details_and_checklist เจ้าหน้าที่เปิดรายละเอียดและเห็น Checklist', async () => {
   // Given เจ้าหน้าที่ที่ Login แล้วเลือกเอกสารจากคิว
@@ -87,15 +97,11 @@ test('test_AC_VDC_04_reviewer_selects_relevant_checklist_items แต่ละ�
     )
     const firstItem = await screen.findByLabelText('รายการเฉพาะโครงการหนึ่ง')
     fireEvent.click(firstItem)
-    fireEvent.change(screen.getByLabelText('สถานะเอกสาร รายการเฉพาะโครงการหนึ่ง'), {
-      target: { value: 'ครบ' },
-    })
+    chooseResult('รายการเฉพาะโครงการหนึ่ง', 'ครบ')
     fireEvent.click(screen.getByRole('button', { name: 'บันทึกผลตรวจ' }))
     await screen.findByText('บันทึกผลตรวจแล้ว')
     expect(screen.getByLabelText('รายการเฉพาะโครงการหนึ่ง').checked).toBe(true)
-    expect(
-      screen.getByLabelText('สถานะเอกสาร รายการเฉพาะโครงการหนึ่ง').value,
-    ).toBe('ครบ')
+    expect(resultRadio('รายการเฉพาะโครงการหนึ่ง', 'ครบ').checked).toBe(true)
     expect(screen.getByLabelText('รูปแบบเอกสารอีกประเภท').checked).toBe(false)
     firstProject.unmount()
 
@@ -108,20 +114,14 @@ test('test_AC_VDC_04_reviewer_selects_relevant_checklist_items แต่ละ�
       />,
     )
     fireEvent.click(await screen.findByLabelText('รูปแบบเอกสารอีกประเภท'))
-    fireEvent.change(screen.getByLabelText('สถานะเอกสาร รูปแบบเอกสารอีกประเภท'), {
-      target: { value: 'ไม่ครบ' },
-    })
+    chooseResult('รูปแบบเอกสารอีกประเภท', 'ไม่ครบ')
     fireEvent.click(screen.getByLabelText('เอกสารเสริมสำหรับโครงการสอง'))
-    fireEvent.change(screen.getByLabelText('สถานะเอกสาร เอกสารเสริมสำหรับโครงการสอง'), {
-      target: { value: 'ครบ' },
-    })
+    chooseResult('เอกสารเสริมสำหรับโครงการสอง', 'ครบ')
     fireEvent.click(screen.getByRole('button', { name: 'บันทึกผลตรวจ' }))
     await screen.findByText('บันทึกผลตรวจแล้ว')
     expect(screen.getByLabelText('รายการเฉพาะโครงการหนึ่ง').checked).toBe(false)
     expect(screen.getByLabelText('รูปแบบเอกสารอีกประเภท').checked).toBe(true)
-    expect(
-      screen.getByLabelText('สถานะเอกสาร รูปแบบเอกสารอีกประเภท').value,
-    ).toBe('ไม่ครบ')
+    expect(resultRadio('รูปแบบเอกสารอีกประเภท', 'ไม่ครบ').checked).toBe(true)
     expect(screen.getByLabelText('เอกสารเสริมสำหรับโครงการสอง').checked).toBe(true)
 
     // Then รายการและผลตรวจของแต่ละโครงการไม่ถูกบังคับให้เหมือนกัน
@@ -164,4 +164,66 @@ test('test_AC_VDC_04_reviewer_selects_relevant_checklist_items แต่ละ�
   } finally {
     vi.unstubAllGlobals()
   }
+})
+
+test('test_AC_VDC_04_reviewer_adds_document_name_for_this_project เพิ่มชื่อเอกสารที่เรียกต่างออกไปแล้วติ๊กให้โครงการนี้', async () => {
+  // Given Checklist มีรายการเดิมที่ยังไม่ตรงกับชื่อเอกสารของโครงการนี้
+  const addChecklistItem = vi.fn(async (itemName) => ({ checklist_item_id: 902, item_name: itemName }))
+  const client = {
+    getSubmissionChecklist: async () => [
+      { checklist_item_id: 901, item_name: 'บันทึกข้อความ', selected: false, result: null },
+    ],
+    updateSubmissionChecklist: async (_submissionId, items) => items,
+    addChecklistItem,
+  }
+  render(<ReviewerChecklistPanel client={client} session={{ token: 'test-token' }} submissionId={41} />)
+
+  // When ผู้ตรวจพิมพ์ชื่อเอกสารใหม่และกดเพิ่ม
+  fireEvent.change(await screen.findByLabelText('เพิ่มเอกสารที่ไม่มีในรายการ'), {
+    target: { value: 'หนังสือขอความอนุเคราะห์วิทยากร' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'เพิ่ม' }))
+
+  // Then รายการใหม่ถูกติ๊กให้โครงการนี้ และต้องระบุครบ/ไม่ครบก่อนบันทึก
+  expect(await screen.findByLabelText('สถานะเอกสาร หนังสือขอความอนุเคราะห์วิทยากร')).toBeTruthy()
+  expect(addChecklistItem).toHaveBeenCalledWith('หนังสือขอความอนุเคราะห์วิทยากร', { token: 'test-token' })
+  expect(screen.getByText('เลือกแล้ว 1 รายการ · ครบ 0 · ไม่ครบ 0')).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'บันทึกผลตรวจ' }).disabled).toBe(true)
+})
+
+test('test_AC_VDC_02_incomplete_items_draft_rejection_reason รายการไม่ครบเตือนและร่างเหตุผลตีกลับ', async () => {
+  // Given เจ้าหน้าที่เปิดเอกสารที่รอตรวจ และ Checklist มีรายการให้ติ๊ก
+  const submission = {
+    submission_id: 41,
+    project_name: 'โครงการสำหรับทดสอบ',
+    project_owner: 'สโมสรนักศึกษาคณะวิทยาศาสตร์',
+    submitted_at: '2026-10-30T09:00:00+07:00',
+    status: 'รอตรวจสอบ',
+    summary: 'รายละเอียด',
+    document: { name: 'เอกสาร.txt', format: 'ข้อความจำลอง', content: 'เนื้อหา' },
+  }
+  const client = {
+    getSubmission: async () => submission,
+    getSubmissionChecklist: async () => [
+      { checklist_item_id: 1, item_name: 'กศ.003', selected: false, result: null },
+    ],
+  }
+  render(
+    <DocumentReviewPage
+      client={client}
+      session={{ token: 'test-token', profile: { username: 'faculty@test.edu' } }}
+      submissionId={41}
+    />,
+  )
+
+  // When ผู้ตรวจระบุว่าเอกสารไม่ครบ
+  fireEvent.click(await screen.findByLabelText('กศ.003'))
+  chooseResult('กศ.003', 'ไม่ครบ')
+
+  // Then ระบบเตือนโดยไม่ปิดปุ่มอนุมัติ และร่างเหตุผลให้แก้ไขได้
+  expect(await screen.findByText('มีเอกสารไม่ครบ 1 รายการ')).toBeTruthy()
+  expect(screen.getByText('มีการเปลี่ยนแปลงที่ยังไม่บันทึก')).toBeTruthy()
+  expect(screen.getByRole('button', { name: 'อนุมัติและส่งต่อให้อาจารย์' }).disabled).toBe(false)
+  fireEvent.click(screen.getByRole('button', { name: 'ตีกลับเอกสาร' }))
+  expect(screen.getByLabelText('เหตุผลในการตีกลับ').value).toBe('เอกสารไม่ครบ: กศ.003')
 })
