@@ -30,12 +30,14 @@ test('test_AC_APR_07_advisor_sees_faculty_checklist_and_history อาจาร�
   expect(screen.getByText('เอกสารที่ต้องแก้: กส 002')).toBeTruthy()
 })
 
-test('test_AC_PRJ_02_reason_names_documents_to_fix เหตุผลระบุเอกสารที่ต้องแก้', () => {
+// ตรวจการประกอบข้อความตีกลับของผู้ตรวจ (UC-03/UC-05) ไม่ใช่ AC-PRJ-02 (F-004)
+test('ข้อความตีกลับระบุเอกสารที่ต้องแก้', () => {
   expect(composeReturnReason(['กส 002'], ' แก้งบประมาณ ')).toBe('เอกสารที่ต้องแก้: กส 002\nแก้งบประมาณ')
   expect(composeReturnReason([], 'แก้งบประมาณ')).toBe('แก้งบประมาณ')
 })
 
-test('test_AC_PRJ_03_form_requires_all_fields ฟอร์มไม่ผ่านถ้ากรอกไม่ครบ', async () => {
+// ตรวจ validation ของ FR-PRJ-02 ตามคำสั่งทีม (Q-04) ไม่ใช่ AC-PRJ-03 (F-004)
+test('ฟอร์มไม่ผ่านถ้ากรอกไม่ครบ', async () => {
   // Given ฟอร์มโครงการใหม่ที่ยังไม่ได้กรอก
   render(<ProjectDocumentForm client={projectDocumentMock} />)
   const name = await screen.findByLabelText('ชื่อโครงการ')
