@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI-PRJ-01 สร้างโครงการใหม่</title>
+<style>
+  /* แก้สีและฟอนต์ได้ตามโปรเจกต์ ส่วนนี้คือ "ยืดหยุ่นได้" */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif;background:#eef2f4;color:#1d2b3a;padding:24px;line-height:1.6}
+  .note{max-width:1100px;margin:0 auto 16px;background:#fff7e6;border:1px dashed #d79a2b;border-radius:10px;padding:10px 14px;font-size:14px;color:#7a5414}
+  .row{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .state{width:340px}
+  .state h2{font-size:14px;color:#5b6b7b;margin:0 0 8px 4px;font-weight:600}
+  .phone{background:#fff;border:1px solid #cfd8de;border-radius:22px;padding:18px 16px 22px;box-shadow:0 6px 18px rgba(0,0,0,.06);min-height:520px}
+  .bar{font-weight:700;font-size:18px;margin-bottom:14px}
+  label{display:block;font-size:13px;color:#5b6b7b;margin:12px 0 4px}
+  .input{border:1px solid #b9c6ce;border-radius:10px;padding:10px 12px;background:#fff;color:#8a97a3;min-height:44px}
+  .input.tall{min-height:72px}
+  .btn{display:block;text-align:center;background:#0e7c7b;color:#fff;border-radius:12px;padding:12px;font-weight:700;margin-top:18px}
+  .btn.ghost{background:#fff;color:#0e7c7b;border:1px solid #0e7c7b}
+  .item{border:1px solid #dde4e8;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:14px}
+  .item small{display:block;color:#5b6b7b}
+  .empty{border:1px dashed #b9c6ce;border-radius:12px;padding:18px;text-align:center;color:#5b6b7b;margin-top:12px;font-size:14px}
+  .todo{border:2px dashed #d79a2b;border-radius:12px;padding:14px;text-align:center;color:#7a5414;background:#fffaf0;margin-top:12px;font-size:14px}
+</style>
+</head>
+<body>
+<!-- MOCKUP สำหรับคุยกับผู้ใช้และ PO ไม่ใช่โค้ดจริง ห้ามคัดลอกไฟล์นี้ไปเป็นโค้ดทั้งไฟล์
+     ร่างจากข้อความใน spec.md (FR-PRJ-01, FR-PRJ-02, AC-PRJ-03) ไม่ได้ลอกจากหน้าจอที่ทำแล้ว
+     ยังไม่ได้ให้ PO ยืนยัน -->
+<p class="note">🧩 MOCKUP UI-PRJ-01 สร้างโครงการใหม่ | รองรับ FR-PRJ-01, FR-PRJ-02 (ตรวจด้วย AC-PRJ-03) | ข้อมูลทั้งหมดเป็นตัวอย่าง | ร่างจาก spec รอ PO ยืนยัน</p>
+<div class="row">
+  <section class="state">
+    <h2>สถานะ 1: หน้ารายการโครงการ (มีโครงการเดิม)</h2>
+    <div class="phone">
+      <div class="bar">เอกสารโครงการ</div>
+      <span class="btn" data-req="FR-PRJ-01">สร้างโครงการใหม่</span>
+      <div class="item">โครงการตัวอย่าง ก<small>สถานะ: รอเจ้าหน้าที่คณะตรวจสอบ</small></div>
+      <div class="item">โครงการตัวอย่าง ข<small>สถานะ: ถูกตีกลับ</small></div>
+    </div>
+  </section>
+  <section class="state">
+    <h2>สถานะ 2: หน้ารายการโครงการ (ยังไม่มีโครงการ)</h2>
+    <div class="phone">
+      <div class="bar">เอกสารโครงการ</div>
+      <span class="btn" data-req="FR-PRJ-01">สร้างโครงการใหม่</span>
+      <div class="empty">ยังไม่มีโครงการ</div>
+    </div>
+  </section>
+  <section class="state">
+    <h2>สถานะ 3: ฟอร์มเอกสารเปล่า (AC-PRJ-03)</h2>
+    <div class="phone">
+      <div class="bar">สร้างโครงการใหม่</div>
+      <label>ชื่อโครงการ</label>
+      <div class="input" data-req="FR-PRJ-02"></div>
+      <label>วัตถุประสงค์</label>
+      <div class="input tall" data-req="FR-PRJ-02"></div>
+      <label>วันที่</label>
+      <div class="input" data-req="FR-PRJ-02"></div>
+      <label>สถานที่</label>
+      <div class="input" data-req="FR-PRJ-02"></div>
+      <label>ตัวชี้วัด</label>
+      <div class="input tall" data-req="FR-PRJ-02"></div>
+      <span class="btn">ถัดไป</span>
+      <span class="btn ghost">กลับ</span>
+    </div>
+  </section>
+  <section class="state">
+    <h2>สถานะ 4: ผู้ใช้บทบาทอื่นเปิดหน้านี้</h2>
+    <div class="phone">
+      <div class="bar">สร้างโครงการใหม่</div>
+      <div class="todo">รอ Q-10: ผู้ใช้ที่เข้าสู่ระบบแล้วแต่ไม่ใช่กรรมการสโมสร ต้องเห็นอะไร</div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
