@@ -1927,3 +1927,9 @@
 - คำสั่ง: แก้ตาม F-004 ใน specs/001-จัดการเอกสารโครงการ/rtm.md แตะเฉพาะไฟล์ที่เกี่ยวข้อง ห้ามแก้ test ที่ขึ้นต้นด้วย test_TC_
 - แก้ `frontend/src/__tests__/review-context.test.jsx`: เปลี่ยนชื่อ `test_AC_PRJ_02_reason_names_documents_to_fix` เป็น "ข้อความตีกลับระบุเอกสารที่ต้องแก้" และ `test_AC_PRJ_03_form_requires_all_fields` เป็น "ฟอร์มไม่ผ่านถ้ากรอกไม่ครบ" พร้อมคอมเมนต์ว่าตรวจเรื่องอะไร ไม่แก้ assert
 - ผล: `npm test` 76 ผ่าน 0 ไม่ผ่าน; git diff มีแค่ไฟล์นี้
+
+## 2569-11-08 fix F-011 (ทีมตัดสิน: แก้โค้ด)
+
+- คำสั่ง: แก้ตาม F-011 ใน specs/001-จัดการเอกสารโครงการ/rtm.md แตะเฉพาะไฟล์ที่เกี่ยวข้อง ห้ามแก้ test ที่ขึ้นต้นด้วย test_TC_
+- ลบ `frontend/src/components/AuthGuard.jsx` (ไม่มีไฟล์ใด import) การกันหน้าจอยังอยู่ที่ `App.jsx` (แสดงหน้า login เมื่อไม่มี session) และ API ใช้ `require_club`
+- ผล: `npm test` 76 ผ่าน, `pytest` 148 ผ่าน, ไม่ผ่าน 0; git diff มีแค่ไฟล์ที่ลบ
