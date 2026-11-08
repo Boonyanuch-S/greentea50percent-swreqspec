@@ -102,7 +102,6 @@ export default function HoursSubmission({ client }) {
   return (
     <div>
       <PageHeader
-        eyebrow="กรรมการสโมสร · ชั่วโมงกิจกรรม"
         title="ส่งข้อมูลชั่วโมงกิจกรรม"
         description="ตรวจสอบข้อมูลจากกิจกรรมที่จบแล้วก่อนยืนยันส่ง"
       />

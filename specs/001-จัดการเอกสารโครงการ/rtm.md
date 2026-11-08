@@ -1,10 +1,10 @@
 # RTM: จัดการเอกสารโครงการ
-อ้างอิง: spec.md Draft v2 | tasks.md | test-cases.md (มีแถว AC-PRJ-03: TC-PRJ-03-1 ถึง 8 ใช้ได้ 7 แถว, TC-PRJ-03-7 ร่าง)
+อ้างอิง: spec.md Draft v3 | mockups/UI-PRJ-01-new-project.html | tasks.md | test-cases.md (มีแถว AC-PRJ-03: TC-PRJ-03-1 ถึง 8 ใช้ได้ 7 แถว, TC-PRJ-03-7 ร่าง)
 สร้างด้วย /verify เมื่อ 2569-11-08 (รอบ verify v2 หลัง fix F-004, F-011 และ spec Draft v2) | test: 224 ผ่าน 0 ไม่ผ่าน (backend 148, frontend 76)
 รอบก่อน: 2569-11-08 verify v1 | 224 ผ่าน; 2569-11-02 | 217 ผ่าน
 
 หมายเหตุการรัน: รอบนี้ `cd backend && pytest -v` รันได้แล้ว (แก้ `backend/pytest.ini` 2569-11-08) และ `cd frontend && npm test`
-ไม่มี `specs/000-shared/` และไม่มี `mockups/` จึงไม่มีการตรวจข้อ 6
+ไม่มี `specs/000-shared/`; รอบ verify ui (2569-11-08) มี `mockups/UI-PRJ-01-new-project.html` แล้ว จึงตรวจข้อ 6 ในหัวข้อ 2.1
 
 ## 1. ตามรอยไปข้างหน้า (requirement ไป โค้ด ไป test)
 | ID | AC | task | โค้ด (ไฟล์: ฟังก์ชัน) | test (ผล) | สถานะ |
@@ -40,6 +40,21 @@
 | `models/auth_token.py`: `utc_now` (แก้ 2569-11-08) | FR-AUTH-04, IF-TOKEN-01 ของ specs/009 | แทน `datetime.utcnow()` ค่าเหมือนเดิม ไม่เปลี่ยนสิ่งที่ผู้ใช้ได้รับ | ไม่ใช่ข้อค้นพบ เป็นไฟล์ของ 009 |
 | `components/AuthGuard.jsx` | NFR-SEC-01 | ลบแล้ว 2569-11-08 | F-011 แก้แล้ว |
 | `services/projectDocumentMock.js` | FR-PRJ-01, 03, 05, 06, 07 | หน้าจริงเรียกข้อมูลผ่าน API แล้ว แต่ `ProjectDocumentsPage` กับ `ProjectDetailPage` ยัง import ค่าคงที่ `RETURNED` จากไฟล์นี้ ส่วน test หน้าจอยังใช้เป็น client และ Checklist คนละชุดกับ backend | F-004 |
+
+### 2.1 หน้าจอเทียบ mockup (คำถามข้อ 6, verify ui 2569-11-08)
+| UI | "ต้องตรง" ใน spec | หน้าจอจริง (ไฟล์) | ผล | test |
+|---|---|---|---|---|
+| UI-PRJ-01 สถานะ 1, 2 | ปุ่ม "สร้างโครงการใหม่" อยู่ที่หน้ารายการทั้งตอนมีและไม่มีโครงการ | `ProjectDocumentsPage.jsx` บรรทัด 60 "+ สร้างโครงการใหม่" ใน PageHeader แสดงทุกกรณี | ตรง (เครื่องหมาย + เป็นการตกแต่ง) | TC-PRJ-03-1, TC-PRJ-03-4 (ผ่าน) |
+| UI-PRJ-01 สถานะ 3 | ฟอร์ม 5 ช่อง ว่างทุกช่องและพิมพ์ได้ | `ProjectDocumentForm.jsx`: `fields`, `api/client.js`: `getNewProjectForm` | ตรง; ชื่อช่อง "วันที่จัดกิจกรรม" อยู่ในข้อ "ยืดหยุ่นได้" | TC-PRJ-03-1 (ผ่าน) |
+| UI-PRJ-01 สถานะ 3 | ไม่มีข้อมูลของโครงการเดิมบนฟอร์มใหม่ | `ProjectDocumentForm.jsx` โหลดใหม่ทุกครั้งตาม `projectId` | ตรง | TC-PRJ-03-3 (ผ่าน) |
+| UI-PRJ-01 สถานะ 4 | รอ Q-10 | `require_club` และ `RoleHome` ใน `App.jsx` | ไม่ตรวจ (รอ Q-10) | ไม่มี (TC-PRJ-03-7 ร่าง) |
+
+สิ่งบนหน้าจอที่ไม่มีใน mockup:
+- ข้อความแนะนำ "ควรเสนอล่วงหน้าอย่างน้อย 1 เดือน…" ที่ช่องวันที่: ไม่มี FR เป็นข้อค้นพบเดิม F-006 (รอ Q-07) ไม่เพิ่มซ้ำ
+- กล่องสรุปเอกสารแนบ (0/3) และหมายเหตุ "รอ Q-01" ข้างฟอร์ม: มี FR-PRJ-03 รองรับ (แสดง Checklist ก่อนส่ง) ไม่ใช่ของแถม
+- ตัวแสดงขั้น "ข้อมูลโครงการ / แนบเอกสารตาม Checklist" และปุ่ม ถัดไป ยกเลิก: ปุ่มนำทาง ไม่นับ
+- คลิกแถวในรายการเพื่อเปิดหน้ารายละเอียด: ข้อค้นพบเดิม F-009 (รอ Q-08) ไม่เพิ่มซ้ำ
+mockup เกิน spec: ไม่มี (mockup ร่างจากข้อความใน spec และสถานะ 4 ใช้กล่อง "รอ Q-10")
 
 ## 3. ข้อค้นพบ
 ชนิด: AC ไม่มี test / test อ่อน / โค้ดไม่มี FR / FR ไม่มี AC / เดา Q-xx / ละเมิด Constraint / ตัวเลขไม่ตรง spec / อ้าง ID ผิดเรื่อง
