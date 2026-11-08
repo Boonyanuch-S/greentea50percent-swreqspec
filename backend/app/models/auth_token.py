@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import enum
 import uuid
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import DateTime, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+def utc_now() -> datetime:
+    """เวลาปัจจุบันแบบ UTC ไม่มี tzinfo ให้เทียบกับคอลัมน์ DateTime เดิมได้ (แทน datetime.utcnow ที่เลิกใช้แล้ว)."""
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Base(DeclarativeBase):
@@ -36,16 +41,16 @@ class AuthToken(Base):
     token_value: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
-    issued_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    issued_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     @staticmethod
     def compute_expiry(issued_at: datetime | None = None) -> datetime:
         """คำนวณวันหมดอายุ Token 30 นาทีตาม IF-TOKEN-01 และ ASM-02."""
-        base_time = issued_at or datetime.utcnow()
+        base_time = issued_at or utc_now()
         return base_time + timedelta(minutes=DEFAULT_TOKEN_TTL_MINUTES)
 
     def is_expired(self, now: datetime | None = None) -> bool:
         """ตรวจว่า Token หมดอายุแล้วตาม IF-TOKEN-01."""
-        check_time = now or datetime.utcnow()
+        check_time = now or utc_now()
         return check_time >= self.expires_at

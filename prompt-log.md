@@ -1825,3 +1825,51 @@
 - 009: แก้หมายเหตุที่ล้าสมัย (authMock, Token ไม่ถูกต้อง), หน้าหลักกองกิจยังเริ่มที่ UC-05 ไม่ตรงคำตอบ Q-01 2569-11-01, plan ระบุว่าไม่มี `GET /api/auth/me`; spec บันทึกสถานะ prototype ของ Q-03, Q-06
 - 006, 008, 011: หมายเหตุว่าหน้า mock ยังอยู่แต่ App.jsx ไม่ได้เชื่อมเมนู
 - ยังไม่ปิด Open Question ใดและไม่กรอกช่อง "ทีมตัดสิน" ใน rtm.md เพราะต้องให้ทีมตัดสิน
+
+## 2569-11-08 /testcases AC-PRJ-03 (001 จัดการเอกสารโครงการ)
+
+- คำสั่ง: `/testcases AC-PRJ-03 specs/001-จัดการเอกสารโครงการ/`
+- โหมด: ร่าง (ยังไม่มี test-cases.md จึงสร้างใหม่ตามแบบในภาคผนวก)
+- TC ที่เสนอ (สถานะ "ร่าง" ทุกแถว): TC-PRJ-03-1 ถึง TC-PRJ-03-8 (ปกติ 3, ขอบ 2, ทางผิด 3; vitest 5, คน 3)
+- ส่วนที่ spec ไม่ได้บอก: TC-PRJ-03-7 ผู้ใช้ที่ login แล้วแต่ไม่ใช่กรรมการสโมสรเปิดหน้าสร้างโครงการใหม่ ผลควรเป็นอย่างไร
+- ข้อสังเกต: T-16 สถานะ "รอ Q-02" แต่ข้อความ AC-PRJ-03/FR-PRJ-01 ชัดแล้ว จึงไม่ได้ใส่ "(รอ Q-02)" ในแถวใด ให้ทีมยืนยัน; "ยังไม่สร้างระเบียน" มาจาก plan.md ข้อ 6 ไม่ได้อยู่ใน Then ของ AC
+- ผล test: ไม่ได้รัน (โหมดร่าง ไม่เขียนโค้ด test)
+
+## 2569-11-08 แก้แถวร่างใน test-cases.md ของ AC-PRJ-03
+
+- คำสั่ง: "ตรวจสอบ test cases ว่าหลังจากตอบคำถามมีอะไรที่ทำไม่ได้หรือตกหล่นไหม" แล้ว "แก้ไขข้อผิดพลาดที่เกิดขึ้น"
+- พบว่ายังไม่มีคำตอบของทีมบันทึกในไฟล์ใด จึงตรวจแถวเทียบกับโค้ดแทน
+- แก้แถวร่าง (สถานะยังเป็น "ร่าง" ทุกแถว ไม่เพิ่ม/ลบแถว ไม่สร้าง ID ใหม่):
+  - TC-PRJ-03-1: ระบุว่าหน้าจอใช้ชื่อช่อง "วันที่จัดกิจกรรม"
+  - TC-PRJ-03-2: ตัดการอ้าง `POST /project-documents` เพราะไม่อยู่ใน plan.md ข้อ 4 (F-007)
+  - TC-PRJ-03-3: Given เพิ่มการกดยืนยันในกล่อง "ยกเลิกการกรอกเอกสาร?"
+  - TC-PRJ-03-6: เปลี่ยนตรวจด้วยจาก "คน" เป็น vitest + pytest แยก Then เป็น 2 ส่วน และตั้งชื่อ test
+- ยังไม่แก้ (ต้องให้ทีมตัดสิน): TC-PRJ-03-7 ใช้ FR-AUTH-04 ของ specs/009 หรือเพิ่ม Q ใหม่, ทำ endpoint `GET /project-documents/new` (T-04/Q-02) หรือไม่, ชื่อ test ตาม plan.md ข้อ 6 กับรูปแบบ TC, test เดิมใน F-003/F-004
+- ผล test: ไม่ได้รัน (ยังไม่เขียนโค้ด test)
+
+## 2569-11-08 ทีมตัดสินชื่อ test ของ AC-PRJ-03
+
+- คำสั่ง: "งั้นทำการคงชื่อไว้ตามตาราง"
+- ทีมตัดสิน: ใช้ชื่อ test ตาม test-cases.md (`test_TC_PRJ_03_n_…`) ไม่ใช้ชื่อ `test_AC_PRJ_03_show_empty_project_form`
+- แก้ plan.md ข้อ 6 แถว AC-PRJ-03 ให้ชี้ไป TC-PRJ-03-1 ถึง 8 ใน test-cases.md
+- แก้ tasks.md T-16 ช่อง "ไฟล์ที่แตะ" และ "เสร็จเมื่อ" ให้ตรงชื่อในตาราง พร้อมหมายเหตุ 2569-11-08
+- ไม่แก้ test-cases.md (ชื่อในตารางคงเดิม) และไม่แตะ AC ข้ออื่น
+
+## 2569-11-08 รัน pytest -v และแก้การรันจากโฟลเดอร์ backend
+
+- คำสั่ง: "pytest -v และแก้ไข"
+- `cd backend && pytest -v` รันไม่ได้: `ModuleNotFoundError: No module named 'backend'` เพราะ conftest import `backend.app.main` แต่ `backend/pytest.ini` ตั้ง `pythonpath = .` (คือโฟลเดอร์ backend)
+- แก้ `backend/pytest.ini` เป็น `pythonpath = .. .` (ไฟล์ตั้งค่า test ไม่ใช่โค้ดของระบบ)
+- ผล: `cd backend && pytest` 147 ผ่าน 0 ไม่ผ่าน และ `PYTHONPATH=. pytest backend/tests` 147 ผ่าน เท่าเดิม
+- คำเตือนที่ยังมี (ไม่ทำให้ test ไม่ผ่าน ไม่ได้แก้): `datetime.utcnow()` deprecated ใน `backend/app/models/auth_token.py:45` และ Starlette เตือนเรื่อง httpx
+
+## 2569-11-08 แก้ให้ `pytest -v` รันได้ไม่มี error และไม่มีคำเตือน
+
+- คำสั่ง: "แก้ไม่ให้เออเร่อ pytest -v"
+- อาการ: รัน `pytest -v` ที่โฟลเดอร์หลักแล้ว error ตอนเก็บ test (`No module named 'backend'` และ `No module named 'app'`) เพราะไม่มี pytest.ini ที่โฟลเดอร์หลัก และ test บางไฟล์ import `backend.app` บางไฟล์ import `app`
+- แก้:
+  - เพิ่ม `pytest.ini` ที่โฟลเดอร์หลัก: `pythonpath = . backend`, `testpaths = backend/tests`
+  - `backend/pytest.ini`: `pythonpath = .. .`
+  - ทั้งสองไฟล์ซ่อนคำเตือน Starlette เรื่อง httpx (มาจาก library ไม่ใช่โค้ดทีม)
+  - `backend/app/models/auth_token.py`: เปลี่ยน `datetime.utcnow()` ที่เลิกใช้แล้วเป็น `utc_now()` (UTC ไม่มี tzinfo เหมือนเดิม พฤติกรรมไม่เปลี่ยน)
+- ผล: `pytest -v` (โฟลเดอร์หลัก), `cd backend && pytest -v` และ `PYTHONPATH=. pytest backend/tests` ผ่าน 147 ไม่ผ่าน 0 ไม่มีคำเตือน

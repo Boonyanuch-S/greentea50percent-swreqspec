@@ -146,9 +146,10 @@
 ### T-16 ทดสอบการแสดงฟอร์มโครงการใหม่
 - รองรับ: FR-PRJ-01
 - ตรวจด้วย: AC-PRJ-03
-- ไฟล์ที่แตะ: `frontend/src/__tests__/` ชุดทดสอบ `test_AC_PRJ_03_show_empty_project_form`
+- ไฟล์ที่แตะ: `frontend/src/__tests__/TC-PRJ-03-*.test.jsx` และ `backend/tests/test_AC_PRJ_03.py` ตามแถว TC-PRJ-03-* ใน test-cases.md
 - ต้องทำหลัง: T-03, T-12
-- เสร็จเมื่อ: `test_AC_PRJ_03_show_empty_project_form` ผ่านและยืนยันว่าฟอร์มเปล่าแสดงโดยยังไม่สร้างระเบียน
+- เสร็จเมื่อ: test ของแถว TC-PRJ-03-* ที่สถานะ "ใช้ได้" ผ่านทั้งหมด และยืนยันว่าฟอร์มเปล่าแสดงโดยยังไม่สร้างระเบียน
+- หมายเหตุ 2569-11-08: ทีมตัดสินใช้ชื่อ test ตามตาราง test-cases.md (`test_TC_PRJ_03_n_…`) แทนชื่อเดียวใน plan.md ข้อ 6
 - สถานะ: รอ Q-02
 - หมายเหตุ 2569-11-03: test T-03 ใน `projectDocumentForm.test.jsx` ยังไม่ตรวจว่าช่องว่างและไม่ได้เริ่มจากปุ่มสร้างใหม่ (F-003); `test_AC_PRJ_03_form_requires_all_fields` ตรวจ validation ซึ่ง AC-PRJ-03 ไม่ได้สั่ง (F-004)
 - หมายเหตุ 2569-10-29: มี test ใกล้เคียงแล้วใน `frontend/src/__tests__/projectDocumentForm.test.jsx` ชื่อ "T-03 แสดงฟอร์มโครงการใหม่พร้อมช่องข้อมูลหลักครบ" แต่ยังไม่ได้ตั้งชื่อตาม AC-PRJ-03 และยังไม่ได้ตรวจว่า "ยังไม่สร้างระเบียน"
