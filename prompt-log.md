@@ -1988,3 +1988,11 @@
 - ผลสรุปตามรอย: ครบ 7, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 5
 - ข้อค้นพบที่ยังคงอยู่: F-001, F-002, F-003, F-004, F-005
 - หมายเหตุ: ไม่มีการแก้โค้ดหรือ test; เป้าหมายคือรายงานตาม spec และชี้จุดที่ยังขัดแย้งกับ requirement
+
+## 2569-11-09 คำสั่ง: /fix F-003
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่แก้: `backend/app/routers/project_documents.py`, `frontend/src/pages/DocumentReviewPage.jsx`, `frontend/src/components/ReviewContext.jsx`, `specs/003-ตรวจเอกสารโครงการ/rtm.md`
+- เป้าหมาย: ใช้ `checklist_item_id` เป็น identity หลัก และคง fallback ไว้ที่ `item_name` เฉพาะกรณีที่ไม่มี ID
+- ผลการทดสอบ: `cd backend && PYTHONPATH=. pytest -v` ผ่าน 148 tests
+- สรุป: F-003 ปรับให้ผลตรวจยึด identity ของ checklist ที่คงอยู่แทนการจับคู่ด้วย `item_name` อย่างเดียว

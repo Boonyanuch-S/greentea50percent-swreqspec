@@ -236,13 +236,24 @@ def list_submission_documents(
     submission_id: int,
     _: AuthenticatedUserContext = Depends(require_faculty),
     service: ProjectDocumentService = Depends(get_project_document_service),
+    session: Session = Depends(get_checklist_session),
 ) -> list[dict]:
     """คืนไฟล์ที่กรรมการแนบเพื่อให้เจ้าหน้าที่ตรวจ ตาม FR-VDC-02 และ FR-VDC-04."""
     project = service.get_by_submission(submission_id)
     if project is None:
         return []
+    checklist_item_ids = {
+        item.item_name: item.checklist_item_id
+        for item in ChecklistService.latest_items(session)
+    }
     return [
-        {"id": item.id, "type": item.code, "title": item.name, "reference": project.attachments[item.id].file_name}
+        {
+            "id": item.id,
+            "type": item.code,
+            "title": item.name,
+            "reference": project.attachments[item.id].file_name,
+            "checklist_item_id": checklist_item_ids.get(item.code) or checklist_item_ids.get(item.name),
+        }
         for item in PROJECT_CHECKLIST
         if item.id in project.attachments
     ]

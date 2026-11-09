@@ -16,6 +16,22 @@ function formatSubmittedAt(value) {
   }).format(new Date(value))
 }
 
+function findDocumentResult(checklistItems, document) {
+  const documentItemId = document?.checklist_item_id
+  const documentNames = [document?.type, document?.title, document?.name].filter(Boolean)
+
+  if (documentItemId != null) {
+    const byStableId = checklistItems.find(
+      (item) => String(item.checklist_item_id) === String(documentItemId),
+    )
+    if (byStableId) {
+      return byStableId.result
+    }
+  }
+
+  return checklistItems.find((item) => documentNames.includes(item.item_name))?.result ?? null
+}
+
 // ผูกไฟล์กับเอกสารที่เปิดอยู่ เพื่อใช้ตัวแสดงไฟล์ชุดเดียวกับหน้าอนุมัติ
 function useFileClient(client, submissionId) {
   return useMemo(
@@ -100,8 +116,7 @@ export default function DocumentReviewPage({
                       onClick={() => setSelectedDocumentId(item.id)}
                     >
                       {item.type}
-                      {checklistItems.find((checklistItem) => checklistItem.item_name === item.type)?.result
-                        && ` · ${checklistItems.find((checklistItem) => checklistItem.item_name === item.type).result}`}
+                      {findDocumentResult(checklistItems, item) && ` · ${findDocumentResult(checklistItems, item)}`}
                     </Button>
                   ))}
                 </div>

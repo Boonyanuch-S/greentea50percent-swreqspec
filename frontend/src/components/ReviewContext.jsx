@@ -23,9 +23,16 @@ export function ResultBadge({ result }) {
   return <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${tone}`}>{result ?? 'ยังไม่ตรวจ'}</span>
 }
 
-// จับคู่ผล Checklist กับเอกสารจากชื่อรายการ เพื่อให้เห็นผลตรวจข้างไฟล์แต่ละฉบับ ตาม FR-APR-02 และ IF-CHK-02
-export function resultForDocument(results, documentType) {
-  return results?.find((item) => item.item_name === documentType)?.result
+// จับคู่ผล Checklist กับเอกสารโดยใช้ identity เดียวกัน และ fallback เป็นชื่อรายการเดิมเมื่อไม่มี ID ตาม FR-APR-02 และ IF-CHK-02
+export function resultForDocument(results, document) {
+  const documentType = typeof document === 'string' ? document : document?.type ?? document?.item_name ?? document?.name ?? document?.title
+  const documentItemId = typeof document === 'object' ? document?.checklist_item_id : undefined
+
+  if (documentItemId != null) {
+    return results?.find((item) => String(item.checklist_item_id) === String(documentItemId))?.result
+  }
+
+  return results?.find((item) => item.item_name === documentType || item.name === documentType)?.result
 }
 
 // แสดงรายการ Checklist อื่นที่ไม่ใช่ไฟล์ในชุด เพื่อให้ทุกบทบาทเห็นผลตรวจเหมือนกัน
