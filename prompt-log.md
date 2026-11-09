@@ -2143,3 +2143,10 @@
 - โหมด: เขียน test จากแถวสถานะ "ใช้ได้"
 - เพิ่ม test: `test_TC_SBH_03_1_mixed_activity_statuses`, `test_TC_SBH_03_2_status_boundary`, `test_TC_SBH_03_3_no_finished_activity`, `test_TC_SBH_03_4_only_finished_activities` ใน `frontend/src/__tests__/hours-submission-navigation.test.jsx`
 - ผล test: `cd frontend && npm test` ผ่าน 34 files / 82 tests; test ใหม่ทั้ง 4 ผ่าน
+
+## 2569-11-09 คำสั่ง: /verify specs/002-ส่งข้อมูลชั่วโมง/
+- ผล test: backend `pytest -v` ผ่าน 155 tests (รอบแรกติดตั้งไม่ได้เพราะ environment ขาด SQLAlchemy; ติดตั้งจาก `backend/requirements.txt` แล้วรันซ้ำ); frontend `npm test` ผ่าน 34 files / 82 tests; รวม 237 ผ่าน, 0 ไม่ผ่าน
+- ตามรอยไปข้างหน้า: 12 IDs — ครบ 2, ยังไม่ถึง 0, รอ mapping 2, ช่องโหว่ 8
+- ข้อค้นพบใหม่: F-006 (TC-SBH-03-1/2 ไม่เตรียม Given สถานะปะปนและ assertions ซ้ำ), F-007 (FR-SBH-04 ไม่มี AC ที่ตรวจการตรวจความครบถ้วน)
+- ข้อค้นพบเดิมที่ยังเปิด: F-001 ถึง F-005
+- แก้เฉพาะ `specs/002-ส่งข้อมูลชั่วโมง/rtm.md` และ `prompt-log.md`; ไม่แก้โค้ดหรือ test
