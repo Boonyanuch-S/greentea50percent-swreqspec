@@ -2150,3 +2150,12 @@
 - ข้อค้นพบใหม่: F-006 (TC-SBH-03-1/2 ไม่เตรียม Given สถานะปะปนและ assertions ซ้ำ), F-007 (FR-SBH-04 ไม่มี AC ที่ตรวจการตรวจความครบถ้วน)
 - ข้อค้นพบเดิมที่ยังเปิด: F-001 ถึง F-005
 - แก้เฉพาะ `specs/002-ส่งข้อมูลชั่วโมง/rtm.md` และ `prompt-log.md`; ไม่แก้โค้ดหรือ test
+
+## 2569-11-09 คำสั่ง: แก้ตาม F-004 ใน specs/002-ส่งข้อมูลชั่วโมง/rtm.md
+- แก้ `HoursSubmission.jsx` ให้มีลิงก์ไป UC-11 เมื่อเกินกำหนด และเชื่อมการนำทางไปหน้า `LateSubmissionPage` ที่มีอยู่; ไม่ได้เพิ่ม flow ขอผ่อนผัน
+- ระบุ `deadlineExceeded: false` ให้ข้อมูล mock ที่ไม่มี deadline ตาม ASM-03; เพิ่ม test ยืนยันว่าไม่แสดงลิงก์เมื่อไม่เกินกำหนด
+- แก้ `Activity.regular_submission_deadline` ให้รับ `None` ตาม ASM-03 และเพิ่ม assertion ว่า API คืน `deadline_exceeded: false` เมื่อไม่มี deadline
+- เพิ่ม/ปรับ test เฉพาะ AC-SBH-05 ในไฟล์ test ที่ไม่ขึ้นต้น `test_TC_`; ไม่แก้ test `test_TC_*`
+- ผล test: `pytest -v` ผ่าน 155 tests; frontend tests เฉพาะ `hours-submission.test.jsx` และ `hours-submission-navigation.test.jsx` ผ่าน 2 files / 9 tests
+- หมายเหตุ: คำสั่ง frontend รอบแรกจาก repository root ไม่พบ `package.json`; รันซ้ำจาก `frontend/` แล้วผ่าน
+- `git diff --check` ผ่าน; ยังไม่ commit ตามคำสั่งผู้ใช้

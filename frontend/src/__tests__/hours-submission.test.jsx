@@ -42,8 +42,11 @@ test('test_AC_SBH_05_show_exception_link_when_deadline_exceeded เสนอ UC-
     await screen.findByText('กำหนดส่งของกองกิจผ่านแล้ว'),
   ).toBeTruthy()
   expect(
-    screen.getByText('สามารถยื่นคำขอผ่อนผันเวลาส่งช้าได้'),
+    screen.getByRole('link', { name: 'ไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า' }),
   ).toBeTruthy()
+  expect(
+    screen.getByRole('link', { name: 'ไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า' }).getAttribute('href'),
+  ).toBe('?view=late-submission')
 })
 
 test('test_AC_SBH_05_show_exception_link_when_deadline_exceeded ไม่เสนอ UC-11 เมื่อ deadline ยังไม่ผ่าน', async () => {
@@ -57,4 +60,5 @@ test('test_AC_SBH_05_show_exception_link_when_deadline_exceeded ไม่เส�
 
   await screen.findByText('กิจกรรมทดสอบ')
   expect(screen.queryByText('กำหนดส่งของกองกิจผ่านแล้ว')).toBeNull()
+  expect(screen.queryByRole('link', { name: 'ไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า' })).toBeNull()
 })

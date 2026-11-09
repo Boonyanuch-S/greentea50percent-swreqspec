@@ -25,7 +25,7 @@ def _client_with_club_token() -> TestClient:
     return TestClient(app, headers={"Authorization": token})
 
 
-def _activity(activity_id: int, deadline: date) -> Activity:
+def _activity(activity_id: int, deadline: date | None) -> Activity:
     return Activity(
         activity_id=activity_id,
         owner_user_id="club-1",
@@ -52,6 +52,7 @@ def test_AC_SBH_05_show_exception_link_when_deadline_exceeded():
             _activity(1, today - timedelta(days=1)),
             _activity(2, today),
             _activity(3, today + timedelta(days=1)),
+            _activity(4, None),
         ]
     )
     session.commit()
@@ -63,11 +64,14 @@ def test_AC_SBH_05_show_exception_link_when_deadline_exceeded():
         exceeded = client.get("/activities/1/hours-submission")
         due_today = client.get("/activities/2/hours-submission")
         not_exceeded = client.get("/activities/3/hours-submission")
+        no_deadline = client.get("/activities/4/hours-submission")
 
         assert exceeded.status_code == 200
         assert exceeded.json()["deadline_exceeded"] is True
         assert due_today.json()["deadline_exceeded"] is False
         assert not_exceeded.json()["deadline_exceeded"] is False
+        assert no_deadline.status_code == 200
+        assert no_deadline.json()["deadline_exceeded"] is False
     finally:
         app.dependency_overrides.pop(get_activity_session, None)
         session.close()

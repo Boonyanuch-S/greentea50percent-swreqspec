@@ -19,7 +19,7 @@ class Activity(Base):
     name = synonym("activity_name")
     end_date: Mapped[date] = mapped_column("activity_date", Date, nullable=False)
     activity_date = synonym("end_date")
-    regular_submission_deadline: Mapped[date] = mapped_column(Date, nullable=False)
+    regular_submission_deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str | None] = mapped_column(String, nullable=True)
     project_number_status: Mapped[str | None] = mapped_column(String, nullable=True)
     category_template_id: Mapped[str | None] = mapped_column(String, nullable=True)

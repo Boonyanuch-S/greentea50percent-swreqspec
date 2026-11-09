@@ -27,7 +27,7 @@ function ActivitySelector({ activities, selectedId, onChange }) {
 }
 
 // แสดงหน้าส่งชั่วโมงตาม FR-SBH-01, FR-SBH-03, FR-SBH-04, FR-SBH-06 และ FR-SBH-07
-export default function HoursSubmission({ client }) {
+export default function HoursSubmission({ client, onOpenLateSubmission }) {
   const [activities, setActivities] = useState([])
   const [selectedId, setSelectedId] = useState('')
   const [submission, setSubmission] = useState(null)
@@ -139,7 +139,21 @@ export default function HoursSubmission({ client }) {
             <>
               {submission.deadlineExceeded === true && (
                 <Notice tone="warning" title="กำหนดส่งของกองกิจผ่านแล้ว" role="status">
-                  <p>สามารถยื่นคำขอผ่อนผันเวลาส่งช้าได้</p>
+                  <p>
+                    สามารถยื่นคำขอผ่อนผันเวลาส่งช้าได้{' '}
+                    <a
+                      className="font-semibold text-teal-800 underline"
+                      href="?view=late-submission"
+                      onClick={(event) => {
+                        if (onOpenLateSubmission) {
+                          event.preventDefault()
+                          onOpenLateSubmission()
+                        }
+                      }}
+                    >
+                      ไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า
+                    </a>
+                  </p>
                 </Notice>
               )}
 

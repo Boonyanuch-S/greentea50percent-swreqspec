@@ -9,6 +9,7 @@ import ActivityHoursReview from './pages/ActivityHoursReview.jsx'
 import ChecklistManagementPage from './pages/ChecklistManagementPage.jsx'
 import DocumentReviewPage from './pages/DocumentReviewPage.jsx'
 import HoursSubmission from './pages/HoursSubmission.jsx'
+import LateSubmissionPage from './pages/LateSubmissionPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import ProjectApprovalListPage from './pages/ProjectApprovalListPage.jsx'
@@ -20,6 +21,7 @@ import RoleHomePage from './pages/RoleHomePage.jsx'
 import { authApi } from './services/auth.js'
 import { checklistApi, createProjectApprovalClient, createProjectDocumentClient, createReviewClient } from './api/client.js'
 import { hoursSubmissionMock } from './services/hoursSubmissionMock.js'
+import { lateSubmissionMock } from './services/lateSubmissionMock.js'
 import { activityHoursMock } from './services/activityHoursMock.js'
 import { projectOfficeReviewMock } from './services/projectOfficeReviewMock.js'
 import { AuthProvider } from './store/AuthContext.jsx'
@@ -134,6 +136,10 @@ function RoleHome({
   const sessionHoursSubmissionClient = hoursSubmissionClient ?? hoursSubmissionMock
 
   if (role === 'club_committee') {
+    if (params.get('view') === 'late-submission') {
+      return <LateSubmissionPage client={lateSubmissionMock} />
+    }
+
     // สลับจาก UC-01 ไปหน้าส่งข้อมูลชั่วโมงตาม FR-SBH-01 และ FR-SBH-03
     return (
       <>
@@ -144,7 +150,15 @@ function RoleHome({
           onChange={(view) => updateParams({ tab: view, project: null, edit: null })}
         />
         {tab === 'hours' ? (
-          <HoursSubmission client={sessionHoursSubmissionClient} />
+          <HoursSubmission
+            client={sessionHoursSubmissionClient}
+            onOpenLateSubmission={() => updateParams({
+              view: 'late-submission',
+              tab: null,
+              project: null,
+              edit: null,
+            })}
+          />
         ) : (
           <ProjectDocumentsPage client={sessionProjectClient} />
         )}

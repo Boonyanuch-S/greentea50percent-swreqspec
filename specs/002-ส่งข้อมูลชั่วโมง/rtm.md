@@ -51,7 +51,6 @@
 | F-001 | โค้ดไม่มี FR | `backend/app/api/hours_submission.py:get_activity_session`, `backend/app/main.py`, `frontend/src/App.jsx` | FR-SBH-01, FR-SBH-02, T-05 | API จริงไม่มี `app.state.activity_session` จึงตอบ 503; หน้ากรรมการใช้ `hoursSubmissionMock` เป็นค่าเริ่มต้น แม้มี authenticated client และ tests ผ่านเพราะ override dependency/ฉีด client เอง จึงยังไม่มี flow ใช้ข้อมูลกิจกรรมจริงตาม T-05 | |
 | F-002 | อ้าง ID ผิดเรื่อง | `test_AC_SBH_04_generate_excel_from_activity_data`, `hoursSubmissionMock.js`, ไม่มี generator/registry | FR-SBH-03, AC-SBH-04, IF-TPL-01 | test ชื่อสร้าง Excel แต่ตรวจแค่ participant/Staff/hour type; ไม่มีการสร้างไฟล์หรือใช้ template config ส่วนหน้าจอแสดง preview object จาก mock เสมือนเป็นไฟล์จริง และ endpoint preview/template registry ยังไม่มี | |
 | F-003 | เดา Q-03 | `hoursSubmissionMock.js:submitHours`, `activityHoursMock.addSubmittedDocument` | Q-03, FR-SBH-05, IF-UC07-01 | หน้าจอจำลองยืนยันส่งแล้วเพิ่มรายการเข้า UC-07 ใน memory ทันที ทั้งที่ Q-03 ยังเปิดและ T-11/T-17 ยังไม่ทำ; ไม่มี API/การบันทึกรายการส่งจริง | |
-| F-004 | test อ่อน | `HoursSubmission.jsx`, `hours-submission.test.jsx`, `Activity.regular_submission_deadline` | FR-SBH-07, AC-SBH-05, ASM-03 | AC ระบุให้เสนอทางเลือกไป UC-11 แต่ UI มีเพียงข้อความไม่มี link/ปุ่ม และ test ตรวจเพียงข้อความ แม้ชื่อบอก link; mock ไม่มี deadline flag ในการใช้งานจริง กล่องไม่แสดง นอกจากนี้ model กำหนด deadline เป็น non-null ทั้งที่ ASM-03 อนุญาตกรณีไม่มี deadline | |
 | F-005 | ละเมิด Constraint | `frontend/src/services/hoursSubmissionMock.js`: `template` | IF-TPL-01 | ค่า `HOURS-SCI` / version `1.0` hardcode ใน mock และถูกแสดงบนหน้าจอ ขัดกับข้อกำหนดอ่าน template ID/เวอร์ชันจาก config และไม่ hardcode แม้เป็น mock ที่ถูกใช้เป็นค่าเริ่มต้นของ App | |
 | F-006 | test อ่อน | `frontend/src/__tests__/hours-submission-navigation.test.jsx:96-125` | AC-SBH-03, TC-SBH-03-1, TC-SBH-03-2 | test ทั้งสองสร้างตัวแปรกิจกรรมยังไม่จบ แต่ส่งให้ client เฉพาะ `[finished]`; Given ที่มีสถานะปะปนจึงไม่เกิดจริงและ assertions ซ้ำกัน จึงไม่พิสูจน์พฤติกรรมหน้าจอเมื่อได้รับข้อมูลปะปน (แม้ backend test เดิมจะตรวจการกรอง API ได้) | |
 | F-007 | FR ไม่มี AC | `spec.md:FR-SBH-04 / AC-SBH-01`, `HoursSubmission.jsx` | FR-SBH-04 | Traceability ผูก FR-SBH-04 กับ AC-SBH-01 แต่ AC-01 ระบุเพียงว่ากรรมการตรวจไฟล์เรียบร้อยแล้วใน Given และ Then ไม่ตรวจว่าระบบให้ตรวจความครบถ้วนก่อนยืนยันได้; ไม่มี test ยืนยัน checkbox/การบล็อกยืนยันจนตรวจ และ T-09 ยังพร้อมทำ | |
@@ -59,7 +58,7 @@
 ## 4. แก้แล้ว
 | F-ID | แก้อย่างไร | รู้ได้อย่างไร |
 |---|---|---|
-| ไม่มี | รอบนี้ยังไม่มีข้อค้นพบที่ยืนยันว่าแก้แล้ว | F-001 ถึง F-007 ยังเปิดอยู่ |
+| F-004 | เพิ่มลิงก์จากหน้าส่งข้อมูลชั่วโมงไปหน้า UC-11 เมื่อ deadline เกินกำหนด; กำหนด `deadlineExceeded: false` ให้ mock ที่ไม่มี deadline และทำให้ `Activity.regular_submission_deadline` รับค่า `None` ตาม ASM-03 | Frontend tests ตรวจว่ามีลิงก์และนำทางไปหน้า UC-11 เมื่อเกินกำหนด และไม่แสดงลิงก์เมื่อไม่เกินกำหนด; backend `pytest -v` ผ่าน 155 tests รวมกรณีไม่มี deadline ที่คืน `deadline_exceeded: false` |
 
 ## 5. คำตอบที่เสนอสำหรับ Open Questions (รอทีมยืนยัน ยังไม่ใช่คำตอบทีม)
 | Q | คำตอบที่เสนอ | หลักฐาน | ความมั่นใจ |

@@ -32,9 +32,41 @@ test('กรรมการสโมสรเปิดหน้าส่งข�
   fireEvent.click(screen.getByRole('button', { name: 'ส่งข้อมูลชั่วโมงกิจกรรม' }))
   expect(await screen.findByRole('heading', { name: 'ส่งข้อมูลชั่วโมงกิจกรรม' })).toBeTruthy()
   expect(await screen.findByRole('heading', { name: 'Preview ไฟล์ Excel' })).toBeTruthy()
+  expect(screen.queryByRole('link', { name: 'ไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า' })).toBeNull()
 
   fireEvent.click(screen.getByRole('button', { name: 'เอกสารโครงการ' }))
   expect(await screen.findByRole('heading', { name: 'เอกสารโครงการ' })).toBeTruthy()
+})
+
+test('AC-SBH-05 กรรมการไปที่ UC-11 ได้เมื่อเกินกำหนดส่ง', async () => {
+  const hoursSubmissionClient = {
+    getFinishedActivities: async () => [
+      { id: 'activity-1', name: 'กิจกรรมเลยกำหนด', status: 'จบแล้ว' },
+    ],
+    getSubmission: async () => ({
+      id: 'activity-1',
+      name: 'กิจกรรมเลยกำหนด',
+      status: 'จบแล้ว',
+      projectNumberStatus: 'พร้อมแล้ว',
+      projectNumber: 'PROJECT-1',
+      deadlineExceeded: true,
+      preview: { templateId: 'test', templateVersion: '1', rows: [] },
+    }),
+  }
+
+  render(
+    <App
+      authClient={createAuthClient()}
+      hoursSubmissionClient={hoursSubmissionClient}
+      projectDocumentClient={{ listMyProjects: async () => [] }}
+    />,
+  )
+
+  login()
+  fireEvent.click(await screen.findByRole('button', { name: 'ส่งข้อมูลชั่วโมงกิจกรรม' }))
+  fireEvent.click(await screen.findByRole('link', { name: 'ไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า' }))
+
+  expect(await screen.findByRole('heading', { name: 'ขอบันทึกชั่วโมงย้อนหลัง' })).toBeTruthy()
 })
 
 test('AC-SBH-03 only finished activities are loaded from authenticated API', async () => {
