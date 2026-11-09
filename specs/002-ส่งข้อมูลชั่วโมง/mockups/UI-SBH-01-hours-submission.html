@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI-SBH-01 ส่งข้อมูลชั่วโมงกิจกรรม</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif;background:#eef2f4;color:#1d2b3a;padding:24px;line-height:1.6}
+  .note{max-width:1100px;margin:0 auto 16px;background:#fff7e6;border:1px dashed #d79a2b;border-radius:10px;padding:10px 14px;font-size:14px;color:#7a5414}
+  .row{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .state{width:min(100%,520px)}
+  .state h2{font-size:14px;color:#5b6b7b;margin:0 0 8px 4px;font-weight:600}
+  .screen{background:#fff;border:1px solid #cfd8de;border-radius:18px;padding:22px;box-shadow:0 6px 18px rgba(0,0,0,.06);min-height:520px}
+  .bar{font-weight:700;font-size:20px}
+  .sub{font-size:14px;color:#5b6b7b;margin-bottom:16px}
+  .section{font-size:14px;font-weight:700;color:#5b6b7b;margin:16px 0 8px}
+  .chip{display:inline-block;font-size:12px;border-radius:999px;padding:2px 10px;background:#e6f2f2;color:#0e7c7b;border:1px solid #9fcfce}
+  .field{border:1px solid #b9c6ce;border-radius:10px;padding:10px 12px;background:#fff;min-height:44px}
+  .status{border-radius:12px;padding:12px 14px;margin-top:12px;font-size:14px;background:#fff7e6;border:1px solid #e8c879;color:#7a5414}
+  .preview{border:1px solid #cfd8de;border-radius:12px;margin-top:14px;overflow:hidden}
+  .preview-head{padding:14px 16px;background:#f7f9fa;border-bottom:1px solid #dde4e8}
+  .preview-head small,.muted{color:#5b6b7b}
+  .help{padding:12px 16px;font-size:13px;color:#5b6b7b}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-top:1px solid #e5eaed}
+  th{font-weight:600;color:#5b6b7b;background:#fafcfd}
+  .check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px}
+  .check input{margin-top:5px}
+  .btn{display:block;text-align:center;background:#0e7c7b;color:#fff;border-radius:10px;padding:11px 14px;font-weight:700;margin-top:16px}
+  .btn.disabled{background:#d9e0e4;color:#71808a}
+  .link{display:inline-block;color:#0e7c7b;text-decoration:underline;font-weight:700;margin-top:6px}
+  .empty{border:1px dashed #b9c6ce;border-radius:12px;padding:20px;text-align:center;color:#5b6b7b;margin-top:12px}
+</style>
+</head>
+<body>
+<p class="note">MOCKUP UI-SBH-01 ส่งข้อมูลชั่วโมงกิจกรรม | รองรับ FR-SBH-01 ถึง FR-SBH-07 | ข้อมูลตัวอย่าง ยังไม่ยืนยันโดย PO</p>
+<div class="row">
+  <section class="state">
+    <h2>สถานะ 1: กิจกรรมจบแล้ว เลขสรุปพร้อม และแสดง Preview (AC-SBH-01, AC-SBH-03, AC-SBH-04)</h2>
+    <div class="screen">
+      <div class="bar">ส่งข้อมูลชั่วโมงกิจกรรม</div>
+      <div class="sub">ตรวจสอบข้อมูลจากกิจกรรมที่จบแล้วก่อนยืนยันส่ง</div>
+      <div class="section">เลือกกิจกรรมที่จบแล้ว</div>
+      <div class="field">กิจกรรมตัวอย่าง <span class="chip">จบแล้ว</span></div>
+      <div class="section">เลขสรุปโครงการ</div>
+      <div class="field">พร้อมแล้ว</div>
+      <div class="preview">
+        <div class="preview-head"><strong>Preview ไฟล์ Excel</strong><br><small>Template ID / version จาก config</small></div>
+        <p class="help">หากพบข้อมูลไม่ถูกต้องหรือไม่ครบถ้วน ให้กลับไปแก้ไขไฟล์ต้นทางแล้วส่งฉบับแก้ไขกลับเข้าระบบ โดยไม่แก้ไขข้อมูลในหน้านี้</p>
+        <table>
+          <thead><tr><th>ชื่อ</th><th>บทบาท</th><th>ประเภทชั่วโมง</th></tr></thead>
+          <tbody>
+            <tr><td>ผู้เข้าร่วมตัวอย่าง</td><td>ผู้เข้าร่วม</td><td>ตามกิจกรรม</td></tr>
+            <tr><td>Staff ตัวอย่าง</td><td>Staff</td><td>ตามกิจกรรม</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <label class="check"><input type="checkbox"><span>ตรวจสอบความครบถ้วนของข้อมูลในไฟล์แล้ว</span></label>
+      <span class="btn disabled">ยืนยันส่งข้อมูล</span>
+    </div>
+  </section>
+  <section class="state">
+    <h2>สถานะ 2: เลขสรุปโครงการยังไม่พร้อม (AC-SBH-02)</h2>
+    <div class="screen">
+      <div class="bar">ส่งข้อมูลชั่วโมงกิจกรรม</div>
+      <div class="sub">กิจกรรมตัวอย่าง <span class="chip">จบแล้ว</span></div>
+      <div class="section">สถานะเลขสรุปโครงการ</div>
+      <div class="status"><strong>ขอเลขสรุปจากกองกิจ</strong><br>ยังไม่สามารถส่งข้อมูลชั่วโมงได้จนกว่าเลขสรุปโครงการจะพร้อม</div>
+      <div class="empty">ไม่อนุญาตให้ดำเนินการส่งข้อมูลชั่วโมง</div>
+      <span class="btn disabled">ยืนยันส่งข้อมูล</span>
+    </div>
+  </section>
+  <section class="state">
+    <h2>สถานะ 3: กำหนดส่งผ่านแล้ว (AC-SBH-05)</h2>
+    <div class="screen">
+      <div class="bar">ส่งข้อมูลชั่วโมงกิจกรรม</div>
+      <div class="sub">กิจกรรมตัวอย่าง <span class="chip">จบแล้ว</span></div>
+      <div class="status"><strong>กำหนดส่งของกองกิจผ่านแล้ว</strong><br>สามารถยื่นคำขอผ่อนผันเวลาส่งช้าได้<br><span class="link">ไปที่ UC-11 เพื่อขอผ่อนผันเวลาส่งช้า</span></div>
+      <p class="muted" style="margin-top:14px">แสดงทางเลือกนี้เมื่อกิจกรรมมีการกำหนดเวลาส่งและเกินกำหนดเท่านั้น</p>
+    </div>
+  </section>
+</div>
+</body>
+</html>

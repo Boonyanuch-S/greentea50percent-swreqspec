@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI-SBH-02 จัดการ Template</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif;background:#eef2f4;color:#1d2b3a;padding:24px;line-height:1.6}
+  .note{max-width:1100px;margin:0 auto 16px;background:#fff7e6;border:1px dashed #d79a2b;border-radius:10px;padding:10px 14px;font-size:14px;color:#7a5414}
+  .row{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .state{width:min(100%,520px)}
+  .state h2{font-size:14px;color:#5b6b7b;margin:0 0 8px 4px;font-weight:600}
+  .screen{background:#fff;border:1px solid #cfd8de;border-radius:18px;padding:22px;box-shadow:0 6px 18px rgba(0,0,0,.06);min-height:500px}
+  .bar{font-weight:700;font-size:20px}
+  .sub{font-size:14px;color:#5b6b7b;margin-bottom:16px}
+  .section{font-size:14px;font-weight:700;color:#5b6b7b;margin:18px 0 8px}
+  .field{display:block;width:100%;border:1px solid #b9c6ce;border-radius:10px;padding:11px 12px;background:#fff;margin-top:8px;color:#5b6b7b;font:inherit}
+  .table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  .table th,.table td{text-align:left;padding:10px;border-top:1px solid #e5eaed}
+  .table th{font-weight:600;color:#5b6b7b;background:#fafcfd}
+  .badge{display:inline-block;font-size:12px;border-radius:999px;padding:2px 10px;background:#e6f2f2;color:#0e7c7b;border:1px solid #9fcfce}
+  .btn{display:inline-block;text-align:center;background:#0e7c7b;color:#fff;border-radius:10px;padding:10px 14px;font-weight:700;margin-top:12px}
+  .btn.ghost{background:#fff;color:#0e7c7b;border:1px solid #0e7c7b}
+  .empty{border:1px dashed #b9c6ce;border-radius:12px;padding:22px;text-align:center;color:#5b6b7b;margin-top:12px}
+  .help{font-size:13px;color:#5b6b7b;margin-top:8px}
+</style>
+</head>
+<body>
+<p class="note">MOCKUP UI-SBH-02 จัดการ Template | รองรับ FR-SBH-03, IF-TPL-01, ASM-04 | ข้อมูลตัวอย่าง ยังไม่ยืนยันโดย PO</p>
+<div class="row">
+  <section class="state">
+    <h2>สถานะ 1: มี Template พร้อมใช้งาน</h2>
+    <div class="screen">
+      <div class="bar">จัดการ Template ไฟล์ Excel</div>
+      <div class="sub">รายการ Template ID และเวอร์ชันจาก config</div>
+      <table class="table">
+        <thead><tr><th>Template ID</th><th>เวอร์ชัน</th><th>สถานะ</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>ตัวอย่าง ID</td><td>ตัวอย่างเวอร์ชัน</td><td><span class="badge">พร้อมใช้</span></td><td><span class="btn ghost">เลือกใช้</span></td></tr>
+          <tr><td>ตัวอย่าง ID อื่น</td><td>ตัวอย่างเวอร์ชัน</td><td><span class="badge">พร้อมใช้</span></td><td><span class="btn ghost">เลือกใช้</span></td></tr>
+        </tbody>
+      </table>
+      <div class="section">อัปโหลด Template</div>
+      <label class="help" for="template-file">ไฟล์ Template</label>
+      <input class="field" id="template-file" type="file">
+      <label class="help" for="template-version">เวอร์ชัน</label>
+      <input class="field" id="template-version" type="text" placeholder="ระบุเวอร์ชัน">
+      <p class="help">Template ID/เวอร์ชันที่พร้อมใช้ต้องมาจาก config ไม่ฝังรายการไว้ในโค้ด</p>
+      <span class="btn">บันทึก Template</span>
+    </div>
+  </section>
+  <section class="state">
+    <h2>สถานะ 2: ยังไม่มี Template พร้อมใช้งาน</h2>
+    <div class="screen">
+      <div class="bar">จัดการ Template ไฟล์ Excel</div>
+      <div class="sub">รายการ Template ID และเวอร์ชันจาก config</div>
+      <div class="empty">ยังไม่มี Template ที่พร้อมใช้งาน</div>
+      <div class="section">อัปโหลด Template</div>
+      <label class="help" for="template-file-empty">ไฟล์ Template</label>
+      <input class="field" id="template-file-empty" type="file">
+      <label class="help" for="template-version-empty">เวอร์ชัน</label>
+      <input class="field" id="template-version-empty" type="text" placeholder="ระบุเวอร์ชัน">
+      <span class="btn">บันทึก Template</span>
+    </div>
+  </section>
+</div>
+</body>
+</html>
