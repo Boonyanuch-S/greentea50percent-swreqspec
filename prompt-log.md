@@ -2245,3 +2245,9 @@
 - ย้าย F-007 ไปหัวข้อ “แก้แล้ว” ใน `rtm.md`; สรุปช่องโหว่คงเหลือจาก 13 เป็น 12
 - ผล `pytest -v`: 157 passed; ผล `cd frontend && npm test -- --run src/__tests__/activity-hours-empty-queue.test.jsx`: 1 passed
 - คำสั่ง npm ที่รันจาก root ก่อนแก้ไขตรวจพาธไม่พบ `package.json`; รันซ้ำจาก `frontend/` แล้ว test ผ่าน
+
+## 2569-11-09 22:57 UTC คำสั่ง: /implement T-24 (แก้ F-008)
+- เพิ่ม `test_AC_HRS_09_reg_retry_endpoint_logs_access_context` ใน `backend/tests/test_AC_HRS_09_student_access_is_logged.py`; ยืนยัน accessor_id, accessed_at และ access_item ของการเรียก `/reg-retry` แม้ REG retry จะล้มเหลว
+- ผล `pytest -v`: 158 passed, 0 failed
+- ไม่แก้ test ที่ชื่อขึ้นต้นด้วย `test_TC_`; T-24 ปรับเป็น “เสร็จ รอทีมตรวจ”
+- ไม่มีรายละเอียดจาก spec ที่ต้องเดา; ใช้ error timeout เดิมของ retry และ access item ที่ implementation บันทึกอยู่แล้ว

@@ -8,14 +8,17 @@ from sqlalchemy.pool import StaticPool
 from backend.app.api.activity_hours import (
     get_activity_hours_excel_config,
     get_activity_hours_file_resolver,
+    get_reg_client,
 )
 from backend.app.api.hours_submission import get_activity_session
 from backend.app.audit.student_access_log import record_student_access
+from backend.app.integrations.reg_client import RegClient
 from backend.app.main import app
 from backend.app.models.activity import Activity, Base
 from backend.app.models.activity_hours import ActivityHourDocument
 from backend.app.models.auth_token import UserRole
 from backend.app.models.authenticated_user_context import AuthenticatedUserContext
+from backend.app.models.reg_submission import RegClientResponse, RegSubmission
 from backend.app.models.student_access_log import StudentAccessLog
 from backend.app.services.auth_service import token_registry
 
@@ -141,5 +144,46 @@ def test_AC_HRS_09_individual_summary_endpoint_logs_access_context() -> None:
             app.state.uc04_summary_provider = previous_provider
         else:
             del app.state.uc04_summary_provider
+        session.close()
+        engine.dispose()
+
+
+def test_AC_HRS_09_reg_retry_endpoint_logs_access_context() -> None:
+    """บันทึกผู้เข้าถึงและเอกสารเมื่อส่ง REG ซ้ำตาม AC-HRS-09 และ DOM-PDPA-01."""
+    engine, session, token = _create_logged_in_activity_document()
+    now = datetime.now(timezone.utc)
+    session.add(
+        RegSubmission(
+            document_id=41,
+            submitted_data={"document_id": 41, "participant_hours": []},
+            submitted_at=now,
+            response_status="timeout",
+            error_message="ส่งข้อมูลไม่สำเร็จ",
+            last_attempt_at=now,
+            attempt_count=1,
+        )
+    )
+    session.commit()
+    app.dependency_overrides[get_reg_client] = lambda: RegClient(
+        transport=lambda _: RegClientResponse(
+            response_status="timeout",
+            error_message="ส่งข้อมูลไม่สำเร็จ",
+        )
+    )
+
+    try:
+        response = TestClient(app).post(
+            "/activity-hours/documents/41/reg-retry",
+            headers={"Authorization": token},
+        )
+
+        assert response.status_code == 502
+        access_log = session.query(StudentAccessLog).one()
+        assert access_log.accessor_id == "staff-1"
+        assert isinstance(access_log.accessed_at, datetime)
+        assert access_log.access_item == "activity-hours:document:41:reg-retry"
+    finally:
+        app.dependency_overrides.pop(get_activity_session, None)
+        app.dependency_overrides.pop(get_reg_client, None)
         session.close()
         engine.dispose()
