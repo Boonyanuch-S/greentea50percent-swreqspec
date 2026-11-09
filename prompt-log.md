@@ -2071,3 +2071,25 @@
 - ข้อค้นพบใหม่: F-017 (แถว "ใช้ได้" ของ AC-APR-03 ที่ยังไม่มี test), F-018 (โค้ดตัดสินกรณีที่ spec ไม่ได้บอก รวมกองกิจเปิดชุด "ส่งต่ออาจารย์" ได้), F-019 (review-context อ้าง FR-APR-02 ผิดเรื่อง)
 - ข้อค้นพบเดิมที่ยังอยู่: F-012, F-014, F-015, F-016; ลบแถว `AuthGuard.jsx` ออกจากตารางย้อนกลับเพราะไฟล์ถูกลบแล้ว
 - แก้เฉพาะ `rtm.md` และ `prompt-log.md` ไม่แก้โค้ด test spec plan tasks
+
+## 2569-11-09 /verify specs/005-อนุมัติเอกสาร/ (รอบ 2)
+- คำสั่ง: `/verify specs/005-อนุมัติเอกสาร/`
+- สิ่งที่เปลี่ยนตั้งแต่รอบก่อน: มีแค่ commit `9bf9b27` (rtm.md, prompt-log.md) โค้ด test spec plan tasks test-cases ไม่เปลี่ยน; ช่อง "ทีมตัดสิน" ของทุกข้อค้นพบยังว่าง
+- ผล test: backend `pytest -v` 152 passed; frontend `npm test` 34 files / 78 tests passed (รันได้แล้วเพราะมี `frontend/node_modules` กลับมา)
+- ตารางไปข้างหน้า: ครบ 9, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 3 (FR-APR-01, FR-APR-02, IF-UC01-02), ไม่นับเพราะยกเลิก 1
+- ข้อค้นพบใหม่: ไม่มี; ข้อค้นพบเดิมที่ยังเจอ: F-012, F-014, F-015, F-016, F-017, F-018, F-019 (ลองยิง API ซ้ำแล้วผลของ F-018 เหมือนเดิม)
+- แก้เฉพาะหัว `rtm.md` (ผล test) และ `prompt-log.md`
+
+## 2569-11-09 คำสั่ง: แก้ตาม F-001 ใน specs/005-อนุมัติเอกสาร/rtm.md
+- คำสั่ง: "แก้ตาม F-001 ใน specs/005-อนุมัติเอกสาร/rtm.md แตะเฉพาะไฟล์ที่เกี่ยวข้อง ห้ามแก้ test ที่ชื่อขึ้นต้นด้วย test_TC_ แล้วรัน pytest -v และจดใน prompt-log"
+- ผล: ไม่ได้แก้ไฟล์ใด เพราะ F-001 อยู่ในหัวข้อ "4. แก้แล้ว" ของ rtm.md (แก้ไปแล้วเมื่อ 2569-10-31 ตาม T-20) ตรวจแล้วโค้ดยังอยู่ครบ: `return_documents(by_advisor=...)` ใน router และ service, ฟอร์ม "การส่งเอกสารกลับ" ใน `ProjectApprovalPage.jsx`
+- ผล test: `cd backend && pytest -v` 152 passed รวม `test_IF_UC01_02_advisor_returns_documents_with_comment` และ `test_IF_UC01_02_advisor_cannot_return_after_cover_sheet` ผ่าน
+- ถามทีมกลับว่าต้องการ F-ID ไหน (ข้อค้นพบที่ยังเปิด: F-012, F-014 ถึง F-019)
+
+## 2569-11-09 คำสั่ง: แก้ตาม F-012 ใน specs/005-อนุมัติเอกสาร/rtm.md
+- คำสั่ง: "แก้ตาม F-012 ใน specs/005-อนุมัติเอกสาร/rtm.md แตะเฉพาะไฟล์ที่เกี่ยวข้อง ห้ามแก้ test ที่ชื่อขึ้นต้นด้วย test_TC_ แล้วรัน pytest -v และจดใน prompt-log"
+- AI ถามกลับ (เพราะ AGENTS.md ข้อ 5 ห้ามสร้าง ID เอง): (1) ข้อความ AC-APR-09 ใช้ร่าง A หรือ B (2) เปลี่ยนชื่อ test `test_IF_UC01_02_*` เป็น `test_AC_APR_09_*` ไหม
+- ทีมตอบ: (1) ร่าง A: Given อาจารย์เปิดเอกสารที่ส่งต่อถึงอาจารย์ และยังไม่อัปโหลดใบปะหน้า / When อาจารย์กดส่งเอกสารกลับและกรอกความเห็น / Then ระบบส่งเอกสารทั้งชุดกลับไปยัง UC-01 พร้อมความเห็นครบถ้วน (2) เปลี่ยนชื่อ
+- ไฟล์ที่แก้: `spec.md` (เพิ่ม AC-APR-09, แถว Traceability, CHANGELOG แทนบรรทัด "ยังเปิดให้ทีมพิจารณา"), `plan.md` ข้อ 6 (แถว AC-APR-09), `tasks.md` (T-20 ตรวจด้วย AC-APR-09, ชื่อ test, จุดตรวจคนลอง, ตาราง AC, ปิดเรื่องที่ต้องตัดสินข้อ 1), เปลี่ยนชื่อ test 4 ตัว (เนื้อ test ไม่เปลี่ยน): `backend/tests/test_AC_APR_04_return_full_document_with_comment.py` 2 ตัว, `frontend/src/__tests__/project-approval-advisor-return.test.jsx` 2 ตัว
+- ไม่แก้โค้ดของระบบ ไม่แตะ test_TC_ และไม่แก้ rtm.md (ให้ /verify รอบถัดไปย้าย F-012 ไป "แก้แล้ว")
+- ผล test: `cd backend && pytest -v` 152 passed (รวม `test_AC_APR_09_*` 2 ตัว); `npm test` 34 files / 78 tests passed

@@ -42,7 +42,7 @@ def test_AC_APR_04_blank_comment_is_rejected(advisor, office, service):
     assert office.get(BASE_URL).json()["status"] == "รออนุมัติ"
 
 
-def test_IF_UC01_02_advisor_returns_documents_with_comment(advisor, service):
+def test_AC_APR_09_advisor_returns_documents_with_comment(advisor, service):
     # Given อาจารย์ไม่เห็นด้วยกับเอกสารบางส่วน
     # When อาจารย์ส่งกลับพร้อมความเห็น
     response = advisor.post(f"{BASE_URL}/return", json={"comment_text": COMMENT})
@@ -55,7 +55,7 @@ def test_IF_UC01_02_advisor_returns_documents_with_comment(advisor, service):
     assert service.list_comments(SAMPLE_APPROVAL_ID)[0].author_id == "intuwet_p@silpakorn.edu"
 
 
-def test_IF_UC01_02_advisor_cannot_return_after_cover_sheet(advisor, service):
+def test_AC_APR_09_advisor_cannot_return_after_cover_sheet(advisor, service):
     # Given อาจารย์ส่งใบปะหน้าแล้ว เอกสารอยู่ที่กองกิจ
     submit_cover_sheet(advisor)
     # When อาจารย์ส่งกลับ

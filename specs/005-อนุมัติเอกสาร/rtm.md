@@ -1,6 +1,6 @@
 # RTM: อนุมัติเอกสารโครงการ
 อ้างอิง: spec.md Draft v2 | tasks.md | test-cases.md (AC-APR-03: TC-APR-03-1 ถึง TC-APR-03-10 สถานะ "ใช้ได้")
-สร้างด้วย /verify เมื่อ 2569-11-09 | test: 230 ผ่าน 0 ไม่ผ่าน (backend 152 รันรอบนี้; frontend 78 จากการรัน `/testcases` วันเดียวกัน รอบนี้รันซ้ำไม่ได้เพราะไม่มี `frontend/node_modules` หลัง commit `d06ca53` และ `frontend/src` ไม่เปลี่ยนตั้งแต่รอบนั้น)
+สร้างด้วย /verify เมื่อ 2569-11-09 (รอบ 2 หลัง commit `9bf9b27`) | test: 230 ผ่าน 0 ไม่ผ่าน (backend 152, frontend 34 ไฟล์ 78 test รันจริงทั้งสองฝั่งรอบนี้)
 
 F-ID ในไฟล์นี้นับเฉพาะฟีเจอร์ 005 คนละชุดกับ `rtm.md` ที่ root
 

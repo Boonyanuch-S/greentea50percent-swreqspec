@@ -23,7 +23,7 @@ function createClient(status) {
   }
 }
 
-test('test_IF_UC01_02_advisor_returns_documents_with_comment อาจารย์ส่งเอกสารกลับพร้อมความเห็น', async () => {
+test('test_AC_APR_09_advisor_returns_documents_with_comment อาจารย์ส่งเอกสารกลับพร้อมความเห็น', async () => {
   // Given อาจารย์ไม่เห็นด้วยกับเอกสารบางส่วน
   const client = createClient('ส่งต่ออาจารย์')
   render(<ProjectApprovalPage client={client} />)
@@ -39,7 +39,7 @@ test('test_IF_UC01_02_advisor_returns_documents_with_comment อาจารย�
   expect(screen.getByText('สถานะ: ตีกลับให้แก้ไข')).toBeTruthy()
 })
 
-test('test_IF_UC01_02_advisor_cannot_return_after_cover_sheet ส่งกลับไม่ได้หลังเอกสารไปถึงกองกิจ', async () => {
+test('test_AC_APR_09_advisor_cannot_return_after_cover_sheet ส่งกลับไม่ได้หลังเอกสารไปถึงกองกิจ', async () => {
   // Given เอกสารมีสถานะรออนุมัติแล้ว
   render(<ProjectApprovalPage client={createClient('รออนุมัติ')} />)
 
