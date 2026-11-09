@@ -2159,3 +2159,11 @@
 - ผล test: `pytest -v` ผ่าน 155 tests; frontend tests เฉพาะ `hours-submission.test.jsx` และ `hours-submission-navigation.test.jsx` ผ่าน 2 files / 9 tests
 - หมายเหตุ: คำสั่ง frontend รอบแรกจาก repository root ไม่พบ `package.json`; รันซ้ำจาก `frontend/` แล้วผ่าน
 - `git diff --check` ผ่าน; ยังไม่ commit ตามคำสั่งผู้ใช้
+
+## 2569-11-09 คำสั่ง: แก้ตาม F-006 ใน specs/002-ส่งข้อมูลชั่วโมง/rtm.md
+- ปรับ `HoursSubmission.jsx` ให้กรองรายการกิจกรรมเป็นสถานะ "จบแล้ว" ก่อนแสดงและเลือกได้
+- เพิ่ม `test_AC_SBH_03_mixed_activity_statuses_are_filtered_before_display` ให้ Given มีทั้งกิจกรรมจบแล้วและยังไม่จบ ตรวจว่ามีเฉพาะกิจกรรมจบแล้วในรายการ และเปิดรายละเอียดได้เฉพาะกิจกรรมนั้น
+- ไม่แก้ test ที่ชื่อขึ้นต้น `test_TC_`; เพิ่ม AC test แยกแทน
+- ผล test: backend `pytest -v` ผ่าน 155 tests; frontend `hours-submission-navigation.test.jsx` ผ่าน 8 tests
+- ย้าย F-006 จากข้อค้นพบไปหัวข้อ "แก้แล้ว" ใน `specs/002-ส่งข้อมูลชั่วโมง/rtm.md`
+- `git diff --check` ผ่าน; ไม่ commit

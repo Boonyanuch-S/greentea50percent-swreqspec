@@ -8,7 +8,7 @@
 ## 1. ตามรอยไปข้างหน้า (requirement ไป โค้ด ไป test)
 | ID | AC | task | โค้ด (ไฟล์: ฟังก์ชัน) | test (ผล) | สถานะ |
 |---|---|---|---|---|---|
-| FR-SBH-01 | AC-SBH-03 | T-01, T-02, T-04 เสร็จ; T-05 ทำบางส่วน | `api/hours_submission.py`: `list_hours_submission_activities`, `get_hours_submission_activity`; `HoursSubmission.jsx`: `ActivitySelector` | `test_AC_SBH_03_only_finished_activity_allowed` (ผ่าน); `test_TC_SBH_03_1_*` ถึง `test_TC_SBH_03_4_*` (ผ่านแต่ F-006) | ช่องโหว่ (F-001, F-006) |
+| FR-SBH-01 | AC-SBH-03 | T-01, T-02, T-04 เสร็จ; T-05 ทำบางส่วน | `api/hours_submission.py`: `list_hours_submission_activities`, `get_hours_submission_activity`; `HoursSubmission.jsx`: กรองสถานะและแสดง `ActivitySelector` | `test_AC_SBH_03_only_finished_activity_allowed`, `test_AC_SBH_03_mixed_activity_statuses_are_filtered_before_display` (ผ่าน); `test_TC_SBH_03_*` เดิมไม่แก้และไม่นับเป็นหลักฐาน | ช่องโหว่ (F-001) |
 | FR-SBH-02 | AC-SBH-04 | T-06 เสร็จ; T-08/T-09 พร้อมทำ | `api/activity_data.py`: `get_activity_people`, `get_activity_hour_types`; `services/hours_data.py` | `test_AC_SBH_04_generate_excel_from_activity_data`, `test_hours_data_service_returns_activity_people_and_all_hour_types` (ผ่าน; ข้อมูลถูกตรวจ แต่ Excel ไม่ได้สร้าง: F-002) | ช่องโหว่ (F-001, F-002) |
 | FR-SBH-03 | AC-SBH-04 | T-07/T-08/T-09/T-10 พร้อมทำ | ไม่มี generator หรือ template registry; mock สร้างเฉพาะ preview object | ไม่มี test สร้าง/ตรวจไฟล์ Excel หรือ template | ช่องโหว่ (F-002, F-005) |
 | FR-SBH-04 | AC-SBH-01 (ไม่ได้ตรวจการให้ตรวจความครบถ้วน) | T-09 พร้อมทำ; T-16 รอ Q-02 | `HoursSubmission.jsx`: checkbox และปุ่มยืนยัน (ใช้ preview mock) | ไม่มี test ยืนยันว่ากรรมการตรวจความครบถ้วนของไฟล์ได้ | ช่องโหว่ (F-007) |
@@ -52,13 +52,13 @@
 | F-002 | อ้าง ID ผิดเรื่อง | `test_AC_SBH_04_generate_excel_from_activity_data`, `hoursSubmissionMock.js`, ไม่มี generator/registry | FR-SBH-03, AC-SBH-04, IF-TPL-01 | test ชื่อสร้าง Excel แต่ตรวจแค่ participant/Staff/hour type; ไม่มีการสร้างไฟล์หรือใช้ template config ส่วนหน้าจอแสดง preview object จาก mock เสมือนเป็นไฟล์จริง และ endpoint preview/template registry ยังไม่มี | |
 | F-003 | เดา Q-03 | `hoursSubmissionMock.js:submitHours`, `activityHoursMock.addSubmittedDocument` | Q-03, FR-SBH-05, IF-UC07-01 | หน้าจอจำลองยืนยันส่งแล้วเพิ่มรายการเข้า UC-07 ใน memory ทันที ทั้งที่ Q-03 ยังเปิดและ T-11/T-17 ยังไม่ทำ; ไม่มี API/การบันทึกรายการส่งจริง | |
 | F-005 | ละเมิด Constraint | `frontend/src/services/hoursSubmissionMock.js`: `template` | IF-TPL-01 | ค่า `HOURS-SCI` / version `1.0` hardcode ใน mock และถูกแสดงบนหน้าจอ ขัดกับข้อกำหนดอ่าน template ID/เวอร์ชันจาก config และไม่ hardcode แม้เป็น mock ที่ถูกใช้เป็นค่าเริ่มต้นของ App | |
-| F-006 | test อ่อน | `frontend/src/__tests__/hours-submission-navigation.test.jsx:96-125` | AC-SBH-03, TC-SBH-03-1, TC-SBH-03-2 | test ทั้งสองสร้างตัวแปรกิจกรรมยังไม่จบ แต่ส่งให้ client เฉพาะ `[finished]`; Given ที่มีสถานะปะปนจึงไม่เกิดจริงและ assertions ซ้ำกัน จึงไม่พิสูจน์พฤติกรรมหน้าจอเมื่อได้รับข้อมูลปะปน (แม้ backend test เดิมจะตรวจการกรอง API ได้) | |
 | F-007 | FR ไม่มี AC | `spec.md:FR-SBH-04 / AC-SBH-01`, `HoursSubmission.jsx` | FR-SBH-04 | Traceability ผูก FR-SBH-04 กับ AC-SBH-01 แต่ AC-01 ระบุเพียงว่ากรรมการตรวจไฟล์เรียบร้อยแล้วใน Given และ Then ไม่ตรวจว่าระบบให้ตรวจความครบถ้วนก่อนยืนยันได้; ไม่มี test ยืนยัน checkbox/การบล็อกยืนยันจนตรวจ และ T-09 ยังพร้อมทำ | |
 
 ## 4. แก้แล้ว
 | F-ID | แก้อย่างไร | รู้ได้อย่างไร |
 |---|---|---|
 | F-004 | เพิ่มลิงก์จากหน้าส่งข้อมูลชั่วโมงไปหน้า UC-11 เมื่อ deadline เกินกำหนด; กำหนด `deadlineExceeded: false` ให้ mock ที่ไม่มี deadline และทำให้ `Activity.regular_submission_deadline` รับค่า `None` ตาม ASM-03 | Frontend tests ตรวจว่ามีลิงก์และนำทางไปหน้า UC-11 เมื่อเกินกำหนด และไม่แสดงลิงก์เมื่อไม่เกินกำหนด; backend `pytest -v` ผ่าน 155 tests รวมกรณีไม่มี deadline ที่คืน `deadline_exceeded: false` |
+| F-006 | กรองรายการกิจกรรมในหน้าส่งข้อมูลให้แสดงและเลือกได้เฉพาะสถานะ “จบแล้ว”; เพิ่ม AC test ใหม่ที่ป้อนกิจกรรมจบแล้วและยังไม่จบพร้อมกัน โดยไม่แก้ test ที่ชื่อขึ้นต้น `test_TC_` | AC test ใหม่ตรวจว่ามีเฉพาะกิจกรรมจบแล้วในตัวเลือก และ `getSubmission` ถูกเรียกเฉพาะกิจกรรมนั้น; frontend navigation tests ผ่าน 8 tests และ backend `pytest -v` ผ่าน 155 tests |
 
 ## 5. คำตอบที่เสนอสำหรับ Open Questions (รอทีมยืนยัน ยังไม่ใช่คำตอบทีม)
 | Q | คำตอบที่เสนอ | หลักฐาน | ความมั่นใจ |

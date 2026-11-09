@@ -113,6 +113,20 @@ test('AC-SBH-03 only finished activities are loaded from authenticated API', asy
   }
 })
 
+test('test_AC_SBH_03_mixed_activity_statuses_are_filtered_before_display', async () => {
+  const finished = activity(7, 'กิจกรรมที่จบแล้ว', 'จบแล้ว')
+  const unfinished = activity(8, 'กิจกรรมที่ยังไม่จบ', 'กำลังดำเนินการ')
+  const client = createHoursSubmissionTestClient([finished, unfinished])
+
+  render(<HoursSubmission client={client} />)
+
+  expect(await screen.findByRole('option', { name: finished.name })).toBeTruthy()
+  expect(screen.queryByRole('option', { name: unfinished.name })).toBeNull()
+  expect(client.getSubmission).toHaveBeenCalledTimes(1)
+  expect(client.getSubmission).toHaveBeenCalledWith(finished.id)
+  expect(client.getSubmission).not.toHaveBeenCalledWith(unfinished.id)
+})
+
 function createHoursSubmissionTestClient(activities) {
   return {
     getFinishedActivities: vi.fn().mockResolvedValue(activities),

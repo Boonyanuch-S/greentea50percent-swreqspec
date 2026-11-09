@@ -42,8 +42,9 @@ export default function HoursSubmission({ client, onOpenLateSubmission }) {
     setLoading(true)
     client.getFinishedActivities().then((result) => {
       if (!active) return
-      setActivities(result)
-      setSelectedId(result[0]?.id ?? '')
+      const finishedActivities = result.filter((activity) => activity.status === 'จบแล้ว')
+      setActivities(finishedActivities)
+      setSelectedId(finishedActivities[0]?.id ?? '')
     }).catch((reason) => {
       if (active) setError(reason.message)
     }).finally(() => {
