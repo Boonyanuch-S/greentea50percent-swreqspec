@@ -1,4 +1,5 @@
 from backend.app.services.project_approval_service import SAMPLE_APPROVAL_ID
+from backend.tests.test_AC_APR_02_office_approval_completes import submit_cover_sheet
 
 FILE_URL = f"/project-approvals/{SAMPLE_APPROVAL_ID}/documents/project-book/file"
 
@@ -16,8 +17,10 @@ def test_AC_APR_03_advisor_opens_selected_document_file(advisor):
     assert response.content.startswith(b"%PDF-")
 
 
-def test_AC_APR_02_office_opens_document_file(office):
-    # Given กองกิจตรวจเอกสารทั้งชุด
+def test_AC_APR_02_office_opens_document_file(advisor, office):
+    # Given อาจารย์ส่งใบปะหน้าแล้ว เอกสารเป็นรออนุมัติ และกองกิจตรวจเอกสารทั้งชุด
+    # (กองกิจเปิดชุดที่ยังเป็น "ส่งต่ออาจารย์" ไม่ได้ ตามที่ทีมตัดสิน F-018 2569-11-09)
+    submit_cover_sheet(advisor)
     # When เปิดไฟล์เอกสาร
     response = office.get(FILE_URL)
 

@@ -32,8 +32,9 @@ def test_AC_APR_02_review_requires_cover_sheet(advisor, office, service):
     # When กองกิจให้ผ่าน
     response = office.post(f"{BASE_URL}/review")
     # Then สถานะไม่เปลี่ยนและไม่เรียก UC-10
+    # (อ่านสถานะผ่านอาจารย์ เพราะกองกิจเปิดชุด "ส่งต่ออาจารย์" ไม่ได้ ตามที่ทีมตัดสิน F-018 2569-11-09)
     assert response.status_code == 409
-    assert office.get(BASE_URL).json()["status"] == "ส่งต่ออาจารย์"
+    assert advisor.get(BASE_URL).json()["status"] == "ส่งต่ออาจารย์"
     assert service.uc10.list_requests() == []
 
 
@@ -44,3 +45,42 @@ def test_AC_APR_02_office_list_shows_only_pending(advisor, office):
     response = office.get("/project-approvals")
     # Then เห็นเฉพาะเอกสารสถานะรออนุมัติ
     assert [item["id"] for item in response.json()] == [SAMPLE_APPROVAL_ID]
+
+
+OFFICE_READ_PATHS = [
+    BASE_URL,
+    f"{BASE_URL}/documents/ks-002",
+    f"{BASE_URL}/documents/ks-002/file",
+    f"{BASE_URL}/cover-sheet/file",
+    f"{BASE_URL}/review-context",
+]
+
+
+def test_AC_APR_02_office_cannot_open_forwarded_approval(office):
+    # Given เอกสารยังอยู่ขั้นอาจารย์ สถานะ "ส่งต่ออาจารย์" (ทีมตัดสิน F-018 2569-11-09)
+    # When กองกิจเปิดชุดนั้นด้วย approvalId โดยตรง
+    responses = [office.get(path) for path in OFFICE_READ_PATHS]
+    # Then ระบบตอบว่าไม่พบเอกสาร และไม่ส่งข้อมูลเอกสารกลับ
+    assert [item.status_code for item in responses] == [404] * len(OFFICE_READ_PATHS)
+    assert all("documents" not in item.json() for item in responses)
+
+
+def test_AC_APR_02_office_opens_approval_after_cover_sheet(advisor, office):
+    # Given อาจารย์ส่งใบปะหน้าแล้ว เอกสารเป็น "รออนุมัติ"
+    submit_cover_sheet(advisor)
+    # When กองกิจเปิดชุดนั้น
+    responses = [office.get(path) for path in OFFICE_READ_PATHS]
+    # Then เปิดได้ทุกส่วนที่ใช้ตรวจ
+    assert [item.status_code for item in responses] == [200] * len(OFFICE_READ_PATHS)
+    assert responses[0].json()["status"] == "รออนุมัติ"
+
+
+def test_AC_APR_02_office_still_opens_after_review_passed(advisor, office):
+    # Given กองกิจตรวจผ่านแล้ว เอกสารเป็น "อนุมัติสมบูรณ์"
+    submit_cover_sheet(advisor)
+    office.post(f"{BASE_URL}/review")
+    # When กองกิจเปิดชุดนั้นอีกครั้ง
+    response = office.get(BASE_URL)
+    # Then ยังเปิดได้ เพราะทีมห้ามเฉพาะสถานะ "ส่งต่ออาจารย์"
+    assert response.status_code == 200
+    assert response.json()["status"] == "อนุมัติสมบูรณ์"

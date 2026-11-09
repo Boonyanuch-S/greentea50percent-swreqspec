@@ -22,7 +22,7 @@ from ..services.project_document_service import (
 )
 from ..storage.project_document import StoredDocumentFile
 from .checklists import get_checklist_session
-from .project_approvals import project_approval_service
+from .project_approvals import project_approval_service, require_visible_approval
 from .review_decisions import approval_service, rejection_service
 from .review_queue import review_queue_service
 
@@ -294,7 +294,10 @@ def get_submission_history(
     return service.history_of(project) if project else []
 
 
-@project_document_router.get("/project-approvals/{approval_id}/review-context")
+@project_document_router.get(
+    "/project-approvals/{approval_id}/review-context",
+    dependencies=[Depends(require_visible_approval)],
+)
 def get_approval_review_context(
     approval_id: str,
     _: AuthenticatedUserContext = Depends(require_approval_reader),

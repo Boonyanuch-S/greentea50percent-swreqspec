@@ -45,7 +45,7 @@ route หลังบ้านจริงไม่มีคำนำหน้�
 | รายการ | Input / Output หลัก | รองรับ |
 |---|---|---|
 | `GET /api/project-approvals` | Input: Token ของอาจารย์หรือกองกิจ; Output: รายการเอกสาร อาจารย์เห็นทุกชุด กองกิจเห็นเฉพาะ `รออนุมัติ` | `FR-APR-01`, `FR-APR-05` |
-| `GET /api/project-approvals/{approvalId}` | Input: `approvalId`; Output: รายการเอกสาร สถานะ ใบปะหน้าล่าสุด และชนิดไฟล์ที่รับ; บทบาทอื่นได้ 403 | `FR-APR-01`, `CON-NFR-21` |
+| `GET /api/project-approvals/{approvalId}` | Input: `approvalId`; Output: รายการเอกสาร สถานะ ใบปะหน้าล่าสุด และชนิดไฟล์ที่รับ; บทบาทอื่นได้ 403; กองกิจขอชุดที่ยังเป็น `ส่งต่ออาจารย์` ได้ 404 ซึ่งใช้กับ `/documents/{documentId}`, `/file`, `/cover-sheet/file` และ `/review-context` ด้วย (`require_visible_approval`, ทีมตัดสิน F-018 2569-11-09) | `FR-APR-01`, `CON-NFR-21` |
 | `GET /api/project-approvals/{approvalId}/documents/{documentId}` | Input: `documentId`; Output: เอกสารรายการที่เลือก พร้อมวัตถุประสงค์ ตัวชี้วัด และรูปแบบเอกสาร | `FR-APR-01`, `AC-APR-03` |
 | `POST /api/project-approvals/{approvalId}/content-approval` | Input: Token ของอาจารย์; Output: เวลาที่อนุมัติและข้อความให้พิมพ์ใบปะหน้า; ต้องมีเอกสารครบชุด กดซ้ำเก็บเวลาครั้งแรกตาม `ASM-03` | `FR-APR-02`, `FR-APR-03`, `AC-APR-01` |
 | `POST /api/project-approvals/{approvalId}/cover-sheet` | Input: Token ของอาจารย์และไฟล์ใบปะหน้าที่เซ็นแล้ว; Output: สถานะ `รออนุมัติ` หรือข้อผิดพลาดไฟล์ (409); ต้องอนุมัติเนื้อหาก่อนตาม `ASM-01` และอัปโหลดซ้ำแทนไฟล์เดิม | `FR-APR-04`, `IF-UPLOAD-01`, `AC-APR-02` |

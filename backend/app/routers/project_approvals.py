@@ -9,6 +9,7 @@ from ..models.auth_token import UserRole
 from ..models.authenticated_user_context import AuthenticatedUserContext
 from ..models.project_approval import PENDING_STATUS, ProjectApproval, ProjectDocumentItem
 from ..storage.project_document import StoredDocumentFile
+from ..services.approval_service import FORWARDED_STATUS
 from ..services.project_approval_service import (
     PRINT_COVER_SHEET_MESSAGE,
     ProjectApprovalConflict,
@@ -31,6 +32,21 @@ require_approval_reader = require_roles(UserRole.ADVISOR, UserRole.STUDENT_AFFAI
 
 def get_project_approval_service() -> ProjectApprovalService:
     return project_approval_service
+
+
+def require_visible_approval(
+    approval_id: str,
+    user: AuthenticatedUserContext = Depends(require_approval_reader),
+    service: ProjectApprovalService = Depends(get_project_approval_service),
+) -> ProjectApproval:
+    """ให้กองกิจเปิดได้เฉพาะชุดที่ผ่านขั้นอาจารย์แล้ว ตาม FR-APR-05 และ plan ข้อ 4 (ทีมตัดสิน F-018 2569-11-09)."""
+    approval = service.get_approval(approval_id)
+    hidden_from_office = user.role == UserRole.STUDENT_AFFAIRS_OFFICER and (
+        approval is not None and approval.status == FORWARDED_STATUS
+    )
+    if approval is None or hidden_from_office:
+        raise HTTPException(status_code=404, detail=APPROVAL_NOT_FOUND)
+    return approval
 
 
 class ReturnRequest(BaseModel):
@@ -120,21 +136,18 @@ def list_project_approvals(
     return [_approval_summary(item) for item in service.list_approvals(status)]
 
 
-@project_approval_router.get("/{approval_id}", dependencies=[Depends(require_approval_reader)])
+@project_approval_router.get("/{approval_id}")
 def get_project_approval(
-    approval_id: str,
+    approval: ProjectApproval = Depends(require_visible_approval),
     service: ProjectApprovalService = Depends(get_project_approval_service),
 ) -> dict:
     """คืนรายการเอกสารทั้งชุดและสถานะ ตาม FR-APR-01."""
-    approval = service.get_approval(approval_id)
-    if approval is None:
-        raise HTTPException(status_code=404, detail=APPROVAL_NOT_FOUND)
     return _approval_response(approval, service)
 
 
 @project_approval_router.get(
     "/{approval_id}/documents/{document_id}",
-    dependencies=[Depends(require_approval_reader)],
+    dependencies=[Depends(require_visible_approval)],
 )
 def get_project_document(
     approval_id: str,
@@ -150,7 +163,7 @@ def get_project_document(
 
 @project_approval_router.get(
     "/{approval_id}/documents/{document_id}/file",
-    dependencies=[Depends(require_approval_reader)],
+    dependencies=[Depends(require_visible_approval)],
 )
 def get_project_document_file(
     approval_id: str,
@@ -166,7 +179,7 @@ def get_project_document_file(
 
 @project_approval_router.get(
     "/{approval_id}/cover-sheet/file",
-    dependencies=[Depends(require_approval_reader)],
+    dependencies=[Depends(require_visible_approval)],
 )
 def get_cover_sheet_file(
     approval_id: str,

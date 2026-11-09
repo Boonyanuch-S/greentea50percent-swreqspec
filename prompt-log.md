@@ -2093,3 +2093,13 @@
 - ไฟล์ที่แก้: `spec.md` (เพิ่ม AC-APR-09, แถว Traceability, CHANGELOG แทนบรรทัด "ยังเปิดให้ทีมพิจารณา"), `plan.md` ข้อ 6 (แถว AC-APR-09), `tasks.md` (T-20 ตรวจด้วย AC-APR-09, ชื่อ test, จุดตรวจคนลอง, ตาราง AC, ปิดเรื่องที่ต้องตัดสินข้อ 1), เปลี่ยนชื่อ test 4 ตัว (เนื้อ test ไม่เปลี่ยน): `backend/tests/test_AC_APR_04_return_full_document_with_comment.py` 2 ตัว, `frontend/src/__tests__/project-approval-advisor-return.test.jsx` 2 ตัว
 - ไม่แก้โค้ดของระบบ ไม่แตะ test_TC_ และไม่แก้ rtm.md (ให้ /verify รอบถัดไปย้าย F-012 ไป "แก้แล้ว")
 - ผล test: `cd backend && pytest -v` 152 passed (รวม `test_AC_APR_09_*` 2 ตัว); `npm test` 34 files / 78 tests passed
+
+## 2569-11-09 คำสั่ง: แก้ตาม F-018 ใน specs/005-อนุมัติเอกสาร/rtm.md
+- คำสั่ง: "แก้ตาม F-018 ใน specs/005-อนุมัติเอกสาร/rtm.md แตะเฉพาะไฟล์ที่เกี่ยวข้อง ห้ามแก้ test ที่ชื่อขึ้นต้นด้วย test_TC_ แล้วรัน pytest -v และจดใน prompt-log"
+- AI ถามกลับ 3 ข้อ (spec ไม่ได้บอก และมี test เดิมยืนยันพฤติกรรมเดิม): (1) กองกิจเปิดชุดสถานะไหนได้ (2) ถ้าไม่มีสิทธิ์ตอบอะไร (3) ส่วนอื่นของ F-018 (TC-5, TC-7 ส่วน 2, TC-8, TC-9) จะเอาอย่างไร
+- ทีมตอบ: (1) ห้ามเฉพาะ "ส่งต่ออาจารย์" (2) 404 ไม่พบเอกสาร (3) ยอมรับตามโค้ด บันทึกใน spec
+- โค้ด: เพิ่ม `require_visible_approval` ใน `backend/app/routers/project_approvals.py` ใช้กับ GET `/{id}`, `/documents/{documentId}`, `/documents/{documentId}/file`, `/cover-sheet/file` และ `/review-context` ใน `backend/app/routers/project_documents.py`
+- test (ไม่แตะ test_TC_): ปรับ Given ของ 2 test ที่ยืนยันพฤติกรรมเดิมซึ่งทีมเปลี่ยนแล้ว `test_AC_APR_02_review_requires_cover_sheet` (อ่านสถานะผ่านอาจารย์), `test_AC_APR_02_office_opens_document_file` (ส่งใบปะหน้าก่อน); เพิ่ม `test_AC_APR_02_office_cannot_open_forwarded_approval`, `test_AC_APR_02_office_opens_approval_after_cover_sheet`, `test_AC_APR_02_office_still_opens_after_review_passed`
+- ตรวจว่า test ใหม่จับได้จริง: คืน router เป็นของเดิมชั่วคราว `test_AC_APR_02_office_cannot_open_forwarded_approval` ไม่ผ่าน แล้วคืนไฟล์แก้
+- เอกสาร: `spec.md` CHANGELOG บันทึกคำตอบทีม (ไม่สร้าง ID ใหม่), `plan.md` ข้อ 4 แถว `GET /{approvalId}`; ไม่แก้ rtm.md และ test-cases.md (Then ของ TC-APR-03-5, 7, 8, 9 ให้ทีมเติมเองหรือใช้ /testcases)
+- ผล test: `cd backend && pytest -v` 155 passed (เดิม 152 + ใหม่ 3); `npm test` 34 files / 78 tests passed
