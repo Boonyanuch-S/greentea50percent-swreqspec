@@ -2054,3 +2054,12 @@
 - ติดขัด: TC-APR-03-5, TC-APR-03-8, TC-APR-03-9 ไม่มี Then ให้ assert; TC-APR-03-7 ส่วน (2) ยังไม่มีคำตอบ
 - ตกหล่น/ควรปรับ: TC-APR-03-5 ใช้ชื่อ test เดียวกับ 2 เครื่องมือ; TC-APR-03-6 ไม่ระบุรหัสตอบกลับ; ยังไม่มีกรณีกองกิจเปิดชุดสถานะ "ส่งต่ออาจารย์"; TC-APR-03-8 ยังไม่มีข้อมูลชุดที่ยังไม่ส่งต่อ
 - ไม่แก้ test-cases.md ไม่แก้โค้ด รอทีมตัดสิน
+
+## 2569-11-09 /testcases AC-APR-03 specs/005-อนุมัติเอกสาร/ (รอบ 2)
+- คำสั่ง: `/testcases AC-APR-03 specs/005-อนุมัติเอกสาร/`
+- โหมด: เขียน test (ทุกแถวสถานะ "ใช้ได้")
+- เขียน test: TC-APR-03-1, TC-APR-03-3, TC-APR-03-6, TC-APR-03-7 ใน `backend/tests/test_AC_APR_03.py` (ไฟล์ใหม่); TC-APR-03-2, TC-APR-03-4 ใน `frontend/src/__tests__/TC-APR-03-2.test.jsx`, `TC-APR-03-4.test.jsx`
+- TC-APR-03-7 ส่วน (2) ไม่เขียน assert เพราะ spec ไม่ได้บอก (เขียนเป็นคอมเมนต์)
+- ไม่เขียน test: TC-APR-03-5, TC-APR-03-8, TC-APR-03-9 เพราะ Then ทั้งแถวเป็น "spec ไม่ได้บอก" ไม่มีอะไรให้ assert โดยไม่เดา; TC-APR-03-10 เป็นแถว "คน"
+- ผล test: backend `PYTHONPATH=. pytest -v backend/tests` 152 passed (เดิม 148, เพิ่ม 4); frontend `npm test` 34 files / 78 tests ผ่าน (เดิม 76, เพิ่ม 2)
+- ไม่แก้โค้ดของระบบ ไม่แก้ test-cases.md
