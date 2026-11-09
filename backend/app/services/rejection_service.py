@@ -28,6 +28,13 @@ class RejectionService:
         self._member_messages: list[UC01ReturnMessage] = []
         self._next_decision_id = 1
 
+    def _replace_submission_decision(self, submission_id: int, decision: ReviewDecision, message: UC01ReturnMessage) -> None:
+        """ใช้คำตัดสินล่าสุดแทนคำตัดสินก่อนหน้าใน submission เดียวกัน ตาม Q-05."""
+        self._decisions = [existing for existing in self._decisions if existing.submission_id != submission_id]
+        self._member_messages = [existing for existing in self._member_messages if existing.submission_id != submission_id]
+        self._decisions.append(decision)
+        self._member_messages.append(message)
+
     def reject(
         self,
         submission_id: int,
@@ -61,18 +68,7 @@ class RejectionService:
             )
             submission.status = RETURNED_STATUS
             submission.current_status = RETURNED_STATUS
-            self._decisions = [
-                existing
-                for existing in self._decisions
-                if existing.submission_id != submission_id
-            ]
-            self._member_messages = [
-                existing
-                for existing in self._member_messages
-                if existing.submission_id != submission_id
-            ]
-            self._decisions.append(decision)
-            self._member_messages.append(message)
+            self._replace_submission_decision(submission_id, decision, message)
             return decision, message
 
     def list_decisions(self) -> list[ReviewDecision]:

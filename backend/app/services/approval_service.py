@@ -33,6 +33,15 @@ class ApprovalService:
         self._next_notification_id = 1
         self.on_approved = None
 
+    def _replace_submission_decision(self, submission_id: int, submission: ProjectSubmission, decision: ReviewDecision, notification: NotificationMessage) -> None:
+        """ใช้คำตัดสินล่าสุดแทนคำตัดสินก่อนหน้าใน submission เดียวกัน ตาม Q-05."""
+        self._decisions = [existing for existing in self._decisions if existing.submission_id != submission_id]
+        self._advisor_handoffs = [existing for existing in self._advisor_handoffs if existing.submission_id != submission_id]
+        self._club_notifications.pop(submission_id, None)
+        self._decisions.append(decision)
+        self._advisor_handoffs.append(submission)
+        self._club_notifications[submission_id] = notification
+
     def approve(
         self,
         submission_id: int,
@@ -59,17 +68,7 @@ class ApprovalService:
             self._next_decision_id += 1
             submission.status = FORWARDED_STATUS
             submission.current_status = FORWARDED_STATUS
-            self._decisions = [
-                existing
-                for existing in self._decisions
-                if existing.submission_id != submission_id
-            ]
-            self._advisor_handoffs = [
-                existing
-                for existing in self._advisor_handoffs
-                if existing.submission_id != submission_id
-            ]
-            self._club_notifications[submission_id] = NotificationMessage(
+            notification = NotificationMessage(
                 notification_id=self._next_notification_id,
                 target_user_id=submission.sender_user_id,
                 target_case="UC-01",
@@ -77,8 +76,7 @@ class ApprovalService:
                 sent_at=decision.decided_at,
             )
             self._next_notification_id += 1
-            self._decisions.append(decision)
-            self._advisor_handoffs.append(submission)
+            self._replace_submission_decision(submission_id, submission, decision, notification)
             if self.on_approved is not None:
                 self.on_approved(submission_id)
             return decision

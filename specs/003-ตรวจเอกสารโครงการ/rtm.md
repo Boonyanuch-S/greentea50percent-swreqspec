@@ -43,7 +43,7 @@
 | F-002 | test อ่อน | `backend/app/services/approval_service.py`, `frontend/src/components/ApprovalAction.jsx` | FR-VDC-05, AC-VDC-01 | test ตรวจเฉพาะสถานะอนุมัติและการส่งต่อ ไม่ได้ตรวจว่ากรรมการเห็นข้อความแจ้งเตือนจริงหรือ API จัดส่ง notification ตาม Q-03; ถ้าเอา notification ออกหรือเปลี่ยนข้อความจะไม่มี test ล้ม | |
 | F-003 | โค้ดไม่มี FR | `frontend/src/pages/DocumentReviewPage.jsx`, `frontend/src/components/ReviewContext.jsx`, `backend/app/routers/project_documents.py` | ASM-03, Q-07, FR-VDC-07 | การจับคู่ผลตรวจกับไฟล์และรายการตรวจใช้ `item_name` แทน `checklist_item_id` ทำให้เมื่อเจ้าหน้าที่แก้ชื่อรายการกลาง หรือ rename item แล้วผลตรวจเดิมหายไป แม้ spec ระบุให้คงสถานะตรวจเดิมไว้ตราบใดที่ item เดิมยังอยู่ | แก้โค้ด |
 | F-004 | FR ไม่มี AC | `spec.md`: FR-VDC-04 | FR-VDC-04 | FR-VDC-04 ระบุให้เจ้าหน้าที่ตรวจสอบเนื้อหาและรูปแบบเอกสารก่อนตัดสินใจ แต่ไม่มี AC ที่ตรวจเรื่องนี้ใน traceability; ควรเสนอทีมเพิ่ม AC ที่ตรวจเนื้อหา/รูปแบบเอกสารโดยตรง | |
-| F-005 | test อ่อน | `backend/app/services/approval_service.py` | Q-05, T-22 | logic `pending_only=True` และ test ที่ตรวจคำตัดสินล่าสุดแทนที่ก่อนหน้า ไม่ได้ตรวจพฤติกรรมเมื่อมีคำตัดสินซ้ำบนข้อมูลเดียวกันจริงไประยะยาว; ขาด assertion สำหรับวิธีจัดการทับคำตัดสินหรือผลลัพธ์สุดท้ายที่ผู้ใช้เห็น | |
+| F-005 | test อ่อน | `backend/app/services/approval_service.py`, `backend/app/services/rejection_service.py` | Q-05, T-22 | logic `pending_only=True` และ test ที่ตรวจคำตัดสินล่าสุดแทนที่ก่อนหน้า ไม่ได้ตรวจพฤติกรรมเมื่อมีคำตัดสินซ้ำบนข้อมูลเดียวกันจริงไประยะยาว; ขาด assertion สำหรับวิธีจัดการทับคำตัดสินหรือผลลัพธ์สุดท้ายที่ผู้ใช้เห็น | แก้โค้ด |
 
 ## 4. แก้แล้ว
 | F-ID | แก้อย่างไร | รู้ได้อย่างไร |
@@ -51,3 +51,4 @@
 | F-001 | ยังไม่แก้ | จนถึงวันที่ตรวจ รัน frontend suite ผ่าน แต่ `ReviewQueuePage.jsx` ยังใช้ `urgentFirst` และ `URGENT_DAYS = 30` ต่อเนื่อง |
 | F-003 | แก้ใช้ `checklist_item_id` พร้อม fallback ชื่อ Item เพื่อให้คงสถานะแม้มี rename | รัน `PYTHONPATH=. pytest -v` แล้ว; `DocumentReviewPage.jsx` และ `checklist_item_id` จาก `project_documents.py` ใช้ identity เดิมแทนการ match ด้วย `item_name` |
 | F-004 | ยังไม่แก้ | spec ยังไม่มี AC ที่ระบุ FR-VDC-04 อย่างชัดเจนตาม traceability |
+| F-005 | แก้ให้ `approve`/`reject` ใช้คำตัดสินล่าสุดแทนคำตัดสินเดิมของ submission เดียวกัน | รัน `PYTHONPATH=. pytest -v` แล้ว; `ApprovalService` และ `RejectionService` ล้างผลเก่าก่อนบันทึกคำตัดสินใหม่ |

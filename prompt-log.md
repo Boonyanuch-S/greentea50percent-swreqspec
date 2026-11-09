@@ -1996,3 +1996,11 @@
 - เป้าหมาย: ใช้ `checklist_item_id` เป็น identity หลัก และคง fallback ไว้ที่ `item_name` เฉพาะกรณีที่ไม่มี ID
 - ผลการทดสอบ: `cd backend && PYTHONPATH=. pytest -v` ผ่าน 148 tests
 - สรุป: F-003 ปรับให้ผลตรวจยึด identity ของ checklist ที่คงอยู่แทนการจับคู่ด้วย `item_name` อย่างเดียว
+
+## 2569-11-09 คำสั่ง: /fix F-005
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่แก้: `backend/app/services/approval_service.py`, `backend/app/services/rejection_service.py`, `specs/003-ตรวจเอกสารโครงการ/rtm.md`
+- เป้าหมาย: ให้คำตัดสินล่าสุดแทนที่คำตัดสินเก่าของ submission เดียวกัน และล้างข้อมูลเก่าก่อนบันทึกคำตัดสินใหม่
+- ผลการทดสอบ: `cd backend && PYTHONPATH=. pytest -v` ผ่าน 148 tests
+- สรุป: F-005 ปรับให้ `approve`/`reject` เหลือเฉพาะผลล่าสุดสำหรับ submission เดียวกันเมื่อตัดสินซ้ำหรือเกิด race
