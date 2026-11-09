@@ -2238,3 +2238,10 @@
 - ประเด็นใหม่: UC-10 client เก็บ request ในหน่วยความจำ ไม่ได้เรียกปลายทางจริง; UI หลัง UC-04 กลับแท็บรายชื่อแทนขั้นตรวจเกณฑ์; TC-HRS-03-3 เป็น todo ทั้งที่ระบุใช้ได้; ไม่มี test ตรวจ audit log บนเส้นทาง retry
 - อ่าน source ปกติใน backend/app และ frontend/src และ tests ทั้ง backend/tests และ frontend/src/__tests__; ไม่พบ `specs/000-shared/` หรือ mockups
 - แก้เฉพาะ `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้ code, tests, spec, plan หรือ tasks และไม่ commit
+
+## 2569-11-09 22:50 UTC คำสั่ง: แก้ตาม F-007 ใน specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/rtm.md
+- ถามความชัดเจนของ expected behavior; ทีมยืนยันว่าเมื่อไม่มีเอกสารรอตรวจให้แสดง empty state โดยไม่กำหนดข้อความเฉพาะ
+- ปรับ AC-HRS-03 และ changelog ใน `spec.md`; ปรับ TC-HRS-03-3 ใน `test-cases.md`; เพิ่ม `test_AC_HRS_03_empty_pending_queue_shows_empty_state` เพื่อยืนยัน empty state โดยไม่แตะ `frontend/src/__tests__/TC-HRS-03-3.test.jsx` ซึ่งยังเป็น todo ตามคำสั่ง
+- ย้าย F-007 ไปหัวข้อ “แก้แล้ว” ใน `rtm.md`; สรุปช่องโหว่คงเหลือจาก 13 เป็น 12
+- ผล `pytest -v`: 157 passed; ผล `cd frontend && npm test -- --run src/__tests__/activity-hours-empty-queue.test.jsx`: 1 passed
+- คำสั่ง npm ที่รันจาก root ก่อนแก้ไขตรวจพาธไม่พบ `package.json`; รันซ้ำจาก `frontend/` แล้ว test ผ่าน

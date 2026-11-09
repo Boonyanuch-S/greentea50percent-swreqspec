@@ -7,7 +7,7 @@
 ## 1. ตามรอยไปข้างหน้า (requirement ไป AC ไป task ไป โค้ด ไป test)
 | ID | AC | task | โค้ด (ไฟล์: ฟังก์ชัน) | test (ผล) | สถานะ |
 |---|---|---|---|---|---|
-| FR-HRS-01 | AC-HRS-03 | T-05, T-06, T-18, T-20, T-21 | `backend/app/api/activity_hours.py`: `list_pending_activity_hour_documents`; `frontend/src/pages/ActivityHoursQueue.jsx`; `frontend/src/App.jsx`: client wiring | `test_AC_HRS_03_pending_documents_sorted_by_submitted_at` (ผ่าน); `test_TC_HRS_03_1_pending_documents_sorted_by_submitted_date` (ผ่านแต่ fixture เรียงอยู่แล้ว); `test_TC_HRS_03_2_single_pending_document` (ผ่าน); `test_TC_HRS_03_3_no_pending_documents` (todo) | ช่องโหว่ (F-001, F-007) |
+| FR-HRS-01 | AC-HRS-03 | T-05, T-06, T-18, T-20, T-21 | `backend/app/api/activity_hours.py`: `list_pending_activity_hour_documents`; `frontend/src/pages/ActivityHoursQueue.jsx`; `frontend/src/App.jsx`: client wiring | `test_AC_HRS_03_pending_documents_sorted_by_submitted_at` (ผ่าน); `test_TC_HRS_03_1_pending_documents_sorted_by_submitted_date` (ผ่านแต่ fixture เรียงอยู่แล้ว); `test_TC_HRS_03_2_single_pending_document` (ผ่าน); `test_AC_HRS_03_empty_pending_queue_shows_empty_state` (ผ่าน) | ช่องโหว่ (F-001) |
 | FR-HRS-02 | AC-HRS-04 | T-01, T-04, T-07, T-08, T-20, T-21 | `backend/app/api/activity_hours.py`: `list_activity_hour_document_participants`; `backend/app/services/activity_hours_reader.py`: `read_activity_hour_document`; `frontend/src/pages/ActivityHoursReview.jsx` | `test_AC_HRS_04_display_all_excel_participants_and_hour_types` (ผ่าน; ใช้ config จำลอง); frontend AC-HRS-04 tests (ผ่าน; ใช้ mock) | ช่องโหว่ (F-001, F-002) |
 | FR-HRS-03 | AC-HRS-01, AC-HRS-02 | T-01, T-09, T-10, T-11, T-20, T-22 | `backend/app/api/activity_hours.py`: `validate_activity_hour_document`; `backend/app/services/hour_validation.py`: `mark_participants_with_unmatched_hour_types`; `backend/app/services/activity_hours_approval.py`: `approve_activity_hour_document` | `test_AC_HRS_01_approve_matching_hours`, `test_AC_HRS_02_return_document_and_mark_invalid_items` (ผ่าน; ตรวจข้อมูลจากตารางฐานข้อมูล ไม่ใช่แถวที่อ่านจาก Excel) | ช่องโหว่ (F-002) |
 | FR-HRS-04 | AC-HRS-01 | T-01, T-12, T-13, T-20, T-22 | `backend/app/services/activity_hours_approval.py`: `approve_activity_hour_document`; `frontend/src/pages/ActivityHoursReview.jsx`: `handleApprove`, `submitHours` | `test_AC_HRS_01_approve_matching_hours` (ผ่าน); `test_AC_HRS_01_mock_passing_document_asks_confirmation_before_saving` (ผ่านเฉพาะ mock client) | ช่องโหว่ (F-001, F-002, F-004) |
@@ -23,7 +23,7 @@
 | IF-REG-01 | AC-HRS-01, AC-HRS-06 | T-12, T-13, T-14, T-19, T-20, T-22 | `backend/app/integrations/reg_client.py`; `backend/app/services/reg_retry.py`; `backend/app/api/activity_hours.py` | `test_reg_client_contract.py`, `test_AC_HRS_01_approve_matching_hours`, `test_AC_HRS_06_reg_timeout_retry_and_failure_alert` (ผ่าน; ใช้ transport จำลอง) | ช่องโหว่ (F-001, F-004) |
 | IF-XLS-01 | AC-HRS-04 | T-01, T-04, T-07, T-20, T-21 | `backend/importers/activity_hours_excel.py`; `backend/app/services/activity_hours_reader.py`; `backend/app/api/activity_hours.py`: `list_activity_hour_document_participants` | `test_activity_hours_excel_reader.py`, `test_AC_HRS_04_display_all_excel_participants_and_hour_types` (ผ่านด้วย schema/config ที่ test ระบุเอง) | ช่องโหว่ (F-002) |
 
-สรุป: ครบ 2 | ยังไม่ถึง 0 | รอ 0 | ช่องโหว่ 13
+สรุป: ครบ 2 | ยังไม่ถึง 0 | รอ 0 | ช่องโหว่ 12
 
 ## 2. ตามรอยย้อนกลับ (โค้ด ไป requirement)
 | โค้ด (ไฟล์: ฟังก์ชัน หรือ endpoint) | อ้าง ID | ตรงกับข้อความใน spec ไหม | หมายเหตุ |
@@ -54,13 +54,12 @@
 | F-004 | test อ่อน | `backend/app/services/activity_hours_approval.py`: `approve_activity_hour_document` | FR-HRS-07, Q-03 | หลัง approve timeout เอกสารยังรอตรวจและ submission ใหม่เริ่ม `attempt_count=1`; การเรียก approve ซ้ำจึงส่งคำขอใหม่ได้หลายครั้งและเลี่ยงการจำกัด retry หนึ่งครั้ง. Test จำกัดเฉพาะการเรียก `/reg-retry` ซ้ำบน submission เดิม จึงไม่จับกรณี approve ซ้ำ/รีเฟรชหน้า. | |
 | F-005 | โค้ดไม่มี FR | `backend/app/integrations/uc10_notification_client.py`: `request_confirmation` | FR-HRS-05, AC-HRS-05 | Client เพียงเก็บ `UC10NotificationRequest` ใน list ภายใน process และคืนสถานะ `queued`; ไม่มีการส่งต่อหรือเรียก UC-10 จริง. Test ตรวจเฉพาะ event และรายการใน client จำลอง จึงยังไม่ยืนยันการแจ้งสโมสรตาม requirement. | |
 | F-006 | อ้าง ID ผิดเรื่อง | `frontend/src/pages/ActivityHoursReview.jsx`: `openParticipant`, ปุ่ม “กลับไปยังรายชื่อ” | FR-HRS-08, AC-HRS-07 | หลังดูสรุปข้อมูลรายบุคคล UI ปิด dialog แล้วกลับไปยังแท็บรายชื่อ; test ยืนยันการกลับสู่รายชื่อ และ test navigation ต้องเลือกแท็บข้อมูลเอกสารเองภายหลัง. ไม่ได้กลับไปยังขั้นตรวจสอบเกณฑ์ (ขั้นที่ 4) ตาม FR/AC โดยตรง. | |
-| F-007 | AC ไม่มี test | `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/test-cases.md`: TC-HRS-03-3; `frontend/src/__tests__/TC-HRS-03-3.test.jsx` | AC-HRS-03 / FR-HRS-01 | TC-HRS-03-3 อยู่สถานะ “ใช้ได้” แต่ Then ระบุว่า spec ไม่ได้บอกผลเมื่อไม่มีเอกสาร และไฟล์ test เป็น `test.todo` จึงถูก skip ไม่มี assertion. หน้าจอมีข้อความ empty state ที่ยังไม่มีข้อกำหนดรองรับ; ทีมต้องตัดสินผลที่คาดหวังก่อนจึงจะเป็น test ที่ทำงานได้. | |
 | F-008 | test อ่อน | `backend/tests/test_AC_HRS_09_student_access_is_logged.py` | DOM-PDPA-01, NFR-SEC-02, AC-HRS-09 | โค้ด retry บันทึก access log แต่ test AC-HRS-09 ไม่มีกรณีเรียก `/reg-retry` แล้วตรวจ accessor/time/item; จึงยังไม่มี regression assertion ว่าการเข้าถึงข้อมูลระหว่าง retry ถูก log ทุกครั้ง. | |
 
 ## 4. แก้แล้ว
 | F-ID | แก้อย่างไร | รู้ได้อย่างไร |
 |---|---|---|
-| ไม่มี | ไม่พบ F-ID เดิมที่มีหลักฐานว่าแก้แล้วในการตรวจรอบนี้ | F-001 ถึง F-008 ยังคงพบจากโค้ดและ test ปัจจุบัน |
+| F-007 | ทีมกำหนดให้ AC-HRS-03 แสดง empty state เมื่อไม่มีเอกสาร โดยไม่บังคับข้อความเฉพาะ; เพิ่ม assertion test แยกโดยไม่แก้ test_TC เดิม | `spec.md` และ `test-cases.md` ระบุผลที่คาดหวังชัดเจน; `test_AC_HRS_03_empty_pending_queue_shows_empty_state` ผ่าน. Test `test_TC_HRS_03_3_no_pending_documents` ยังคง todo ตามข้อกำหนดผู้ใช้. |
 
 ## 5. สถานะคำถาม
 - Q-01, Q-02, Q-03, Q-05 และ Q-06 ปิดแล้วตาม spec; spec ไม่มี Q-04
