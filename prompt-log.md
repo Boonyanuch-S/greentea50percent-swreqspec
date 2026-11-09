@@ -2200,3 +2200,13 @@
 - ใช้ `app.state.template_session` เป็นจุดรับ SQLAlchemy session; หาก runtime ยังไม่ wiring session API ตอบ 503 พร้อมข้อความชัดเจน ไม่สร้าง database/config source หรือ template เริ่มต้นขึ้นเอง
 - ก่อนเริ่มได้ถามทีมเรื่องแหล่ง registry และขอบเขตไฟล์เพิ่มเติม; ทีมยืนยัน SQLAlchemy config table และอนุญาตเพิ่ม tests พร้อมอัปเดต tasks.md/prompt-log.md; ไม่มีประเด็นที่เดาแทนทีม
 - ไม่ commit
+
+## 2569-11-09 20:08 UTC คำสั่ง: /verify specs/002-ส่งข้อมูลชั่วโมง/
+- อ่าน spec, plan, tasks, test-cases, RTM, AGENTS.md และ mockup ทั้งสองไฟล์; ตรวจ implementation/test ที่เกี่ยวข้องกับ SBH รวมถึงค้น endpoint/หน้า admin/Excel generator ที่เกี่ยวข้อง.
+- ผล test: `cd backend && pytest -v` ผ่าน 157 tests; `cd frontend && npm test` ผ่าน 34 files / 85 tests; รวม 242 ผ่าน, 0 ไม่ผ่าน.
+- ตรวจ runtime เพิ่มด้วย TestClient โดยไม่ override dependency: `GET /activities/hours-submission` และ `GET /config/templates` ตอบ 503 เพราะไม่มี `app.state.activity_session` และ `app.state.template_session`; test ของ template registry ผ่านโดย override session.
+- ตารางไปข้างหน้า: ครบ 3, ยังไม่ถึง 2, รอ 0, ช่องโหว่ 7.
+- ข้อค้นพบเดิมที่ยังพบ: F-001, F-002, F-003, F-005, F-006; ยืนยัน F-004 และ F-007 อยู่ในหัวข้อแก้แล้ว.
+- ข้อค้นพบใหม่: F-008 (runtime ไม่มี template session ทำให้ `GET /config/templates` ตอบ 503 แม้ test ผ่านเมื่อ override).
+- พบ mockup 2 ไฟล์แต่ยังไม่ยืนยันโดย PO และ spec ไม่มีหมวด UI; ไม่ใช้ mockup เป็นข้อกำหนด UI ที่ยืนยันแล้ว. ไม่พบ `specs/000-shared/`.
+- อัปเดตเฉพาะ `specs/002-ส่งข้อมูลชั่วโมง/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks และไม่ commit.
