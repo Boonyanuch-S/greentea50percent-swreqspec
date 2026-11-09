@@ -2063,3 +2063,11 @@
 - ไม่เขียน test: TC-APR-03-5, TC-APR-03-8, TC-APR-03-9 เพราะ Then ทั้งแถวเป็น "spec ไม่ได้บอก" ไม่มีอะไรให้ assert โดยไม่เดา; TC-APR-03-10 เป็นแถว "คน"
 - ผล test: backend `PYTHONPATH=. pytest -v backend/tests` 152 passed (เดิม 148, เพิ่ม 4); frontend `npm test` 34 files / 78 tests ผ่าน (เดิม 76, เพิ่ม 2)
 - ไม่แก้โค้ดของระบบ ไม่แก้ test-cases.md
+
+## 2569-11-09 /verify specs/005-อนุมัติเอกสาร/
+- คำสั่ง: `/verify specs/005-อนุมัติเอกสาร/`
+- ผล test: backend `cd backend && pytest -v` 152 passed; frontend รันไม่ได้ (`vitest: not found` เพราะ commit `d06ca53` ลบ `frontend/node_modules` และไม่ได้ติดตั้งใหม่) ใช้ผล 78/78 จากรอบ `/testcases` วันเดียวกัน ซึ่ง `frontend/src` ไม่เปลี่ยนหลังจากนั้น
+- ตารางไปข้างหน้า: ครบ 9, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 3 (FR-APR-01, FR-APR-02, IF-UC01-02), ไม่นับเพราะยกเลิก 1 (FR-APR-07)
+- ข้อค้นพบใหม่: F-017 (แถว "ใช้ได้" ของ AC-APR-03 ที่ยังไม่มี test), F-018 (โค้ดตัดสินกรณีที่ spec ไม่ได้บอก รวมกองกิจเปิดชุด "ส่งต่ออาจารย์" ได้), F-019 (review-context อ้าง FR-APR-02 ผิดเรื่อง)
+- ข้อค้นพบเดิมที่ยังอยู่: F-012, F-014, F-015, F-016; ลบแถว `AuthGuard.jsx` ออกจากตารางย้อนกลับเพราะไฟล์ถูกลบแล้ว
+- แก้เฉพาะ `rtm.md` และ `prompt-log.md` ไม่แก้โค้ด test spec plan tasks
