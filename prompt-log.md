@@ -2167,3 +2167,27 @@
 - ผล test: backend `pytest -v` ผ่าน 155 tests; frontend `hours-submission-navigation.test.jsx` ผ่าน 8 tests
 - ย้าย F-006 จากข้อค้นพบไปหัวข้อ "แก้แล้ว" ใน `specs/002-ส่งข้อมูลชั่วโมง/rtm.md`
 - `git diff --check` ผ่าน; ไม่ commit
+
+## 2569-11-09 คำสั่ง: แก้ตาม F-007 ใน specs/002-ส่งข้อมูลชั่วโมง/rtm.md
+- เพิ่ม `test_FR_SBH_04_require_completeness_check_before_submit` ตรวจว่า checkbox ยังไม่ถูกเลือกแล้วปุ่มยืนยันถูกปิดและไม่เรียก submit; เมื่อติ๊ก checkbox ปุ่มเปิดใช้งานและ submit ถูกเรียก
+- ไม่แก้ test ที่ชื่อขึ้นต้น `test_TC_`; ไม่เพิ่ม AC ID และไม่แก้ spec
+- ผล test: backend `pytest -v` ผ่าน 155 tests; frontend `hours-submission.test.jsx` ผ่าน 3 tests
+- เพิ่มหลักฐาน test ใน RTM แต่คง F-007 ไว้ในข้อค้นพบ เพราะยังต้องให้ทีมพิจารณาว่าจะปรับ AC-SBH-01 ผ่าน CR หรือไม่
+- `git diff --check` ผ่าน; ไม่ commit
+- คำตอบทีมภายหลังสำหรับ Q-01 ถึง Q-03 อยู่ในข้อความถัดมา; ได้บันทึกไว้ใน spec Draft v3
+
+## 2569-11-09 รับคำตอบทีม Q-01 ถึง Q-03 (specs/002-ส่งข้อมูลชั่วโมง/)
+- Q-01: ระยะต้นแบบไม่เพิ่มแจ้งเตือน เพราะ FR-SBH-06 แสดงสถานะและบล็อกการส่งเมื่อเลขไม่พร้อม
+- Q-02: ข้อมูลผิด/ไม่ครบให้แก้ที่ไฟล์ต้นทางและส่งฉบับแก้กลับ โดยไม่แก้ในหน้าส่งชั่วโมง
+- Q-03: ส่งเข้าคิว UC-07 ทันทีหลังกรรมการตรวจสอบและยืนยัน โดยถือว่าการอนุมัติสรุปโครงการเกิดนอกระบบแล้ว
+- อัปเดต `spec.md` เป็น Draft v3, บันทึกคำตอบ และปรับ AC-SBH-01 ตาม FR-SBH-04 โดยคง AC ID เดิม; อัปเดต T-16/T-17 และ RTM ให้สถานะ Q ถูกต้อง
+- ผล test หลังอัปเดต: backend `pytest -v` ผ่าน 155 tests; frontend `hours-submission.test.jsx` ผ่าน 3 tests
+- ไม่แก้ test ที่ชื่อขึ้นต้น `test_TC_`; ไม่ commit
+
+## 2569-11-09 คำสั่ง: /verify specs/002-ส่งข้อมูลชั่วโมง/
+- อ่าน spec Draft v3, plan, tasks, test-cases, RTM, AGENTS.md และตรวจโค้ด/การทดสอบที่เกี่ยวข้องใน backend และ frontend; ไม่พบ `specs/000-shared/` หรือ mockups
+- ผล test: `cd backend && pytest -v` ผ่าน 155 tests; `cd frontend && npm test` ผ่าน 34 test files / 85 tests; รวม 240 ผ่าน, 0 ไม่ผ่าน
+- ตามรอยไปข้างหน้า: ครบ 3 (FR-SBH-07, NFR-SEC-01, CON-NFR-21); ยังไม่ถึง 2 (FR-SBH-06, IF-PRJNUM-01 ซึ่งยังรอ mapping จาก UC-04 โดยไม่มี Q-ID); รอ 0; ช่องโหว่ 7
+- ข้อค้นพบคงค้าง: F-001 (ไม่มี wiring แหล่งข้อมูลกิจกรรมจริงและ App ใช้ mock), F-002 (ไม่มี Excel/template จริงหรือ flow ส่งไฟล์แก้ไขกลับ), F-003 (ยังไม่ส่งรายการเข้าคิว UC-07 จริง), F-005 (hardcode template), F-006 (TC-SBH-03-1/2 ไม่เตรียม Given ตามกรณีสถานะปะปน แม้มี AC test แยกที่ตรวจพฤติกรรมจริง)
+- ยืนยัน F-004 ปิดแล้วจาก backend/frontend tests ที่ตรวจ deadline และลิงก์/การนำทาง UC-11; F-007 ปิดแล้วเนื่องจาก AC-SBH-01 ปรับตามคำตอบ Q-02 และมี test ตรวจการยืนยันความครบถ้วน
+- อัปเดตเฉพาะ `specs/002-ส่งข้อมูลชั่วโมง/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks และไม่ commit

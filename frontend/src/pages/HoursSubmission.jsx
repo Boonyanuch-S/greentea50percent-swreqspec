@@ -173,6 +173,9 @@ export default function HoursSubmission({ client, onOpenLateSubmission }) {
                     </div>
                     <CountBadge label="รายการ" value={submission.preview.rows.length} />
                   </div>
+                  <p className="px-6 py-3 text-sm text-slate-600">
+                    หากพบข้อมูลไม่ถูกต้องหรือไม่ครบถ้วน ให้กลับไปแก้ไขไฟล์ต้นทางแล้วส่งฉบับแก้ไขกลับเข้าระบบ โดยไม่แก้ไขข้อมูลในหน้านี้
+                  </p>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[600px] text-left text-sm">
                       <thead className="bg-slate-50 text-xs text-slate-500">
