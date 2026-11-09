@@ -2216,3 +2216,16 @@
 - มีคำถามที่ spec ยังไม่ระบุ: พฤติกรรมเมื่อไม่มีเอกสารรอตรวจสอบ
 - ผล test: ไม่ได้รัน (โหมดร่าง; ยังไม่เขียนโค้ด test)
 - ไม่แก้โค้ดระบบ, test, spec, plan หรือ tasks
+
+## 2569-11-09 22:11 UTC คำสั่ง: /testcases AC-HRS-03 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/
+- โหมดเขียน test: ตารางมี 3 แถว AC-HRS-03 สถานะ "ใช้ได้"; สร้างไฟล์ `frontend/src/__tests__/TC-HRS-03-1.test.jsx`, `TC-HRS-03-2.test.jsx` และ `TC-HRS-03-3.test.jsx`
+- TC-HRS-03-1 ทดสอบการแสดงหลายเอกสารตามลำดับวันที่ที่ endpoint ส่งมา; ลำดับการเรียงที่ endpoint รับผิดชอบมี test backend แยกตาม T-05
+- TC-HRS-03-2 ตรวจว่ามีเอกสารเดียวในลิสต์และแสดงสถานะ "รอตรวจสอบ"
+- TC-HRS-03-3 คงเป็น `todo` โดยไม่มี assertion เพราะ spec ไม่ได้กำหนดผลกรณีไม่มีเอกสารรอตรวจสอบ
+- ผล test: รอรัน
+- ไม่แก้โค้ดระบบ, spec, plan หรือ tasks
+
+## 2569-11-09 ผลการรันต่อเนื่อง AC-HRS-03
+- `cd frontend && npm test`: ผ่าน 36 test files, 1 skipped; 87 tests ผ่าน, 1 todo (รวม 88)
+- TC-HRS-03-1 ผ่าน; TC-HRS-03-2 ผ่าน; TC-HRS-03-3 ยังเป็น todo เนื่องจาก spec ไม่กำหนดผลที่คาดหวัง
+- `git diff --check` ผ่าน; มี React `act(...)` warning จาก test `project-approval-select-document.test.jsx` ระหว่างรัน แต่ไม่ทำให้ชุดทดสอบล้มเหลว
