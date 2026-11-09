@@ -2030,3 +2030,13 @@
 - ขอบเขต: ทำ mockup HTML แบบ responsive สะท้อนหน้าจอปัจจุบันของ T-12 โดยอิง AC-VDC-04 และ components ที่ใช้อยู่; ข้อมูลในหน้าจอเป็นตัวอย่าง
 - การตรวจ: HTML ผ่าน parser มาตรฐาน; PNG ที่ render จาก HTML ตรวจแล้วว่าอ่านได้ ขนาด 693×2132; ไม่รันชุด test เพราะเปลี่ยนเฉพาะ mockup แบบ static
 - สถานะ: ยังไม่ commit เพื่อให้ทีมตรวจและตัดสินใจก่อน
+
+## 2569-11-09 คำสั่ง: /verify specs/003-ตรวจเอกสารโครงการ/
+
+- เครื่องมือ: Copilot ใน VS Code
+- ตรวจเพิ่ม: mockup HTML/PNG ของ AC-VDC-04 เทียบกับหน้า `DocumentReviewPage` และตามรอย test cases ที่สถานะ “ใช้ได้”
+- ผลการทดสอบ: backend `cd backend && pytest -v` ผ่าน 148/148; frontend `cd frontend && npm test` ผ่าน 76/76
+- ผลสรุปตามรอย: ครบ 8, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 4
+- ข้อค้นพบคงเหลือ: F-001, F-004, F-006, F-007; F-002 ปิดแล้วเพราะ `test_AC_VDC_01_approve_forwards_to_advisor` ตรวจผู้รับ เป้าหมาย ข้อความ notification และเวลาส่ง พร้อมสถานะกับ handoff
+- รายละเอียดใหม่: ไม่พบ test ตามชื่อ TC-VDC-04-1 ถึง TC-VDC-04-3 ในโค้ด; หน้า `DocumentReviewPage` แสดง `ReviewHistory` ซึ่งไม่มี requirement รองรับและไม่อยู่ใน mockup; ไม่มี `specs/000-shared/` และ `spec.md` ยังไม่มีหมวด UI ที่ระบุองค์ประกอบ “ต้องตรง”
+- หมายเหตุ: แก้เฉพาะ `rtm.md` และ `prompt-log.md`; ไม่แก้โค้ดหรือ test และไม่ commit
