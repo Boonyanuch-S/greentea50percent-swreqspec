@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI-APR-01 เลือกเปิดดูเอกสารโครงการ</title>
+<style>
+  /* แก้สีและฟอนต์ได้ตามโปรเจกต์ ส่วนนี้คือ "ยืดหยุ่นได้" */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,"Segoe UI","Sarabun","Noto Sans Thai",Tahoma,sans-serif;background:#eef2f4;color:#1d2b3a;padding:24px;line-height:1.6}
+  .note{max-width:1100px;margin:0 auto 16px;background:#fff7e6;border:1px dashed #d79a2b;border-radius:10px;padding:10px 14px;font-size:14px;color:#7a5414}
+  .row{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .state{width:340px}
+  .state h2{font-size:14px;color:#5b6b7b;margin:0 0 8px 4px;font-weight:600}
+  .phone{background:#fff;border:1px solid #cfd8de;border-radius:22px;padding:18px 16px 22px;box-shadow:0 6px 18px rgba(0,0,0,.06);min-height:560px}
+  .bar{font-weight:700;font-size:18px}
+  .sub{font-size:13px;color:#5b6b7b;margin-bottom:12px}
+  .chip{display:inline-block;font-size:12px;border-radius:999px;padding:2px 10px;background:#e6f2f2;color:#0e7c7b;border:1px solid #9fcfce}
+  .section{font-size:13px;font-weight:700;color:#5b6b7b;margin:14px 0 4px}
+  .item{display:block;border:1px solid #dde4e8;border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+  .item small{display:block;color:#5b6b7b}
+  .item.selected{border:2px solid #0e7c7b;background:#f0f8f8}
+  .viewer{border:1px solid #b9c6ce;border-radius:12px;margin-top:8px;padding:12px;min-height:150px;background:#fafcfd}
+  .viewer b{display:block}
+  .page{margin-top:8px;height:90px;border-radius:8px;background:repeating-linear-gradient(#fff 0 14px,#e9eef1 14px 16px);border:1px solid #dde4e8}
+  .btn{display:block;text-align:center;background:#0e7c7b;color:#fff;border-radius:12px;padding:12px;font-weight:700;margin-top:18px}
+  .btn.ghost{background:#fff;color:#0e7c7b;border:1px solid #0e7c7b}
+  .alert{border-radius:12px;padding:12px 14px;margin-top:10px;font-size:14px;background:#fbeae9;border:1px solid #e3a5a1;color:#8f2d27}
+  .alert b{display:block;font-size:16px;margin-bottom:2px}
+  .info{border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13px;background:#eef4fb;border:1px solid #b8cde6;color:#2c4a6b}
+</style>
+</head>
+<body>
+<!-- MOCKUP สำหรับคุยกับผู้ใช้และ PO ไม่ใช่โค้ดจริง ห้ามคัดลอกไฟล์นี้ไปเป็นโค้ดทั้งไฟล์
+     ร่างจากข้อความใน spec.md (FR-APR-01, AC-APR-03, CHANGELOG 2569-11-01 และคำตอบทีม 2569-11-09) ไม่ได้ลอกจากหน้าจอที่ทำแล้ว
+     ไม่ใส่ปุ่มอนุมัติ ส่งใบปะหน้า ส่งกลับ จุดตรวจ 4 ข้อ และผล Checklist ของคณะ เพราะเป็นหน้าจอของ FR อื่น หรือยังไม่มี FR (F-014, F-019 ใน rtm.md)
+     ยังไม่ได้ให้ PO ยืนยัน -->
+<p class="note">🧩 MOCKUP UI-APR-01 เลือกเปิดดูเอกสารโครงการ | รองรับ FR-APR-01 (ตรวจด้วย AC-APR-03) | ข้อมูลทั้งหมดเป็นตัวอย่าง | ยังไม่ได้ให้ PO ยืนยัน</p>
+<div class="row">
+
+  <section class="state">
+    <h2>สถานะ 1: เลือก "แบบ กส 002" จากชุดครบ 3 รายการ (AC-APR-03)</h2>
+    <div class="phone">
+      <div class="bar">อนุมัติเอกสารโครงการ</div>
+      <div class="sub">โครงการค่ายวิทยาศาสตร์ 2569 <span class="chip">ส่งต่ออาจารย์</span></div>
+      <div class="section">เอกสารทั้งชุด</div>
+      <span class="item" data-req="FR-APR-01">เล่มโครงการ<small>เล่มโครงการค่ายวิทยาศาสตร์ 2569</small></span>
+      <span class="item selected" data-req="FR-APR-01">กส 002<small>แบบ กส 002 · เปิดอยู่</small></span>
+      <span class="item" data-req="FR-APR-01">ใบแนบกิจกรรม<small>ใบแนบรายละเอียดกิจกรรม</small></span>
+      <div class="section">เอกสารที่เลือก</div>
+      <div class="viewer" data-req="FR-APR-01">
+        <b>แบบ กส 002</b>
+        <small>ไฟล์ที่อัปโหลด: ks-002-2569.pdf</small>
+        <div class="page"></div>
+      </div>
+      <span class="btn ghost">กลับไปรายการโครงการ</span>
+    </div>
+  </section>
+
+  <section class="state">
+    <h2>สถานะ 2: ชุดเอกสารไม่ครบ (คำตอบทีม 2569-11-09)</h2>
+    <div class="phone">
+      <div class="bar">อนุมัติเอกสารโครงการ</div>
+      <div class="sub">โครงการวันวิทยาศาสตร์ <span class="chip">ส่งต่ออาจารย์</span></div>
+      <div class="section">เอกสารทั้งชุด</div>
+      <span class="item selected" data-req="FR-APR-01">เล่มโครงการ<small>เล่มโครงการวันวิทยาศาสตร์ · เปิดอยู่</small></span>
+      <span class="item" data-req="FR-APR-01">กส 002<small>แบบ กส 002</small></span>
+      <div class="info">แสดงเฉพาะรายการที่มีในชุด ยังเปิดดูได้ตามปกติ</div>
+      <div class="section">เอกสารที่เลือก</div>
+      <div class="viewer" data-req="FR-APR-01">
+        <b>เล่มโครงการวันวิทยาศาสตร์</b>
+        <small>ไฟล์ที่อัปโหลด: project-book-2569.pdf</small>
+        <div class="page"></div>
+      </div>
+      <span class="btn ghost">กลับไปรายการโครงการ</span>
+    </div>
+  </section>
+
+  <section class="state">
+    <h2>สถานะ 3: เอกสารที่ขอไม่อยู่ในชุดนี้ (คำตอบทีม 2569-11-09)</h2>
+    <div class="phone">
+      <div class="bar">อนุมัติเอกสารโครงการ</div>
+      <div class="sub">โครงการค่ายวิทยาศาสตร์ 2569 <span class="chip">ส่งต่ออาจารย์</span></div>
+      <div class="section">เอกสารทั้งชุด</div>
+      <span class="item" data-req="FR-APR-01">เล่มโครงการ<small>เล่มโครงการค่ายวิทยาศาสตร์ 2569</small></span>
+      <span class="item" data-req="FR-APR-01">กส 002<small>แบบ กส 002</small></span>
+      <span class="item" data-req="FR-APR-01">ใบแนบกิจกรรม<small>ใบแนบรายละเอียดกิจกรรม</small></span>
+      <div class="alert" data-req="FR-APR-01"><b>ไม่พบเอกสาร</b>เอกสารที่เลือกไม่อยู่ในชุดนี้ เลือกจากรายการด้านบนแทน</div>
+      <span class="btn ghost">กลับไปรายการโครงการ</span>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
