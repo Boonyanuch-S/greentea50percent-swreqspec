@@ -2103,3 +2103,13 @@
 - ตรวจว่า test ใหม่จับได้จริง: คืน router เป็นของเดิมชั่วคราว `test_AC_APR_02_office_cannot_open_forwarded_approval` ไม่ผ่าน แล้วคืนไฟล์แก้
 - เอกสาร: `spec.md` CHANGELOG บันทึกคำตอบทีม (ไม่สร้าง ID ใหม่), `plan.md` ข้อ 4 แถว `GET /{approvalId}`; ไม่แก้ rtm.md และ test-cases.md (Then ของ TC-APR-03-5, 7, 8, 9 ให้ทีมเติมเองหรือใช้ /testcases)
 - ผล test: `cd backend && pytest -v` 155 passed (เดิม 152 + ใหม่ 3); `npm test` 34 files / 78 tests passed
+
+## 2569-11-09 /verify specs/005-อนุมัติเอกสาร/ (รอบ 3)
+- คำสั่ง: `/verify specs/005-อนุมัติเอกสาร/`
+- สิ่งที่เปลี่ยนตั้งแต่รอบก่อน: commit `800112f` (fix F-012) และ `643969b` (fix F-018); test-cases.md ไม่เปลี่ยน; ช่อง "ทีมตัดสิน" ยังว่าง
+- ผล test: backend `pytest -v` 155 passed; frontend `npm test` 34 files / 78 tests passed
+- ตารางไปข้างหน้า: ครบ 9, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 3 (FR-APR-01, FR-APR-02, FR-APR-05), ไม่นับเพราะยกเลิก 1 (FR-APR-07); IF-UC01-02 เปลี่ยนเป็นครบ
+- ย้ายไป "แก้แล้ว": F-012, F-018
+- ข้อค้นพบใหม่: F-020 (กฎกองกิจมองเห็นตามสถานะไม่มี FR/AC เฉพาะและไม่มี task ใน tasks.md, test ใหม่ตั้งชื่อตาม AC-APR-02)
+- ข้อค้นพบเดิมที่ยังเจอ: F-014, F-015, F-016, F-017 (อัปเดตว่า spec มีคำตอบแล้ว), F-019
+- แก้เฉพาะ `rtm.md` และ `prompt-log.md`
