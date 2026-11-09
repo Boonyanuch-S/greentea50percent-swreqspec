@@ -2022,3 +2022,11 @@
 - จุดประสงค์: ปิด task `T-12` ตามเงื่อนไขของ task และยืนยันว่าการทำงานถูกต้องตาม AC-VDC-04
 - ผลการทดสอบ: backend `PYTHONPATH=. pytest -q tests/test_project_review_checklist.py tests/test_AC_VDC_04_reviewer_selects_relevant_checklist_items.py` ผ่าน 2 tests; frontend `npm test -- --run src/__tests__/document-review-checklist.test.jsx` ผ่าน 4 tests
 - สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; task และ spec ระบุไว้ชัดว่า T-12 เป็นการแสดงรายละเอียดเอกสารและ Checklist รายโครงการตาม FR-VDC-02, FR-VDC-03, FR-VDC-04, FR-VDC-07 และไม่ต้องเพิ่มฟีเจอร์ใด ๆ
+
+## 2569-11-09 คำสั่ง: สร้าง mockup AC-VDC-04
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่สร้าง/แก้: `specs/003-ตรวจเอกสารโครงการ/mockups/AC-VDC-04-review-document.html`, `specs/003-ตรวจเอกสารโครงการ/mockups/AC-VDC-04-review-document.png`
+- ขอบเขต: ทำ mockup HTML แบบ responsive สะท้อนหน้าจอปัจจุบันของ T-12 โดยอิง AC-VDC-04 และ components ที่ใช้อยู่; ข้อมูลในหน้าจอเป็นตัวอย่าง
+- การตรวจ: HTML ผ่าน parser มาตรฐาน; PNG ที่ render จาก HTML ตรวจแล้วว่าอ่านได้ ขนาด 693×2132; ไม่รันชุด test เพราะเปลี่ยนเฉพาะ mockup แบบ static
+- สถานะ: ยังไม่ commit เพื่อให้ทีมตรวจและตัดสินใจก่อน
