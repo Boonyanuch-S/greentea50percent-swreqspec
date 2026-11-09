@@ -2229,3 +2229,12 @@
 - `cd frontend && npm test`: ผ่าน 36 test files, 1 skipped; 87 tests ผ่าน, 1 todo (รวม 88)
 - TC-HRS-03-1 ผ่าน; TC-HRS-03-2 ผ่าน; TC-HRS-03-3 ยังเป็น todo เนื่องจาก spec ไม่กำหนดผลที่คาดหวัง
 - `git diff --check` ผ่าน; มี React `act(...)` warning จาก test `project-approval-select-document.test.jsx` ระหว่างรัน แต่ไม่ทำให้ชุดทดสอบล้มเหลว
+
+## 2569-11-09 22:25 UTC คำสั่ง: /verify specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/
+- ผล `cd backend && pytest -v`: 157 passed, 0 failed
+- ผล `cd frontend && npm test`: 87 passed, 0 failed, 1 todo (1 skipped test); มี React `act(...)` warning จาก `project-approval-select-document.test.jsx`
+- RTM ไปข้างหน้า: ครบ 2, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 13 (ทั้งหมด 15 IDs)
+- F-ID เดิมที่ยังพบ: F-001 ถึง F-004; เพิ่มข้อค้นพบ F-005 ถึง F-008
+- ประเด็นใหม่: UC-10 client เก็บ request ในหน่วยความจำ ไม่ได้เรียกปลายทางจริง; UI หลัง UC-04 กลับแท็บรายชื่อแทนขั้นตรวจเกณฑ์; TC-HRS-03-3 เป็น todo ทั้งที่ระบุใช้ได้; ไม่มี test ตรวจ audit log บนเส้นทาง retry
+- อ่าน source ปกติใน backend/app และ frontend/src และ tests ทั้ง backend/tests และ frontend/src/__tests__; ไม่พบ `specs/000-shared/` หรือ mockups
+- แก้เฉพาะ `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้ code, tests, spec, plan หรือ tasks และไม่ commit

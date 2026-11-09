@@ -1,42 +1,46 @@
 # RTM: ตรวจสอบและบันทึกชั่วโมงกิจกรรม
-อ้างอิง: spec.md Draft v2 | tasks.md | test-cases.md ไม่มีแถวของ AC-HRS
-สร้างด้วย /verify เมื่อ 2569-11-02 | test: 217 ผ่าน 0 ไม่ผ่าน (backend 147, frontend 70 ทั้งระบบ)
+อ้างอิง: spec.md Draft v2 | plan.md | tasks.md | test-cases.md
+สร้างด้วย /verify เมื่อ 2569-11-09 22:25 UTC | test: backend 157 ผ่าน, frontend 87 ผ่าน, 0 ไม่ผ่าน, 1 todo
 
-หมายเหตุการรัน: ใช้ `PYTHONPATH=. pytest -q backend/tests` เพราะ `cd backend && pytest` ใช้กับ package path นี้ไม่ได้
-ไม่มี `specs/000-shared/` และไม่มี `mockups/`
+หมายเหตุ: ไม่พบ `specs/000-shared/` และไม่มี `mockups/` ในฟีเจอร์นี้ จึงตรวจ UI ตาม spec และ plan เท่านั้น
 
-## 1. ตามรอยไปข้างหน้า (requirement ไป โค้ด ไป test)
+## 1. ตามรอยไปข้างหน้า (requirement ไป AC ไป task ไป โค้ด ไป test)
 | ID | AC | task | โค้ด (ไฟล์: ฟังก์ชัน) | test (ผล) | สถานะ |
 |---|---|---|---|---|---|
-| FR-HRS-01 | AC-HRS-03 | T-05, T-06, T-18, T-20 | `api/activity_hours.py`: `list_pending_activity_hour_documents`; `ActivityHoursQueue.jsx` | `test_AC_HRS_03_pending_documents_sorted_by_submitted_at` (ผ่าน) | ช่องโหว่ (F-001) |
-| FR-HRS-02 | AC-HRS-04 | T-04, T-07, T-08 | `list_activity_hour_document_participants`; `importers/activity_hours_excel.py` | `test_AC_HRS_04_display_all_excel_participants_and_hour_types` (ผ่าน) | ช่องโหว่ (F-001, F-002) |
-| FR-HRS-03 | AC-HRS-01, AC-HRS-02 | T-09, T-10, T-11 | `validate_activity_hour_document`; `hour_validation.py` | `test_AC_HRS_02_return_document_and_mark_invalid_items` (ผ่าน) | ช่องโหว่ (F-002) |
-| FR-HRS-04 | AC-HRS-01 | T-12, T-13 | `approve_activity_hour_document`; `ActivityHoursReview.jsx`: `handleApprove` | `test_AC_HRS_01_approve_matching_hours` (ผ่าน) | ช่องโหว่ (F-001, F-002) |
-| FR-HRS-05 | AC-HRS-05 | T-15 | `integrations/uc10_notification_client.py` | `test_AC_HRS_05_notify_club_after_reg_success` (ผ่าน) | ช่องโหว่ (F-001) |
-| FR-HRS-06 | AC-HRS-02 | T-10, T-11 | `validate_activity_hour_document`: เปลี่ยนสถานะเป็น `ส่งคืน UC-02` | `test_AC_HRS_02_return_document_and_mark_invalid_items` (ผ่าน) | ช่องโหว่ (F-003) |
-| FR-HRS-07 | AC-HRS-06 | T-14 | `services/reg_retry.py`; `config.py`: `REG_MAX_ATTEMPTS` | `test_AC_HRS_06_reg_timeout_retry_and_failure_alert` (ผ่าน) | ช่องโหว่ (F-004) |
-| FR-HRS-08 | AC-HRS-07 | T-16 | `get_activity_hours_individual_summary`; `uc04_summary_client.py` | `test_AC_HRS_07_open_individual_summary_and_return` (ผ่าน) | ช่องโหว่ (F-001) |
-| NFR-SEC-01 | AC-HRS-08 | T-02, T-24 | `backend/auth/activity_hours_guard.py`: `require_activity_hours_user` | `test_AC_HRS_08_unauthenticated_user_is_denied` (ผ่าน) | ครบ |
-| NFR-SEC-02 | AC-HRS-09 | T-03, T-17, T-24 | `audit/activity_hours_access.py`, `audit/student_access_log.py` | `test_AC_HRS_09_*` 3 ตัว (ผ่าน) | ช่องโหว่ (F-001) |
-| NFR-PERF-01 | AC-HRS-01, AC-HRS-06 | T-19 | `config.py`: `REG_TIMEOUT_SECONDS`; `integrations/reg_client.py` | `test_reg_performance_nfr_perf_01_success_within_configured_timeout` (ผ่าน) | ครบ |
-| CON-NFR-21 | AC-HRS-08 | T-02, T-24 | เหมือน NFR-SEC-01 | เหมือน NFR-SEC-01 (ผ่าน) | ครบ |
-| DOM-PDPA-01 | AC-HRS-09 | T-03, T-17, T-24 | เหมือน NFR-SEC-02 | เหมือน NFR-SEC-02 (ผ่าน) | ช่องโหว่ (F-001) |
-| IF-REG-01 | AC-HRS-01, AC-HRS-06 | T-12, T-14 | `integrations/reg_client.py`: `RegClient` | `test_reg_client_contract.py` (ผ่าน) | ช่องโหว่ (F-001, F-004) |
-| IF-XLS-01 | AC-HRS-04 | T-04, T-07 | `activity_hours_reader.py`: `get_activity_hours_excel_config` | `test_activity_hours_excel_reader.py` (ผ่าน) | ช่องโหว่ (F-002) |
+| FR-HRS-01 | AC-HRS-03 | T-05, T-06, T-18, T-20, T-21 | `backend/app/api/activity_hours.py`: `list_pending_activity_hour_documents`; `frontend/src/pages/ActivityHoursQueue.jsx`; `frontend/src/App.jsx`: client wiring | `test_AC_HRS_03_pending_documents_sorted_by_submitted_at` (ผ่าน); `test_TC_HRS_03_1_pending_documents_sorted_by_submitted_date` (ผ่านแต่ fixture เรียงอยู่แล้ว); `test_TC_HRS_03_2_single_pending_document` (ผ่าน); `test_TC_HRS_03_3_no_pending_documents` (todo) | ช่องโหว่ (F-001, F-007) |
+| FR-HRS-02 | AC-HRS-04 | T-01, T-04, T-07, T-08, T-20, T-21 | `backend/app/api/activity_hours.py`: `list_activity_hour_document_participants`; `backend/app/services/activity_hours_reader.py`: `read_activity_hour_document`; `frontend/src/pages/ActivityHoursReview.jsx` | `test_AC_HRS_04_display_all_excel_participants_and_hour_types` (ผ่าน; ใช้ config จำลอง); frontend AC-HRS-04 tests (ผ่าน; ใช้ mock) | ช่องโหว่ (F-001, F-002) |
+| FR-HRS-03 | AC-HRS-01, AC-HRS-02 | T-01, T-09, T-10, T-11, T-20, T-22 | `backend/app/api/activity_hours.py`: `validate_activity_hour_document`; `backend/app/services/hour_validation.py`: `mark_participants_with_unmatched_hour_types`; `backend/app/services/activity_hours_approval.py`: `approve_activity_hour_document` | `test_AC_HRS_01_approve_matching_hours`, `test_AC_HRS_02_return_document_and_mark_invalid_items` (ผ่าน; ตรวจข้อมูลจากตารางฐานข้อมูล ไม่ใช่แถวที่อ่านจาก Excel) | ช่องโหว่ (F-002) |
+| FR-HRS-04 | AC-HRS-01 | T-01, T-12, T-13, T-20, T-22 | `backend/app/services/activity_hours_approval.py`: `approve_activity_hour_document`; `frontend/src/pages/ActivityHoursReview.jsx`: `handleApprove`, `submitHours` | `test_AC_HRS_01_approve_matching_hours` (ผ่าน); `test_AC_HRS_01_mock_passing_document_asks_confirmation_before_saving` (ผ่านเฉพาะ mock client) | ช่องโหว่ (F-001, F-002, F-004) |
+| FR-HRS-05 | AC-HRS-05 | T-13, T-15, T-20, T-23 | `backend/app/api/activity_hours.py`: `approve_activity_hours`, `retry_activity_hours_reg`; `backend/app/integrations/uc10_notification_client.py`: `request_confirmation` | `test_AC_HRS_05_notify_club_after_reg_success` (ผ่าน; ตรวจลำดับเรียก client จำลองและคำขอในหน่วยความจำ) | ช่องโหว่ (F-005) |
+| FR-HRS-06 | AC-HRS-02 | T-01, T-10, T-11, T-20, T-22 | `backend/app/api/activity_hours.py`: `validate_activity_hour_document`; `frontend/src/pages/ActivityHoursReview.jsx` | `test_AC_HRS_02_return_document_and_mark_invalid_items` (ผ่าน; เรียก validate โดยตรง); frontend review test (ผ่านกับ mock) | ช่องโหว่ (F-002, F-003) |
+| FR-HRS-07 | AC-HRS-06 | T-12, T-14, T-20, T-22 | `backend/app/config.py`: `REG_TIMEOUT_SECONDS`, `REG_MAX_ATTEMPTS`; `backend/app/integrations/reg_client.py`: `RegClient.submit`; `backend/app/services/reg_retry.py`: `retry_activity_hours_reg_submission`; frontend `submitHours` | `test_AC_HRS_06_reg_timeout_retry_and_failure_alert` และ frontend retry test (ผ่าน; ทดสอบ retry เดิมซ้ำ แต่ไม่ทดสอบเรียก approve ใหม่หลัง timeout) | ช่องโหว่ (F-004) |
+| FR-HRS-08 | AC-HRS-07 | T-02, T-07, T-16, T-20, T-23 | `backend/app/api/activity_hours.py`: `get_activity_hours_individual_summary`; `backend/app/integrations/uc04_summary_client.py`; `frontend/src/pages/ActivityHoursReview.jsx`: `openParticipant` | `test_AC_HRS_07_open_individual_summary_and_return` และ frontend summary navigation test (ผ่าน; UI กลับสู่รายชื่อ ไม่ได้กลับสู่ขั้นตรวจสอบเกณฑ์โดยตรง) | ช่องโหว่ (F-001, F-006) |
+| NFR-SEC-01 | AC-HRS-08 | T-02, T-20, T-24 | `backend/auth/activity_hours_guard.py`: `require_activity_hours_user`; `backend/app/api/activity_hours.py`: router dependency | `test_AC_HRS_08_unauthenticated_user_is_denied` (ผ่าน; ทดสอบ guard บน route ที่สร้างใน test) | ครบ |
+| NFR-SEC-02 | AC-HRS-09 | T-03, T-17, T-20, T-24 | `backend/app/audit/activity_hours_access.py`; `backend/app/audit/student_access_log.py`; endpoints participants, validate, approve, retry, summary | HRS-01, HRS-02 และ HRS-09 tests (ผ่าน; ไม่มี assertion log สำหรับ retry endpoint) | ช่องโหว่ (F-001, F-008) |
+| NFR-PERF-01 | AC-HRS-01, AC-HRS-06 | T-12, T-14, T-19, T-20, T-22 | `backend/app/config.py`: `REG_TIMEOUT_SECONDS`; `backend/app/api/activity_hours.py`: `get_reg_client`; `backend/app/integrations/reg_client.py` | `test_reg_performance_nfr_perf_01_success_within_configured_timeout` (ผ่าน; ใช้ transport จำลองที่ตอบทันที) | ช่องโหว่ (F-001) |
+| CON-NFR-21 | AC-HRS-08 | T-02, T-05, T-07, T-20, T-24 | `backend/app/api/activity_hours.py`: dependency ของ router; `backend/auth/activity_hours_guard.py` | `test_AC_HRS_08_unauthenticated_user_is_denied` (ผ่าน) | ครบ |
+| DOM-PDPA-01 | AC-HRS-09 | T-03, T-17, T-20, T-24 | `backend/app/audit/activity_hours_access.py`; `backend/app/audit/student_access_log.py` | HRS-01, HRS-02 และ HRS-09 tests (ผ่าน; ยังขาด assertion สำหรับ retry endpoint) | ช่องโหว่ (F-001, F-008) |
+| IF-REG-01 | AC-HRS-01, AC-HRS-06 | T-12, T-13, T-14, T-19, T-20, T-22 | `backend/app/integrations/reg_client.py`; `backend/app/services/reg_retry.py`; `backend/app/api/activity_hours.py` | `test_reg_client_contract.py`, `test_AC_HRS_01_approve_matching_hours`, `test_AC_HRS_06_reg_timeout_retry_and_failure_alert` (ผ่าน; ใช้ transport จำลอง) | ช่องโหว่ (F-001, F-004) |
+| IF-XLS-01 | AC-HRS-04 | T-01, T-04, T-07, T-20, T-21 | `backend/importers/activity_hours_excel.py`; `backend/app/services/activity_hours_reader.py`; `backend/app/api/activity_hours.py`: `list_activity_hour_document_participants` | `test_activity_hours_excel_reader.py`, `test_AC_HRS_04_display_all_excel_participants_and_hour_types` (ผ่านด้วย schema/config ที่ test ระบุเอง) | ช่องโหว่ (F-002) |
 
-สรุป: ครบ 3 | ยังไม่ถึง 0 | รอ 0 | ช่องโหว่ 12
+สรุป: ครบ 2 | ยังไม่ถึง 0 | รอ 0 | ช่องโหว่ 13
 
 ## 2. ตามรอยย้อนกลับ (โค้ด ไป requirement)
 | โค้ด (ไฟล์: ฟังก์ชัน หรือ endpoint) | อ้าง ID | ตรงกับข้อความใน spec ไหม | หมายเหตุ |
 |---|---|---|---|
-| `GET /activity-hours/documents/pending` | FR-HRS-01 | ตรง แต่ตอบ 503 ในเซิร์ฟเวอร์จริง | F-001 |
-| `GET .../participants` | FR-HRS-02, IF-XLS-01 | อ่านจาก Excel แต่ตรวจเกณฑ์จากตาราง | F-002 |
-| `POST .../validate` | FR-HRS-03, FR-HRS-06 | เปลี่ยนสถานะเอกสารตั้งแต่เปิดหน้า | F-003 |
-| `POST .../approve` | FR-HRS-04 | ตรง แต่ส่งซ้ำได้ไม่จำกัด | F-004 |
-| `POST .../reg-retry` | FR-HRS-07 | ตรงในกรณีปกติ | F-004 |
-| `GET .../individual-summary` | FR-HRS-08 | ตรง แต่ไม่มี provider ในเซิร์ฟเวอร์จริง | F-001 |
-| `App.jsx`: `sessionActivityHoursClient` | FR-HRS-01 | ใช้ `activityHoursMock` เสมอ ไม่เรียก `createActivityHoursClient` | F-001 |
-| `get_activity_hours_excel_config` | IF-XLS-01 | ชื่อชีตและหัวคอลัมน์เป็นค่า `__PLACEHOLDER_...` | F-002 |
+| `GET /activity-hours/documents/pending` | FR-HRS-01, CON-NFR-21, NFR-SEC-01 | ตรงเมื่อมี session | ไม่มีการ wiring `activity_session` ใน `main.py`; เรียกจริงโดยไม่ override จึงตอบ 503 (F-001) |
+| `GET /activity-hours/documents/{document_id}/participants` | FR-HRS-02, IF-XLS-01, NFR-SEC-02 | อ่าน Excel ตาม config และบันทึก access log | schema production เป็น placeholder; response จาก Excel ไม่ถูกบันทึกลง `ActivityParticipantHour` เพื่อใช้ validate/approve (F-002) |
+| `POST /activity-hours/documents/{document_id}/validate` | FR-HRS-03, FR-HRS-06, ASM-01, ASM-03 | เทียบประเภทกับเกณฑ์ active ของปีใน Activity; ทำเครื่องหมายและคืนเอกสาร | คืนเอกสารทันทีเมื่อเรียก validate ไม่ใช่เมื่อเจ้าหน้าที่พยายามอนุมัติตาม AC-HRS-02 (F-003) |
+| `POST /activity-hours/documents/{document_id}/approve` | FR-HRS-04, IF-REG-01, NFR-SEC-02 | ส่งรายการจากตารางฐานข้อมูลและเปลี่ยนสถานะเมื่อ REG success | ไม่มีการปฏิเสธ payload ที่ไม่มีผู้เข้าร่วม; เอกสารว่างจึงส่ง payload ว่างได้ (F-002); การเรียก approve ใหม่หลัง timeout สร้าง attempt ใหม่และเลี่ยงเพดาน retry (F-004) |
+| `POST /activity-hours/documents/{document_id}/reg-retry` | FR-HRS-07, IF-REG-01, NFR-SEC-02 | จำกัดการ retry ของ submission เดิมรวมเป็น 2 ครั้ง | มีการบันทึก access log ในโค้ด แต่ไม่มี test ยืนยัน log สำหรับ endpoint นี้ (F-008) |
+| `GET /activity-hours/documents/{document_id}/individual-summary` | FR-HRS-08, NFR-SEC-02 | ส่งเอกสารและผู้เข้าร่วมที่เลือกไป provider แล้วคืนผล | Provider ไม่ถูก wiring ใน runtime จึง 503; UI ปิดรายละเอียดกลับไปหน้ารายชื่อแทนขั้นตรวจสอบเกณฑ์โดยตรง (F-001, F-006) |
+| `UC10NotificationClient.request_confirmation` | FR-HRS-05 | ไม่ครบ | บันทึก request ไว้ใน list ในหน่วยความจำเท่านั้น ไม่มีการเรียก/ส่งต่อไปยัง UC-10 จริง (F-005); เนื้อหาและช่องทางยังคงอยู่นอก scope |
+| `ActivityHoursQueue` / `activityHoursClient.getPendingDocuments` | FR-HRS-01 | แสดงตามลำดับที่ client ส่งมา | UI ไม่ sort; TC-HRS-03-1 fixture เรียงอยู่แล้ว ขณะที่ backend test แยกตรวจ sort ที่ API; ค่าเริ่มต้นของ App เป็น mock (F-001) |
+| `ActivityHoursReview` | FR-HRS-02, FR-HRS-03, FR-HRS-04, FR-HRS-06, FR-HRS-08 | บางส่วน | เปิดหน้าแล้วเรียก validate ซึ่งอาจคืนเอกสาร; summary dialog กลับสู่รายชื่อ ไม่ใช่ขั้นตรวจเกณฑ์; การยืนยันก่อนส่งถูกทดสอบกับ mock client (F-003, F-006) |
+| `activityHoursMock` | FR-HRS-01 ถึง FR-HRS-08 | ใช้เป็นข้อมูลจำลอง ไม่ใช่การทำงานจริง | ถูกใช้เป็น client เริ่มต้นใน App; แสดงข้อมูลผู้เข้าร่วม/summary ที่สร้างขึ้นและจำลองผลตรวจ/บันทึก (F-001) |
+| `get_activity_hours_excel_config` / `read_activity_hours_excel` | FR-HRS-02, IF-XLS-01 | reader รองรับ schema config แต่ config จริงยังไม่พร้อม | worksheet และชื่อคอลัมน์เป็น placeholder; plan/task ระบุว่ายังต้องยืนยัน schema กับเจ้าของไฟล์ (F-002) |
+| `RegClient.submit` / `retry_activity_hours_reg_submission` | FR-HRS-04, FR-HRS-07, IF-REG-01, NFR-PERF-01 | สอดคล้องข้อจำกัด timeout/retry ต่อ submission | ใช้ timeout 5 วินาทีและ retry ได้ 1 ครั้งต่อ submission; ไม่มี REG transport จริงที่ wiring ใน runtime และ approve ใหม่สร้าง submission ใหม่ได้ (F-001, F-004) |
+| API ตาม plan: `GET /activity-hours/documents/{documentId}`, `POST /activity-hours/documents/{documentId}/notify-club` | plan.md ข้อ 4 | ไม่มี endpoint ตาม path ที่ระบุ | รายชื่อผู้เข้าร่วมใช้ `/participants`; การเรียก UC-10 ฝังใน approve/retry; ผู้ใช้เห็น behavior หลักผ่าน endpoints เหล่านี้ แต่สัญญา plan กับ routes ไม่ตรง |
 
 ## 3. ข้อค้นพบ
 ชนิด: AC ไม่มี test / test อ่อน / โค้ดไม่มี FR / FR ไม่มี AC / เดา Q-xx / ละเมิด Constraint / ตัวเลขไม่ตรง spec / อ้าง ID ผิดเรื่อง
@@ -44,24 +48,21 @@
 
 | F-ID | ชนิด | อยู่ที่ | ขัดกับ | รายละเอียด | ทีมตัดสิน |
 |---|---|---|---|---|---|
-| F-001 | ละเมิด Constraint | `App.jsx`: `activityHoursMock`, `main.py` | DOM-PDPA-01, NFR-SEC-02, IF-REG-01, T-20 | ลองเรียกจริงด้วย Token กองกิจแล้วคิวตอบ 503 เพราะไม่มีการตั้ง `activity_session`, `reg_timeout_transport`, `activity_hours_upload_directory`, `uc04_summary_provider` หน้าเว็บทั้งหมดจึงทำงานบน mock ดังนั้นการเปิดดูข้อมูลนักศึกษาบนเว็บจริงไม่มี log เลย และไม่มีการส่ง REG แม้ T-20 จะเขียนว่า "เสร็จ" test ผ่านเพราะ override dependency ทุกตัว | |
-| F-002 | test อ่อน | `api/activity_hours.py`: `participants`, `validate`, `approve`; `activity_hours_reader.py`: placeholder | FR-HRS-02, FR-HRS-03, FR-HRS-04, IF-XLS-01 | หน้าจออ่านรายชื่อจาก Excel แต่ตรวจเกณฑ์และส่ง REG จากตาราง โดยไม่มีโค้ดนำแถวจาก Excel ลงตาราง ทดลองแล้วเอกสารที่ไม่มีแถวในตาราง `validate` ตอบว่าไม่มีรายการผิด และ `approve` ส่ง REG ด้วยรายการ 0 รายการ ไม่มี test กรณีนี้ นอกจากนี้ schema Excel ยังเป็น placeholder ควรถามเจ้าของไฟล์ | |
-| F-003 | ตัวเลขไม่ตรง spec | `ActivityHoursReview.jsx`: `getDocumentValidationResult`, `validate_activity_hour_document` | FR-HRS-06, AC-HRS-02 | AC ระบุว่าคืนเอกสารเมื่อ "เจ้าหน้าที่พยายามยืนยันอนุมัติ" แต่หน้าเรียก `validate` ทันทีเมื่อเปิดเอกสาร API จะเปลี่ยนสถานะเป็นส่งคืนโดยที่เจ้าหน้าที่ยังไม่กดอะไร ส่วน `approve` ตอบ 409 เฉย ๆ ไม่คืนเอกสาร ควรให้ตรวจแบบอ่านอย่างเดียวตอนเปิด และคืนเมื่อกดยืนยัน หรือแก้ AC | |
-| F-004 | test อ่อน | `activity_hours_approval.py`: `approve_activity_hour_document` | FR-HRS-07, Q-03 | ทดลองแล้วเรียก `approve` ซ้ำหลังล้มเหลวได้เรื่อย ๆ ได้ 3 รอบส่ง REG 6 ครั้ง เพราะเอกสารยังเป็น "รอตรวจสอบ" และทุกครั้งสร้างคำขอใหม่ นับจำนวนใหม่ จึงเลี่ยงกติกาส่งซ้ำได้ 1 ครั้ง หน้าเว็บทำได้โดยรีเฟรช test ตรวจแค่ `reg-retry` ควรตรวจคำขอที่ล้มเหลวก่อนใน `approve` | |
+| F-001 | ละเมิด Constraint | `frontend/src/App.jsx`: `activityHoursMock`; `backend/app/main.py`; runtime dependencies | DOM-PDPA-01, NFR-SEC-02, IF-REG-01, FR-HRS-01/02/04/08, T-20 | App ใช้ mock เป็น client เริ่มต้น; `main.py` ไม่กำหนด `activity_session`, `reg_timeout_transport`, `activity_hours_upload_directory` หรือ `uc04_summary_provider`. API จริงจึงตอบ 503 เมื่อไม่ได้ override/configure และการทำงานบนหน้าเว็บไม่ได้อ่านข้อมูลหรือเขียน audit/REG จริง. Mock ยังแสดง participant/summary ที่สร้างขึ้นเอง รวมถึงรายละเอียด UC-04 ซึ่งเนื้อหาและกลไกอยู่ใน Out of scope. Tasks ระบุ T-20 ทำบางส่วน. | |
+| F-002 | test อ่อน | `backend/app/api/activity_hours.py`: `participants`, `validate`, `approve`; `backend/app/services/activity_hours_reader.py` | FR-HRS-02, FR-HRS-03, FR-HRS-04, IF-XLS-01 | participants อ่านและคืนแถวจาก Excel แต่ validate/approve ใช้ `ActivityParticipantHour` ในฐานข้อมูล; ไม่มีการนำแถว Excel มาบันทึกตารางดังกล่าว. เมื่อไม่มีแถวในตาราง validate ไม่พบรายการผิด และ approve สามารถส่งรายการว่าง. Test ตรวจ Excel ด้วย config ที่กำหนดเฉพาะใน test จึงไม่ยืนยัน schema จริง; config production ยังเป็น placeholder. | |
+| F-003 | ตัวเลขไม่ตรง spec | `frontend/src/pages/ActivityHoursReview.jsx`: effect โหลดข้อมูล; `backend/app/api/activity_hours.py`: `validate_activity_hour_document` | FR-HRS-06, AC-HRS-02 | เปิดหน้ารายละเอียดแล้ว UI เรียก validate ทันที; API เปลี่ยนสถานะเป็นส่งคืนเมื่อพบรายการผิด ก่อนเจ้าหน้าที่พยายามยืนยันอนุมัติตาม AC. ปุ่มอนุมัติถูกซ่อนในกรณีนี้; test เรียก validate โดยตรง ไม่ยืนยันลำดับ trigger ตาม AC. | |
+| F-004 | test อ่อน | `backend/app/services/activity_hours_approval.py`: `approve_activity_hour_document` | FR-HRS-07, Q-03 | หลัง approve timeout เอกสารยังรอตรวจและ submission ใหม่เริ่ม `attempt_count=1`; การเรียก approve ซ้ำจึงส่งคำขอใหม่ได้หลายครั้งและเลี่ยงการจำกัด retry หนึ่งครั้ง. Test จำกัดเฉพาะการเรียก `/reg-retry` ซ้ำบน submission เดิม จึงไม่จับกรณี approve ซ้ำ/รีเฟรชหน้า. | |
+| F-005 | โค้ดไม่มี FR | `backend/app/integrations/uc10_notification_client.py`: `request_confirmation` | FR-HRS-05, AC-HRS-05 | Client เพียงเก็บ `UC10NotificationRequest` ใน list ภายใน process และคืนสถานะ `queued`; ไม่มีการส่งต่อหรือเรียก UC-10 จริง. Test ตรวจเฉพาะ event และรายการใน client จำลอง จึงยังไม่ยืนยันการแจ้งสโมสรตาม requirement. | |
+| F-006 | อ้าง ID ผิดเรื่อง | `frontend/src/pages/ActivityHoursReview.jsx`: `openParticipant`, ปุ่ม “กลับไปยังรายชื่อ” | FR-HRS-08, AC-HRS-07 | หลังดูสรุปข้อมูลรายบุคคล UI ปิด dialog แล้วกลับไปยังแท็บรายชื่อ; test ยืนยันการกลับสู่รายชื่อ และ test navigation ต้องเลือกแท็บข้อมูลเอกสารเองภายหลัง. ไม่ได้กลับไปยังขั้นตรวจสอบเกณฑ์ (ขั้นที่ 4) ตาม FR/AC โดยตรง. | |
+| F-007 | AC ไม่มี test | `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/test-cases.md`: TC-HRS-03-3; `frontend/src/__tests__/TC-HRS-03-3.test.jsx` | AC-HRS-03 / FR-HRS-01 | TC-HRS-03-3 อยู่สถานะ “ใช้ได้” แต่ Then ระบุว่า spec ไม่ได้บอกผลเมื่อไม่มีเอกสาร และไฟล์ test เป็น `test.todo` จึงถูก skip ไม่มี assertion. หน้าจอมีข้อความ empty state ที่ยังไม่มีข้อกำหนดรองรับ; ทีมต้องตัดสินผลที่คาดหวังก่อนจึงจะเป็น test ที่ทำงานได้. | |
+| F-008 | test อ่อน | `backend/tests/test_AC_HRS_09_student_access_is_logged.py` | DOM-PDPA-01, NFR-SEC-02, AC-HRS-09 | โค้ด retry บันทึก access log แต่ test AC-HRS-09 ไม่มีกรณีเรียก `/reg-retry` แล้วตรวจ accessor/time/item; จึงยังไม่มี regression assertion ว่าการเข้าถึงข้อมูลระหว่าง retry ถูก log ทุกครั้ง. | |
 
 ## 4. แก้แล้ว
 | F-ID | แก้อย่างไร | รู้ได้อย่างไร |
 |---|---|---|
-| ไม่มี | rtm.md ของฟีเจอร์นี้สร้างครั้งแรก | |
+| ไม่มี | ไม่พบ F-ID เดิมที่มีหลักฐานว่าแก้แล้วในการตรวจรอบนี้ | F-001 ถึง F-008 ยังคงพบจากโค้ดและ test ปัจจุบัน |
 
-## 5. คำตอบที่เสนอสำหรับ Open Questions (รอทีมยืนยัน ยังไม่ใช่คำตอบทีม)
-ฟีเจอร์นี้ไม่มีคำถามที่ยังเปิด Q-01, Q-02, Q-03, Q-05, Q-06 ปิดแล้ว และ spec ไม่มี Q-04
-
-ข้อมูลประกอบ:
-- ผังกองกิจให้บันทึกชั่วโมงหลังรองอธิการบดีอนุมัติสรุปโครงการ และปลายทางคือ reg.su.ac.th ตรงกับที่ spec ระบุว่าส่งเข้า REG
-- ฟอร์มที่เกี่ยวข้องคือ กศ.012, กศ.013, กศ.013.1 และไฟล์ Excel คือ "แบบบันทึกรหัสนักศึกษาผู้เข้าร่วมโครงการ" ใช้แทนค่า placeholder ใน F-002 ได้เมื่อได้ไฟล์จริง
-
-แหล่งอ้างอิง:
-- [เอกสารกิจกรรมนักศึกษา กองกิจ ม.ศิลปากร](https://dsa.su.ac.th/ksu/?page_id=306)
-- [ผังขั้นตอนการขออนุมัติโครงการและชั่วโมงกิจกรรม](https://drive.google.com/file/d/1aVeGJRqKh0b7_z4vAuG7PpghfxCIe7Nk/view?usp=drive_link)
-- [แนวทางการตรวจโครงการนักศึกษา (2565)](https://dsa.su.ac.th/ksu/wp-content/uploads/2022/03/%e0%b9%81%e0%b8%99%e0%b8%a7%e0%b8%97%e0%b8%b2%e0%b8%87%e0%b8%81%e0%b8%b2%e0%b8%a3%e0%b8%95%e0%b8%a3%e0%b8%a7%e0%b8%88%e0%b9%82%e0%b8%84%e0%b8%a3%e0%b8%87%e0%b8%81%e0%b8%b2%e0%b8%a3%e0%b8%99%e0%b8%b1%e0%b8%81%e0%b8%a8%e0%b8%b6%e0%b8%81%e0%b8%a9%e0%b8%b2.pdf)
+## 5. สถานะคำถาม
+- Q-01, Q-02, Q-03, Q-05 และ Q-06 ปิดแล้วตาม spec; spec ไม่มี Q-04
+- Schema Excel ยังรอเจ้าของไฟล์ยืนยันตาม T-04/T-07 และ F-002
+- ไม่พบโฟลเดอร์ mockup หรือ constraints ที่ใช้ร่วม
