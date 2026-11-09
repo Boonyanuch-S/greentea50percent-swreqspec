@@ -2246,8 +2246,24 @@
 - ผล `pytest -v`: 157 passed; ผล `cd frontend && npm test -- --run src/__tests__/activity-hours-empty-queue.test.jsx`: 1 passed
 - คำสั่ง npm ที่รันจาก root ก่อนแก้ไขตรวจพาธไม่พบ `package.json`; รันซ้ำจาก `frontend/` แล้ว test ผ่าน
 
-## 2569-11-09 22:57 UTC คำสั่ง: /implement T-24 (แก้ F-008)
+## 2569-11-09 22:57 UTC คำสั่ง: /implement T-24 (แก้ F-008 ใน specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/rtm.md)
 - เพิ่ม `test_AC_HRS_09_reg_retry_endpoint_logs_access_context` ใน `backend/tests/test_AC_HRS_09_student_access_is_logged.py`; ยืนยัน accessor_id, accessed_at และ access_item ของการเรียก `/reg-retry` แม้ REG retry จะล้มเหลว
 - ผล `pytest -v`: 158 passed, 0 failed
 - ไม่แก้ test ที่ชื่อขึ้นต้นด้วย `test_TC_`; T-24 ปรับเป็น “เสร็จ รอทีมตรวจ”
 - ไม่มีรายละเอียดจาก spec ที่ต้องเดา; ใช้ error timeout เดิมของ retry และ access item ที่ implementation บันทึกอยู่แล้ว
+
+## 2569-11-09 23:03 UTC คำสั่ง: รับคำตอบทีม Q-01 ถึง Q-03 (specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/)
+- คำตอบทีม: ยืนยันคำตอบเดิมของ Q-01 ถึง Q-03 ตามที่บันทึกไว้ใน `spec.md`
+- Q-01: ไม่เพิ่มพฤติกรรมเรียก UC-11 เพราะอยู่นอก scope ของ UC-07
+- Q-02: DOM-PDPA-01 และ NFR-SEC-02 เป็นข้อกำหนด audit log เฉพาะ UC-07 ไม่ใช่ NFR หลัก; คำถามของ UC-11 เป็นของ Q-04 ใน specs/011
+- Q-03: REG ต้องตอบ success ภายใน 5 วินาที; เมื่อ timeout แจ้ง “ส่งข้อมูลไม่สำเร็จ” ให้เจ้าหน้าที่ retry ด้วยตนเองได้ 1 ครั้ง ไม่มี auto-retry และแจ้งเตือนหาก retry ไม่สำเร็จ
+- ไม่มีการแก้ `spec.md` เพราะคำตอบที่ยืนยันตรงกับรายละเอียดที่ปิดไว้แล้ว; ไม่มีการรัน test เนื่องจากเป็นการบันทึกการยืนยันคำตอบเท่านั้น
+
+## 2569-11-09 23:05 UTC คำสั่ง: /verify specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/
+- ผล `cd backend && pytest -v`: 158 passed, 0 failed
+- ผล `cd frontend && npm test`: 88 passed, 0 failed, 1 todo (1 skipped; 37 test files passed, 1 skipped); มี React `act(...)` warnings ใน `project-approval-select-document.test.jsx`
+- RTM ไปข้างหน้า: ครบ 2, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 13 จาก 15 IDs
+- F-001 ถึง F-006 ยังคงพบ; F-007 ปิดแล้วเพราะ AC-HRS-03 ระบุ empty state และมี test เฉพาะผ่าน; F-008 ปิดแล้วเพราะเพิ่ม retry access-log assertion; เพิ่ม F-009 เรื่อง UI mark รายการผิดด้วย `student_reference` แทน item identity จึงอาจ mark หลายรายการของผู้เข้าร่วมคนเดียวกัน
+- ยืนยัน reverse trace: Excel response ยังไม่ถูกเชื่อมกับข้อมูลที่ validate/approve; UC-10 เป็น in-memory queue; real runtime ยังไม่ได้ wire dependencies; test performance ใช้ transport จำลอง
+- พบสถานะ T-20 ใน tasks.md เป็น “เสร็จ” แต่หมายเหตุใน task/plan.md ระบุ wiring runtime ขาดอยู่; สะท้อนสถานะไม่ตรงกันใน F-001 โดยไม่แก้ tasks.md
+- แก้เฉพาะ `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้ source, tests, spec, plan หรือ tasks
