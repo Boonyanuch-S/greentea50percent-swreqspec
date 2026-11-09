@@ -2191,3 +2191,12 @@
 - ข้อค้นพบคงค้าง: F-001 (ไม่มี wiring แหล่งข้อมูลกิจกรรมจริงและ App ใช้ mock), F-002 (ไม่มี Excel/template จริงหรือ flow ส่งไฟล์แก้ไขกลับ), F-003 (ยังไม่ส่งรายการเข้าคิว UC-07 จริง), F-005 (hardcode template), F-006 (TC-SBH-03-1/2 ไม่เตรียม Given ตามกรณีสถานะปะปน แม้มี AC test แยกที่ตรวจพฤติกรรมจริง)
 - ยืนยัน F-004 ปิดแล้วจาก backend/frontend tests ที่ตรวจ deadline และลิงก์/การนำทาง UC-11; F-007 ปิดแล้วเนื่องจาก AC-SBH-01 ปรับตามคำตอบ Q-02 และมี test ตรวจการยืนยันความครบถ้วน
 - อัปเดตเฉพาะ `specs/002-ส่งข้อมูลชั่วโมง/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks และไม่ commit
+
+## 2569-11-09 คำสั่ง: /implement T-07 specs/002-ส่งข้อมูลชั่วโมง/tasks.md
+- สร้าง SQLAlchemy model `SubmissionTemplateConfig` และ `TemplateRegistry` เพื่ออ่าน template ID/เวอร์ชันจากตาราง config แล้วเลือกเฉพาะรายการที่ `active_flag` เปิดใช้งาน; เพิ่ม API `GET /config/templates` ที่ต้องยืนยันตัวตนและลงทะเบียน router ใน `main.py`
+- เพิ่ม `backend/tests/test_template_registry.py` ตรวจการคืนเฉพาะ template ที่พร้อมใช้จากข้อมูลที่เตรียมในฐานข้อมูลและการปฏิเสธคำขอที่ไม่มี Login
+- เปลี่ยนสถานะ T-07 เป็น “เสร็จ รอทีมตรวจ”; T-08 และ task อื่นไม่เปลี่ยน
+- ผลทดสอบทั้งหมด: `cd backend && pytest -v` ผ่าน 157 tests; `cd frontend && npm test` ผ่าน 34 test files / 85 tests; รวม 242 tests ผ่าน, 0 ไม่ผ่าน; `git diff --check` ผ่าน
+- ใช้ `app.state.template_session` เป็นจุดรับ SQLAlchemy session; หาก runtime ยังไม่ wiring session API ตอบ 503 พร้อมข้อความชัดเจน ไม่สร้าง database/config source หรือ template เริ่มต้นขึ้นเอง
+- ก่อนเริ่มได้ถามทีมเรื่องแหล่ง registry และขอบเขตไฟล์เพิ่มเติม; ทีมยืนยัน SQLAlchemy config table และอนุญาตเพิ่ม tests พร้อมอัปเดต tasks.md/prompt-log.md; ไม่มีประเด็นที่เดาแทนทีม
+- ไม่ commit

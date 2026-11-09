@@ -9,6 +9,7 @@ from .routers.checklists import checklist_router
 from .api.activity_hours import activity_hours_router
 from .api.activity_data import activity_data_router
 from .api.hours_submission import hours_submission_router
+from .api.template_config import template_config_router
 from .routers.project_approvals import project_approval_router
 from .routers.project_documents import project_document_router
 from .routers.review_queue import review_queue_router
@@ -24,6 +25,8 @@ app.include_router(checklist_router)
 app.include_router(activity_data_router)
 # เปิด API หน้าส่งข้อมูลชั่วโมงตาม FR-SBH-01 และ CON-NFR-21
 app.include_router(hours_submission_router)
+# เปิด registry template จาก config ตาม FR-SBH-03 และ IF-TPL-01
+app.include_router(template_config_router)
 app.include_router(review_decision_router)
 app.include_router(project_approval_router)
 app.include_router(project_document_router)

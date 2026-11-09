@@ -96,7 +96,7 @@
 - แบบหน้าจอ: ไม่มี
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: registry อ่าน template ID/เวอร์ชันจาก config และ API คืนเฉพาะ template ที่พร้อมใช้โดยไม่ hardcode template ในโค้ด
-- สถานะ: พร้อมทำ
+- สถานะ: เสร็จ รอทีมตรวจ
 
 ### T-08 สร้างไฟล์ Excel และ preview ผ่าน API
 - รองรับ: FR-SBH-03, FR-SBH-04, IF-TPL-01
