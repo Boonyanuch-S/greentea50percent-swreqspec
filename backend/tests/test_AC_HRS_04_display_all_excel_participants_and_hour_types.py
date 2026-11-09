@@ -138,3 +138,95 @@ def test_activity_hours_file_resolver_rejects_references_outside_upload_director
 
     with pytest.raises(ActivityHoursFileReferenceError):
         resolver.open("../outside.xlsx")
+
+
+def _request_excel_participants(tmp_path, document_id, participants):
+    excel_path = tmp_path / f"activity-hours-{document_id}.xlsx"
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "Mock activity"
+    worksheet.append(["Student reference", "Participant", "Hour type", "Reported hours"])
+    for participant in participants:
+        worksheet.append(participant)
+    workbook.save(excel_path)
+
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    session = Session(engine)
+    session.add(
+        ActivityHourDocument(
+            document_id=document_id,
+            activity_id=1,
+            source_file_reference=excel_path.name,
+            submitted_at=datetime(2026, 10, 20),
+            status="รอตรวจสอบ",
+        )
+    )
+    session.commit()
+    app.dependency_overrides[get_activity_session] = lambda: session
+    app.dependency_overrides[get_activity_hours_excel_config] = _test_excel_config
+    app.state.activity_hours_upload_directory = tmp_path
+
+    token = f"test-activity-hours-tc-{document_id}"
+    now = datetime.now(timezone.utc)
+    token_registry.register(
+        token,
+        AuthenticatedUserContext(
+            "staff-1",
+            UserRole.STUDENT_AFFAIRS_OFFICER,
+            now,
+        ),
+        now.replace(tzinfo=None) + timedelta(minutes=30),
+    )
+
+    try:
+        return TestClient(app).get(
+            f"/activity-hours/documents/{document_id}/participants",
+            headers={"Authorization": token},
+        )
+    finally:
+        app.dependency_overrides.pop(get_activity_session, None)
+        app.dependency_overrides.pop(get_activity_hours_excel_config, None)
+        if hasattr(app.state, "activity_hours_upload_directory"):
+            del app.state.activity_hours_upload_directory
+        session.close()
+        engine.dispose()
+
+
+def test_TC_HRS_04_1_display_all_participants_and_hour_types(tmp_path) -> None:
+    # Given เจ้าหน้าที่เข้าสู่ระบบแล้วเลือกไฟล์ Excel ที่มีผู้เข้าร่วมหลายรายและประเภทชั่วโมงทุกแถว
+    expected = [
+        ("S-101", "Participant One", "Volunteer", 2),
+        ("S-102", "Participant Two", "Education", 3),
+    ]
+
+    # When ระบบเปิดไฟล์นั้น
+    response = _request_excel_participants(tmp_path, 42, expected)
+
+    # Then ระบบแสดงรายชื่อผู้เข้าร่วมพร้อมประเภทชั่วโมงที่แจ้งไว้ครบทุกแถว
+    assert response.status_code == 200
+    rows = response.json()
+    assert len(rows) == len(expected)
+    assert [(row["participant_name"], row["reported_hour_type"]) for row in rows] == [
+        ("Participant One", "Volunteer"),
+        ("Participant Two", "Education"),
+    ]
+
+
+def test_TC_HRS_04_2_display_single_participant_and_hour_type(tmp_path) -> None:
+    # Given เจ้าหน้าที่เข้าสู่ระบบแล้วเลือกไฟล์ Excel ที่มีผู้เข้าร่วมหนึ่งรายและประเภทชั่วโมงหนึ่งรายการ
+    expected = [("S-103", "Participant Single", "Volunteer", 1)]
+
+    # When ระบบเปิดไฟล์นั้น
+    response = _request_excel_participants(tmp_path, 43, expected)
+
+    # Then ระบบแสดงรายชื่อผู้เข้าร่วมรายนั้นพร้อมประเภทชั่วโมงที่แจ้งไว้ครบรายการ
+    assert response.status_code == 200
+    rows = response.json()
+    assert len(rows) == 1
+    assert rows[0]["participant_name"] == "Participant Single"
+    assert rows[0]["reported_hour_type"] == "Volunteer"

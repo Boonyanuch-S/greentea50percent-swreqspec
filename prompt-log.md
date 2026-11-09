@@ -2267,3 +2267,17 @@
 - ยืนยัน reverse trace: Excel response ยังไม่ถูกเชื่อมกับข้อมูลที่ validate/approve; UC-10 เป็น in-memory queue; real runtime ยังไม่ได้ wire dependencies; test performance ใช้ transport จำลอง
 - พบสถานะ T-20 ใน tasks.md เป็น “เสร็จ” แต่หมายเหตุใน task/plan.md ระบุ wiring runtime ขาดอยู่; สะท้อนสถานะไม่ตรงกันใน F-001 โดยไม่แก้ tasks.md
 - แก้เฉพาะ `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้ source, tests, spec, plan หรือ tasks
+
+## 2569-11-09 23:14 UTC คำสั่ง: /testcases AC-HRS-04 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/
+- โหมดร่าง: AC-HRS-04 ยังไม่มีแถวใน `test-cases.md`; เพิ่ม TC-HRS-04-1 (ทางปกติ), TC-HRS-04-2 (ขอบหนึ่งรายการ) และ TC-HRS-04-3 (ไฟล์ไม่ใช่ Excel)
+- AC-HRS-04, FR-HRS-02 และ IF-XLS-01 ไม่ระบุพฤติกรรมเมื่อเลือกไฟล์ที่ไม่ใช่ Excel หรือระบบเปิดไฟล์ไม่ได้ จึงระบุ Then ว่า “spec ไม่ได้บอก” ใน TC-HRS-04-3 เพื่อให้ทีมกำหนดผลที่คาดหวังก่อนเขียน test
+- T-07, T-08 และ T-21 ระบุว่าเสร็จ; T-20 ยังระบุในหมายเหตุว่า runtime/API จริงยังไม่ได้เชื่อมครบ
+- ไม่เขียนหรือรัน test ตามโหมดร่าง; แก้เฉพาะ `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/test-cases.md` และเพิ่มบันทึกนี้
+
+## 2569-11-09 23:19 UTC คำสั่ง: /testcases AC-HRS-04 specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/
+- โหมดเขียน test: TC-HRS-04-1 และ TC-HRS-04-2 เปลี่ยนเป็น “ใช้ได้”; เพิ่ม test ฝั่ง pytest และ vitest ให้แต่ละกรณีตามช่อง “ตรวจด้วย” รวม backend 2 tests และ frontend 2 tests
+- TC-HRS-04-3 เป็นขั้นตอนให้คนยืนยันผลลัพธ์ เพราะ spec ไม่ได้ระบุพฤติกรรมของไฟล์ที่ไม่ใช่ Excel; ไม่เขียน test code สำหรับแถวนั้น
+- pytest ทั้งหมด: 160 passed, 0 failed; `test_TC_HRS_04_1_display_all_participants_and_hour_types` และ `test_TC_HRS_04_2_display_single_participant_and_hour_type` ผ่าน
+- Vitest ทั้งหมด: 90 passed, 0 failed, 1 todo (1 skipped); `TC-HRS-04-1.test.jsx` และ `TC-HRS-04-2.test.jsx` ผ่าน
+- การรัน `npm test` ครั้งแรกจาก repository root หา `package.json` ไม่พบ; รันซ้ำจาก `frontend/` ด้วย `cd frontend && npm test` ผ่าน
+- เพิ่ม test เฉพาะใน `backend/tests/test_AC_HRS_04_display_all_excel_participants_and_hour_types.py` และเพิ่มไฟล์ frontend สองไฟล์ตามชื่อ TC; ไม่แก้โค้ดระบบหรือ test เดิม
