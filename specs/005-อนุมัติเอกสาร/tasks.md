@@ -279,7 +279,7 @@
 - ต้องทำหลัง: T-16
 - เสร็จเมื่อ: `test_AC_APR_05_ai_warning_does_not_block` ผ่าน โดยไม่ทดสอบความแม่นยำของการตรวจจับ AI
 - สถานะ: ยกเลิก 2569-11-01 ตามคำสั่งทีม (AC-APR-05 ยกเลิก)
-- หมายเหตุ 2569-11-03: test หน้าจอเปลี่ยนเป็น `test_AC_APR_05_ai_warning_removed_approval_still_works` แล้ว แต่ test หลังบ้านยังชื่อ `test_AC_APR_05_ai_warning_does_not_block` ทั้งที่ตรวจแค่ว่าอนุมัติได้ (F-015 ใน rtm.md) รอทีมตัดสินว่าจะเปลี่ยนชื่อหรือลบ
+- หมายเหตุ 2569-11-03: test หน้าจอเปลี่ยนเป็น `test_AC_APR_05_ai_warning_removed_approval_still_works` แล้ว แต่ test หลังบ้านยังชื่อ `test_AC_APR_05_ai_warning_does_not_block` ทั้งที่สามารถตรวจแค่ว่าอนุมัติได้ (F-015 ใน rtm.md) รอทีมตัดสินว่าจะเปลี่ยนชื่อหรือลบ
 
 ## เฟสแก้ข้อค้นพบจาก /verify
 
