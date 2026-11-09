@@ -2138,3 +2138,8 @@
 - โหมด: ร่าง
 - เสนอ test cases: TC-SBH-03-1, TC-SBH-03-2, TC-SBH-03-3, TC-SBH-03-4 ใน `specs/002-ส่งข้อมูลชั่วโมง/test-cases.md`
 - ผล test: ยังไม่รัน (โหมดร่าง; ยังไม่เขียนโค้ด test)
+
+## 2569-11-09 คำสั่ง: /testcases AC-SBH-03 specs/002-ส่งข้อมูลชั่วโมง/
+- โหมด: เขียน test จากแถวสถานะ "ใช้ได้"
+- เพิ่ม test: `test_TC_SBH_03_1_mixed_activity_statuses`, `test_TC_SBH_03_2_status_boundary`, `test_TC_SBH_03_3_no_finished_activity`, `test_TC_SBH_03_4_only_finished_activities` ใน `frontend/src/__tests__/hours-submission-navigation.test.jsx`
+- ผล test: `cd frontend && npm test` ผ่าน 34 files / 82 tests; test ใหม่ทั้ง 4 ผ่าน

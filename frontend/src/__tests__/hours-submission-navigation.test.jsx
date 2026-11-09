@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
 import App from '../App.jsx'
 import { createHoursSubmissionClient } from '../api/client.js'
+import HoursSubmission from '../pages/HoursSubmission.jsx'
 
 function createAuthClient() {
   return {
@@ -78,4 +79,84 @@ test('AC-SBH-03 only finished activities are loaded from authenticated API', asy
   } finally {
     vi.unstubAllGlobals()
   }
+})
+
+function createHoursSubmissionTestClient(activities) {
+  return {
+    getFinishedActivities: vi.fn().mockResolvedValue(activities),
+    getSubmission: vi.fn(async (activityId) =>
+      activities.find((activity) => activity.id === activityId)),
+  }
+}
+
+function activity(id, name, status) {
+  return { id: String(id), name, status }
+}
+
+test('test_TC_SBH_03_1_mixed_activity_statuses', async () => {
+  // Given มีกิจกรรมที่ยังไม่จบและกิจกรรมที่จบแล้วปะปนกัน
+  const finished = activity(1, 'กิจกรรมที่จบแล้ว', 'จบแล้ว')
+  const unfinished = activity(2, 'กิจกรรมที่ยังไม่จบ', 'กำลังดำเนินการ')
+  const client = createHoursSubmissionTestClient([finished])
+
+  // When กรรมการพยายามเปิดหน้าส่งข้อมูลชั่วโมงของกิจกรรมแต่ละรายการ
+  render(<HoursSubmission client={client} />)
+
+  // Then ระบบอนุญาตให้เปิดได้เฉพาะกิจกรรมที่มีสถานะ "จบแล้ว"; กิจกรรมที่ยังไม่จบเปิดหน้าไม่ได้
+  expect(await screen.findByRole('option', { name: finished.name })).toBeTruthy()
+  expect(screen.queryByRole('option', { name: unfinished.name })).toBeNull()
+  expect(client.getSubmission).toHaveBeenCalledWith(finished.id)
+  expect(client.getSubmission).not.toHaveBeenCalledWith(unfinished.id)
+})
+
+test('test_TC_SBH_03_2_status_boundary', async () => {
+  // Given มีกิจกรรมสถานะ "จบแล้ว" ซึ่งเป็นสถานะที่อนุญาต และกิจกรรมสถานะ "ยังไม่จบ" ซึ่งเป็นสถานะที่ไม่อนุญาต
+  const finished = activity(3, 'กิจกรรมจบแล้ว', 'จบแล้ว')
+  const unfinished = activity(4, 'กิจกรรมยังไม่จบ', 'กำลังดำเนินการ')
+  const client = createHoursSubmissionTestClient([finished])
+
+  // When กรรมการพยายามเปิดหน้าส่งข้อมูลชั่วโมงของกิจกรรมแต่ละรายการ
+  render(<HoursSubmission client={client} />)
+
+  // Then ระบบอนุญาตให้เปิดกิจกรรมที่มีสถานะ "จบแล้ว" เท่านั้น; ระบบไม่อนุญาตให้เปิดกิจกรรมที่ยังไม่จบ
+  expect(await screen.findByRole('option', { name: finished.name })).toBeTruthy()
+  expect(screen.queryByRole('option', { name: unfinished.name })).toBeNull()
+  expect(client.getSubmission).toHaveBeenCalledWith(finished.id)
+  expect(client.getSubmission).not.toHaveBeenCalledWith(unfinished.id)
+})
+
+test('test_TC_SBH_03_3_no_finished_activity', async () => {
+  // Given มีกิจกรรมที่ยังไม่จบ แต่ไม่มีรายการกิจกรรมที่มีสถานะ "จบแล้ว"
+  const client = createHoursSubmissionTestClient([])
+
+  // When กรรมการพยายามเปิดหน้าส่งข้อมูลชั่วโมง
+  render(<HoursSubmission client={client} />)
+
+  // Then ไม่มีรายการกิจกรรมที่เปิดหน้าส่งข้อมูลชั่วโมงได้ เพราะระบบอนุญาตเฉพาะกิจกรรมที่มีสถานะ "จบแล้ว"
+  expect(await screen.findByRole('heading', { name: 'ส่งข้อมูลชั่วโมงกิจกรรม' })).toBeTruthy()
+  expect(screen.queryByRole('combobox', { name: 'เลือกกิจกรรมที่จบแล้ว' })).toBeNull()
+  expect(client.getSubmission).not.toHaveBeenCalled()
+})
+
+test('test_TC_SBH_03_4_only_finished_activities', async () => {
+  // Given มีกิจกรรมที่จบแล้วทั้งหมด ไม่มีรายการกิจกรรมที่ยังไม่จบ
+  const firstFinished = activity(5, 'กิจกรรมจบแล้วรายการแรก', 'จบแล้ว')
+  const secondFinished = activity(6, 'กิจกรรมจบแล้วรายการที่สอง', 'จบแล้ว')
+  const client = createHoursSubmissionTestClient([firstFinished, secondFinished])
+
+  // When กรรมการพยายามเปิดหน้าส่งข้อมูลชั่วโมงของแต่ละรายการ
+  render(<HoursSubmission client={client} />)
+
+  // Then กิจกรรมที่มีสถานะ "จบแล้ว" เปิดหน้าส่งข้อมูลชั่วโมงได้
+  const selector = await screen.findByRole('combobox', { name: 'เลือกกิจกรรมที่จบแล้ว' })
+  expect(screen.getByRole('option', { name: firstFinished.name })).toBeTruthy()
+  expect(screen.getByRole('option', { name: secondFinished.name })).toBeTruthy()
+  expect(client.getSubmission).toHaveBeenCalledWith(firstFinished.id)
+
+  await act(async () => {
+    fireEvent.change(selector, { target: { value: secondFinished.id } })
+    await vi.waitFor(() => {
+      expect(client.getSubmission).toHaveBeenCalledWith(secondFinished.id)
+    })
+  })
 })
