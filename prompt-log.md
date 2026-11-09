@@ -2014,3 +2014,11 @@
 - ผลสรุปตามรอย: ครบ 9, ยังไม่ถึง 0, รอ 0, ช่องโหว่ 3
 - ข้อค้นพบที่คงเหลือ: F-001, F-002, F-004
 - หมายเหตุ: F-003 และ F-005 ถูกแก้ใน code ปัจจุบันแล้ว และได้รวมไว้ในหัวข้อ “แก้แล้ว” ของ RTM
+
+## 2569-11-09 คำสั่ง: /implement T-12
+
+- เครื่องมือ: Copilot ใน VS Code
+- ไฟล์ที่แก้: `specs/003-ตรวจเอกสารโครงการ/tasks.md`, `prompt-log.md`
+- จุดประสงค์: ปิด task `T-12` ตามเงื่อนไขของ task และยืนยันว่าการทำงานถูกต้องตาม AC-VDC-04
+- ผลการทดสอบ: backend `PYTHONPATH=. pytest -q tests/test_project_review_checklist.py tests/test_AC_VDC_04_reviewer_selects_relevant_checklist_items.py` ผ่าน 2 tests; frontend `npm test -- --run src/__tests__/document-review-checklist.test.jsx` ผ่าน 4 tests
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี; task และ spec ระบุไว้ชัดว่า T-12 เป็นการแสดงรายละเอียดเอกสารและ Checklist รายโครงการตาม FR-VDC-02, FR-VDC-03, FR-VDC-04, FR-VDC-07 และไม่ต้องเพิ่มฟีเจอร์ใด ๆ
