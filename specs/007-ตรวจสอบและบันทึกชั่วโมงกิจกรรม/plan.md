@@ -57,7 +57,7 @@
 | `POST /activity-hours/documents/{documentId}/reg-retry` | Input: documentId, userSession; Output: ผลการส่งซ้ำ | FR-HRS-07, AC-HRS-06; ให้ส่งซ้ำด้วยตนเองได้ 1 ครั้ง ไม่มี auto-retry |
 | `GET /activity-hours/documents/{documentId}/individual-summary` | Input: documentId, participantId; Output: ผลการเรียกดูสรุปข้อมูลจาก UC-04 | FR-HRS-08, AC-HRS-07 |
 | `POST /activity-hours/documents/{documentId}/notify-club` | Input: documentId, notificationContext; Output: ผลการเรียก UC-10 | FR-HRS-05, AC-HRS-05 |
-| หน้าคิวตรวจสอบชั่วโมง | Input: userSession; Output: รายการเอกสารรอตรวจสอบ | FR-HRS-01, AC-HRS-03, NFR-SEC-01 |
+| หน้าคิวตรวจสอบชั่วโมง (UI-HRS-01: `mockups/UI-HRS-01-pending-queue.html`, ภาพ `mockups/UI-HRS-01-pending-queue.png`) | Input: userSession; Output: รายการเอกสารรอตรวจสอบเรียงตามวันส่ง และ empty state เมื่อคิวว่าง | FR-HRS-01, AC-HRS-03, NFR-SEC-01 |
 | หน้าตรวจสอบไฟล์ Excel | Input: เลือกเอกสาร/ไฟล์; Output: รายการผู้เข้าร่วม ประเภทชั่วโมง และจุดที่ผิด | FR-HRS-02, FR-HRS-03, FR-HRS-06, AC-HRS-02, AC-HRS-04 |
 | Middleware Login และ audit log | Input: userSession, accessContext; Output: อนุญาต/ปฏิเสธ และบันทึก StudentAccessLog | CON-NFR-21, DOM-PDPA-01, NFR-SEC-01, NFR-SEC-02, AC-HRS-08, AC-HRS-09 |
 

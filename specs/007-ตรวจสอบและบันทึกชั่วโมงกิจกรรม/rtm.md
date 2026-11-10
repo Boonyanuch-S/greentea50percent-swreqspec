@@ -1,8 +1,8 @@
 # RTM: ตรวจสอบและบันทึกชั่วโมงกิจกรรม
-อ้างอิง: spec.md Draft v2 | plan.md | tasks.md | test-cases.md
+อ้างอิง: spec.md Draft v3 | plan.md | tasks.md | test-cases.md
 สร้างด้วย /verify เมื่อ 2569-11-09 23:05 UTC | test: backend 158 ผ่าน, frontend 88 ผ่าน, 0 ไม่ผ่าน, 1 todo
 
-หมายเหตุ: ไม่พบ `specs/000-shared/` และไม่มี mockup ในฟีเจอร์นี้ จึงตรวจ UI ตาม spec และ plan เท่านั้น
+หมายเหตุ: ไม่พบ `specs/000-shared/`; UI-HRS-01 เพิ่มหลังจาก RTM รอบนี้และยังรอ PO ยืนยัน จึงยังไม่ได้ตรวจ UI เทียบ mockup
 
 ## 1. ตามรอยไปข้างหน้า (requirement ไป AC ไป task ไป โค้ด ไป test)
 | ID | AC | task | โค้ด (ไฟล์: ฟังก์ชัน) | test (ผล) | สถานะ |
@@ -66,4 +66,4 @@
 ## 5. สถานะคำถาม
 - Q-01, Q-02, Q-03, Q-05 และ Q-06 ปิดแล้วตาม spec; spec ไม่มี Q-04
 - Schema Excel ยังรอเจ้าของไฟล์ยืนยันตาม T-04/T-07 และ F-002
-- ไม่พบโฟลเดอร์ mockup หรือ constraints ที่ใช้ร่วม
+- UI-HRS-01 เพิ่มหลัง RTM รอบนี้; mockup และภาพยังรอ PO ยืนยัน/ตรวจเทียบหน้าจอจริง

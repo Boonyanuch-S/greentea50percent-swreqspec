@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI-HRS-01 คิวตรวจสอบชั่วโมงกิจกรรม</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,"Segoe UI","Noto Sans Thai",Tahoma,sans-serif;background:#eef2f4;color:#1d2b3a;padding:24px;line-height:1.6}
+  .note{max-width:980px;margin:0 auto 16px;background:#fff7e6;border:1px dashed #d79a2b;border-radius:10px;padding:10px 14px;font-size:14px;color:#7a5414}
+  .row{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+  .state{width:min(100%,460px)}
+  .state h2{font-size:14px;color:#5b6b7b;margin:0 0 8px 4px;font-weight:600}
+  .screen{background:#fff;border:1px solid #cfd8de;border-radius:16px;padding:22px;box-shadow:0 6px 18px rgba(0,0,0,.06);min-height:390px}
+  .eyebrow{font-size:13px;color:#536575;margin-bottom:4px}
+  h1{font-size:22px;margin-bottom:4px}
+  .description{color:#536575;font-size:14px;margin-bottom:20px}
+  .document{border:1px solid #dbe3e8;border-radius:12px;padding:14px 16px;margin-top:10px}
+  .document h3{font-size:16px}
+  .meta{font-size:14px;color:#536575;margin-top:4px}
+  .button{display:inline-block;margin-top:12px;padding:8px 14px;border-radius:9px;background:#0e7c7b;color:#fff;font-size:14px;font-weight:700}
+  .empty{min-height:210px;border:1px dashed #cfd8de;border-radius:12px;display:grid;place-content:center;text-align:center;padding:20px;color:#536575}
+  .empty strong{font-size:17px;color:#1d2b3a}
+  .flexible{font-size:12px;color:#7a5414;margin-top:8px}
+</style>
+</head>
+<body>
+<p class="note">MOCKUP UI-HRS-01 คิวตรวจสอบชั่วโมงกิจกรรม | รองรับ FR-HRS-01 และ AC-HRS-03 | ข้อมูลเป็นตัวอย่าง; ข้อความ empty state รอ PO ยืนยัน</p>
+<div class="row">
+  <section class="state">
+    <h2>สถานะปกติ: มีเอกสารรอตรวจสอบ</h2>
+    <div class="screen">
+      <p class="eyebrow">กองกิจการนักศึกษา · ชั่วโมงกิจกรรม</p>
+      <h1>คิวตรวจสอบชั่วโมงกิจกรรม</h1>
+      <p class="description" data-req="FR-HRS-01">เอกสารที่รอตรวจสอบเรียงจากวันที่ส่งก่อนถึงหลัง</p>
+      <article class="document" data-req="FR-HRS-01">
+        <h3>ใบสรุปชั่วโมงกิจกรรม · รหัสเอกสาร 1042</h3>
+        <p class="meta">วันที่ส่ง: 12 ต.ค. 2569</p>
+        <span class="button" data-req="FR-HRS-02">ตรวจสอบเอกสาร</span>
+      </article>
+      <article class="document" data-req="FR-HRS-01">
+        <h3>ใบสรุปชั่วโมงกิจกรรม · รหัสเอกสาร 1043</h3>
+        <p class="meta">วันที่ส่ง: 14 ต.ค. 2569</p>
+        <span class="button" data-req="FR-HRS-02">ตรวจสอบเอกสาร</span>
+      </article>
+    </div>
+  </section>
+  <section class="state">
+    <h2>สถานะว่าง: ไม่มีเอกสารรอตรวจสอบ</h2>
+    <div class="screen">
+      <p class="eyebrow">กองกิจการนักศึกษา · ชั่วโมงกิจกรรม</p>
+      <h1>คิวตรวจสอบชั่วโมงกิจกรรม</h1>
+      <p class="description" data-req="FR-HRS-01">เอกสารที่รอตรวจสอบเรียงจากวันที่ส่งก่อนถึงหลัง</p>
+      <div class="empty" data-req="FR-HRS-01">
+        <strong>ไม่มีเอกสารที่รอตรวจสอบ</strong>
+        <p class="flexible">ข้อความตัวอย่าง — ปรับได้ตามที่ทีม/PO ยืนยัน</p>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

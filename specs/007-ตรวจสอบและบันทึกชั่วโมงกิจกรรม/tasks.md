@@ -62,7 +62,7 @@
 - รองรับ: FR-HRS-01
 - ตรวจด้วย: ไม่มี AC ตรง ๆ เป็นงานพื้นฐานของ T-18
 - ไฟล์ที่แตะ: `frontend/src/pages/ActivityHoursQueue.jsx`, `frontend/src/services/activityHoursMock.js`
-- แบบหน้าจอ: ไม่มี
+- แบบหน้าจอ: UI-HRS-01 — `mockups/UI-HRS-01-pending-queue.html` (คิวมีเอกสาร/empty state)
 - ต้องทำหลัง: ไม่มี
 - เสร็จเมื่อ: หน้าคิวแสดงเอกสารรอตรวจจาก API จำลองและเรียงตามวันที่ส่งได้
 - สถานะ: เสร็จ

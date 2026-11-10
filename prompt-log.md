@@ -2281,3 +2281,10 @@
 - Vitest ทั้งหมด: 90 passed, 0 failed, 1 todo (1 skipped); `TC-HRS-04-1.test.jsx` และ `TC-HRS-04-2.test.jsx` ผ่าน
 - การรัน `npm test` ครั้งแรกจาก repository root หา `package.json` ไม่พบ; รันซ้ำจาก `frontend/` ด้วย `cd frontend && npm test` ผ่าน
 - เพิ่ม test เฉพาะใน `backend/tests/test_AC_HRS_04_display_all_excel_participants_and_hour_types.py` และเพิ่มไฟล์ frontend สองไฟล์ตามชื่อ TC; ไม่แก้โค้ดระบบหรือ test เดิม
+
+## 2569-11-09 คำสั่ง: แบบฝึกขั้น 10 — เพิ่ม mockup หน้าจอ AC-HRS-03 (UI lab start 007), "mockup 007"
+- เพิ่ม UI-HRS-01 คิวตรวจสอบชั่วโมง 2 สถานะ (มีเอกสาร/คิวว่าง) เป็น HTML และภาพ PNG ใน `specs/007-ตรวจสอบและบันทึกชั่วโมงกิจกรรม/mockups/`; ข้อมูลตัวอย่างเรียงตามวันที่ส่ง และข้อความ empty state ระบุว่ายืดหยุ่น/รอ PO ยืนยัน
+- อัปเดตหมวด UI และ CHANGELOG ใน `spec.md`, mapping หัวข้อ 4 ใน `plan.md`, ช่องแบบหน้าจอของ T-06, `rtm.md` และ `specs/CHANGELOG.md`; ไม่เปลี่ยน FR/AC หรือสถานะ task
+- ใช้คู่มือ `docs/mockup-guide.md`; ไม่รันคำสั่ง curl/sed ที่อ้างถึง `001-booking` เพราะเป็นอีกฟีเจอร์และไม่แตะ scope ของ UI lab 007
+- ตรวจภาพที่เรนเดอร์จาก HTML ใน browser; ไม่มีการรัน test เนื่องจากเป็นเอกสารและ mockup เท่านั้น
+- ไม่มีคำถามค้างนอกเหนือจากการยืนยันข้อความ empty state โดย PO
